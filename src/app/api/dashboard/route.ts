@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { MOCK_AVATAR, MOCK_AVATAR_SKILLS, MOCK_REVENUE_SUMMARY, MOCK_REVENUES, MOCK_DELEGATIONS, MOCK_TIMELINE, generateResonanceHistory } from '@/lib/mock-data';
+import { MOCK_AVATAR, MOCK_AVATAR_SKILLS, MOCK_REVENUE_SUMMARY, MOCK_REVENUES, MOCK_DELEGATIONS, MOCK_TIMELINE, MOCK_RESONANCE_HISTORY } from '@/lib/mock-data';
 
 export async function GET() {
   return NextResponse.json({
@@ -9,6 +9,6 @@ export async function GET() {
     recentRevenues: MOCK_REVENUES,
     delegations: MOCK_DELEGATIONS,
     timeline: MOCK_TIMELINE,
-    resonanceHistory: generateResonanceHistory(),
+    resonanceHistory: MOCK_RESONANCE_HISTORY,
   });
 }

@@ -24,7 +24,7 @@ import {
   MOCK_REVENUES,
   MOCK_DELEGATIONS,
   MOCK_TIMELINE,
-  generateResonanceHistory,
+  MOCK_RESONANCE_HISTORY,
 } from '@/lib/mock-data';
 
 import CognitiveCard from '@/components/dashboard/cognitive-card';
@@ -35,6 +35,8 @@ import IFDDelegation from '@/components/dashboard/ifd-delegation';
 import SkillVault from '@/components/dashboard/skill-vault';
 import CognitiveTimeline from '@/components/dashboard/cognitive-timeline';
 import X402Payment from '@/components/dashboard/x402-payment';
+import AvatarMarketplace from '@/components/dashboard/avatar-marketplace';
+import NotificationCenter from '@/components/dashboard/notification-center';
 
 // ── Navigation Items ──────────────────────────────────────────
 const NAV_ITEMS = [
@@ -42,6 +44,7 @@ const NAV_ITEMS = [
   { id: 'revenue', label: '收益', icon: DollarSign },
   { id: 'resonance', label: '共振', icon: Activity },
   { id: 'skills', label: '技能', icon: Sparkles },
+  { id: 'marketplace', label: '市场', icon: Users },
   { id: 'governance', label: '治理', icon: Users },
   { id: 'timeline', label: '时间线', icon: Clock },
   { id: 'security', label: '安全', icon: Shield },
@@ -51,7 +54,7 @@ const NAV_ITEMS = [
 const MOBILE_NAV = [
   { id: 'overview', label: '总览', icon: Brain },
   { id: 'revenue', label: '收益', icon: DollarSign },
-  { id: 'skills', label: '技能', icon: Sparkles },
+  { id: 'marketplace', label: '市场', icon: Users },
   { id: 'security', label: '安全', icon: Shield },
 ];
 
@@ -62,13 +65,15 @@ const INITIAL_DATA: DashboardState = {
   recentRevenues: MOCK_REVENUES,
   delegations: MOCK_DELEGATIONS,
   timeline: MOCK_TIMELINE,
-  resonanceHistory: generateResonanceHistory(),
+  resonanceHistory: MOCK_RESONANCE_HISTORY,
 };
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [paymentService, setPaymentService] = useState('GPT-4o 文本生成');
+  const [paymentAmount, setPaymentAmount] = useState(0.02);
   const [data] = useState<DashboardState>(INITIAL_DATA);
 
   if (!data) {
@@ -124,9 +129,16 @@ export default function Home() {
               <span className="sm:hidden text-slate-300 font-mono">0x7a3f</span>
             </button>
 
+            {/* Notification Center */}
+            <NotificationCenter />
+
             {/* x402 Quick Pay */}
             <button
-              onClick={() => setPaymentOpen(true)}
+              onClick={() => {
+                setPaymentService('GPT-4o 文本生成');
+                setPaymentAmount(0.02);
+                setPaymentOpen(true);
+              }}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 transition-all text-xs font-medium"
             >
               <Zap className="w-3.5 h-3.5" />
@@ -276,12 +288,28 @@ export default function Home() {
             </motion.div>
           </div>
 
-          {/* Row 4: Timeline (full width) */}
+          {/* Row 4: Marketplace (full width) */}
+          <motion.div
+            id="section-marketplace"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+          >
+            <AvatarMarketplace
+              onRent={(avatar) => {
+                setPaymentService(`租用 ${avatar.name}`);
+                setPaymentAmount(avatar.hourlyRate * 0.01);
+                setPaymentOpen(true);
+              }}
+            />
+          </motion.div>
+
+          {/* Row 5: Timeline (full width) */}
           <motion.div
             id="section-timeline"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
+            transition={{ delay: 0.8 }}
           >
             <CognitiveTimeline events={data.timeline} />
           </motion.div>
@@ -316,8 +344,8 @@ export default function Home() {
       <X402Payment
         isOpen={paymentOpen}
         onClose={() => setPaymentOpen(false)}
-        service="GPT-4o 文本生成"
-        amount={0.02}
+        service={paymentService}
+        amount={paymentAmount}
       />
 
       {/* ── Footer ────────────────────────────────── */}

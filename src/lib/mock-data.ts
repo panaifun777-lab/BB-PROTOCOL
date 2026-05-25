@@ -106,24 +106,28 @@ export const MOCK_TIMELINE: TimelineEvent[] = [
   { id: 't10', eventType: 'skill_invocation', details: '调用 智能客服 处理用户咨询 23条 — 成本: $0.28', ipfsHash: 'QmA1...bC2', amount: 0.28, createdAt: '2026-02-28T11:30:00Z' },
 ];
 
-// ----- 24小时共振分历史 -----
-export function generateResonanceHistory(): ResonanceDataPoint[] {
+// ----- 24小时共振分历史 (确定性生成, 避免SSR hydration不匹配) -----
+// 使用确定性seed代替Math.random(), 确保服务端和客户端输出一致
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed * 9301 + 49297) * 49297;
+  return x - Math.floor(x);
+}
+
+export const MOCK_RESONANCE_HISTORY: ResonanceDataPoint[] = (() => {
   const data: ResonanceDataPoint[] = [];
-  const now = new Date();
   let score = 68;
   for (let i = 24; i >= 0; i--) {
-    const time = new Date(now.getTime() - i * 3600000);
-    const change = (Math.random() - 0.45) * 8;
+    const hour = (24 - i) % 24;
+    const change = (seededRandom(i * 37 + 7) - 0.45) * 8;
     score = Math.max(40, Math.min(95, score + change));
     data.push({
-      time: `${time.getHours().toString().padStart(2, '0')}:00`,
+      time: `${hour.toString().padStart(2, '0')}:00`,
       score: Math.round(score),
     });
   }
-  // Ensure last point is 72
   data[data.length - 1].score = 72;
   return data;
-}
+})();
 
 // ----- 可委托子分身 -----
 export const AVAILABLE_SUB_AVATARS = [
