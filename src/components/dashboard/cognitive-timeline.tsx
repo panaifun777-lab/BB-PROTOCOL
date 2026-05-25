@@ -101,7 +101,16 @@ function TimelineEventCard({ event, index }: { event: TimelineEvent; index: numb
 
   const formatTimestamp = (iso: string) => {
     try {
-      return format(parseISO(iso), 'yyyy-MM-dd HH:mm:ss');
+      // Always format in UTC to ensure SSR/client consistency
+      // This prevents hydration mismatch from timezone differences
+      const d = new Date(iso);
+      const yyyy = d.getUTCFullYear();
+      const MM = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const dd = String(d.getUTCDate()).padStart(2, '0');
+      const HH = String(d.getUTCHours()).padStart(2, '0');
+      const mm = String(d.getUTCMinutes()).padStart(2, '0');
+      const ss = String(d.getUTCSeconds()).padStart(2, '0');
+      return `${yyyy}-${MM}-${dd} ${HH}:${mm}:${ss} UTC`;
     } catch {
       return iso;
     }
@@ -147,7 +156,7 @@ function TimelineEventCard({ event, index }: { event: TimelineEvent; index: numb
       <div className="min-w-0 flex-1 pb-6">
         {/* Timestamp */}
         <div className="mb-1 flex items-center gap-2">
-          <span className="font-mono text-[11px] text-slate-500">
+          <span className="font-mono text-[11px] text-slate-500" suppressHydrationWarning>
             {formatTimestamp(event.createdAt)}
           </span>
           <Badge

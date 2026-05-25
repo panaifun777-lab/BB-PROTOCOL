@@ -1,0 +1,210 @@
+# =============================================================================
+# docker-compose.yml — Cognitive Avatar Protocol (Production)
+# =============================================================================
+# Usage: docker compose up -d
+# =============================================================================
+
+version: "3.9"
+
+services:
+  # ── Next.js App ──────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
+        VERSION: "2.2.0"
+    container_name: cognitive-avatar-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:./db/production.db
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me-in-production}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=${NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID:-}
+      - NEXT_PUBLIC_CHAIN_ID=${NEXT_PUBLIC_CHAIN_ID:-8453}
+      - NEXT_PUBLIC_RPC_URL=${NEXT_PUBLIC_RPC_URL:-https://mainnet.base.org}
+    volumes:
+      - app_data:/app/db
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ── Resonance Simulation Service ─────────────────────────────
+  resonance-sim:
+    build:
+      context: .
+      dockerfile: mini-services/resonance-sim/Dockerfile
+    container_name: cognitive-avatar-resonance-sim
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── Monitoring Simulation Service ────────────────────────────
+  monitoring-sim:
+    build:
+      context: .
+      dockerfile: mini-services/monitoring-sim/Dockerfile
+    container_name: cognitive-avatar-monitoring-sim
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=production
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── IFD Calculator Engine ────────────────────────────────────
+  ifd-calculator:
+    image: cognitive-avatar/ifd-calculator:latest
+    container_name: cognitive-avatar-ifd-calculator
+    profiles:
+      - engine
+    restart: unless-stopped
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=production
+      - RPC_URL=${NEXT_PUBLIC_RPC_URL:-https://mainnet.base.org}
+      - CHAIN_ID=${NEXT_PUBLIC_CHAIN_ID:-8453}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── ECE Oracle Engine ────────────────────────────────────────
+  ece-oracle:
+    image: cognitive-avatar/ece-oracle:latest
+    container_name: cognitive-avatar-ece-oracle
+    profiles:
+      - engine
+    restart: unless-stopped
+    ports:
+      - "3006:3006"
+    environment:
+      - NODE_ENV=production
+      - RPC_URL=${NEXT_PUBLIC_RPC_URL:-https://mainnet.base.org}
+      - CHAIN_ID=${NEXT_PUBLIC_CHAIN_ID:-8453}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── POUE Prover Engine ───────────────────────────────────────
+  poue-prover:
+    image: cognitive-avatar/poue-prover:latest
+    container_name: cognitive-avatar-poue-prover
+    profiles:
+      - engine
+    restart: unless-stopped
+    ports:
+      - "3007:3007"
+    environment:
+      - NODE_ENV=production
+      - RPC_URL=${NEXT_PUBLIC_RPC_URL:-https://mainnet.base.org}
+      - CHAIN_ID=${NEXT_PUBLIC_CHAIN_ID:-8453}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3007/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── MCP Router Engine ────────────────────────────────────────
+  mcp-router:
+    image: cognitive-avatar/mcp-router:latest
+    container_name: cognitive-avatar-mcp-router
+    profiles:
+      - engine
+    restart: unless-stopped
+    ports:
+      - "3008:3008"
+    environment:
+      - NODE_ENV=production
+      - RPC_URL=${NEXT_PUBLIC_RPC_URL:-https://mainnet.base.org}
+      - CHAIN_ID=${NEXT_PUBLIC_CHAIN_ID:-8453}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── Caddy Reverse Proxy / Gateway ────────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    container_name: cognitive-avatar-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - internal
+    depends_on:
+      app:
+        condition: service_healthy
+      resonance-sim:
+        condition: service_healthy
+      monitoring-sim:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "caddy", "version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  app_data:
+    driver: local
+  db_data:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+
+networks:
+  internal:
+    driver: bridge

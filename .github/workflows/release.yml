@@ -1,0 +1,234 @@
+# =============================================================================
+# Release Pipeline — Cognitive Avatar Protocol
+# =============================================================================
+# Triggers: tag v*
+# Jobs: create-release (changelog, GitHub Release, Docker build+push)
+# =============================================================================
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  BUN_VERSION: "1.1.38"
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  # ── Job: Create Release ───────────────────────────────────────────────────
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Release version: ${VERSION}"
+
+      # ── Generate Changelog ───────────────────────────────────────────────
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [ -z "${PREV_TAG}" ]; then
+            COMMIT_RANGE="HEAD"
+          else
+            COMMIT_RANGE="${PREV_TAG}..HEAD"
+          fi
+
+          echo "Generating changelog for: ${COMMIT_RANGE}"
+
+          # Generate categorized changelog
+          {
+            echo "# Changelog"
+            echo ""
+            echo "## v${{ steps.version.outputs.version }} ($(date +%Y-%m-%d))"
+            echo ""
+
+            # Features
+            FEATURES=$(git log ${COMMIT_RANGE} --oneline --grep="feat" 2>/dev/null || true)
+            if [ -n "${FEATURES}" ]; then
+              echo "### 🚀 Features"
+              echo "${FEATURES}" | while read -r line; do
+                echo "- ${line}"
+              done
+              echo ""
+            fi
+
+            # Bug fixes
+            FIXES=$(git log ${COMMIT_RANGE} --oneline --grep="fix" 2>/dev/null || true)
+            if [ -n "${FIXES}" ]; then
+              echo "### 🐛 Bug Fixes"
+              echo "${FIXES}" | while read -r line; do
+                echo "- ${line}"
+              done
+              echo ""
+            fi
+
+            # Performance improvements
+            PERF=$(git log ${COMMIT_RANGE} --oneline --grep="perf" 2>/dev/null || true)
+            if [ -n "${PERF}" ]; then
+              echo "### ⚡ Performance"
+              echo "${PERF}" | while read -r line; do
+                echo "- ${line}"
+              done
+              echo ""
+            fi
+
+            # Security
+            SECURITY=$(git log ${COMMIT_RANGE} --oneline --grep="security\|sec" 2>/dev/null || true)
+            if [ -n "${SECURITY}" ]; then
+              echo "### 🔒 Security"
+              echo "${SECURITY}" | while read -r line; do
+                echo "- ${line}"
+              done
+              echo ""
+            fi
+
+            # Other changes
+            OTHER=$(git log ${COMMIT_RANGE} --oneline --invert-grep --grep="feat\|fix\|perf\|security\|sec" 2>/dev/null || true)
+            if [ -n "${OTHER}" ]; then
+              echo "### 📝 Other Changes"
+              echo "${OTHER}" | while read -r line; do
+                echo "- ${line}"
+              done
+              echo ""
+            fi
+
+            # Smart contract changes
+            CONTRACT_CHANGES=$(git diff ${COMMIT_RANGE} --name-only -- 'contracts/*.sol' 'contracts/**/*.sol' 2>/dev/null || true)
+            if [ -n "${CONTRACT_CHANGES}" ]; then
+              echo "### 📜 Smart Contract Changes"
+              echo "${CONTRACT_CHANGES}" | while read -r line; do
+                echo "- \`${line}\`"
+              done
+              echo ""
+              echo "> ⚠️ Smart contract changes detected. Ensure formal verification passes before upgrading on-chain."
+              echo ""
+            fi
+
+            # Contributors
+            echo "### 👥 Contributors"
+            git log ${COMMIT_RANGE} --format="@%aN" | sort -u | while read -r author; do
+              echo "- ${author}"
+            done
+
+          } > CHANGELOG_GENERATED.md
+
+          echo "Changelog generated successfully"
+
+      # ── Setup Bun & Build ────────────────────────────────────────────────
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: bun run db:generate
+
+      - name: Build application
+        run: bun run build
+        env:
+          DATABASE_URL: "file:./db/release.db"
+          NEXTAUTH_SECRET: "release-build-secret"
+          NEXTAUTH_URL: "http://localhost:3000"
+
+      # ── Docker Build & Push ──────────────────────────────────────────────
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
+            NODE_ENV=production
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Verify Docker image
+        run: |
+          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}"
+          echo "Published Docker image: ${IMAGE_TAG}"
+
+          # Verify image exists
+          docker pull "${IMAGE_TAG}" || {
+            echo "::error::Failed to pull published image"
+            exit 1
+          }
+
+          echo "✓ Docker image published and verified"
+
+      # ── Create GitHub Release ────────────────────────────────────────────
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: "Cognitive Avatar Protocol v${{ steps.version.outputs.version }}"
+          body_path: CHANGELOG_GENERATED.md
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release summary
+        run: |
+          echo "## Release v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Docker Image:** \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Release URL:** ${{ steps.create_release.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Published Tags" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

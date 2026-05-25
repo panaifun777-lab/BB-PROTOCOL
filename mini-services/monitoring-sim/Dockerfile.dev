@@ -1,0 +1,22 @@
+# =============================================================================
+# Dockerfile.dev — Monitoring Simulation Service (Development)
+# =============================================================================
+
+FROM oven/bun:1.1.38
+
+WORKDIR /app
+
+# Copy package files
+COPY mini-services/monitoring-sim/package.json ./
+COPY mini-services/monitoring-sim/bun.lock ./
+
+# Install dependencies (including dev)
+RUN bun install --frozen-lockfile
+
+# Source mounted via volume
+ENV NODE_ENV=development
+ENV PORT=3004
+
+EXPOSE 3004
+
+CMD ["bun", "--hot", "index.ts"]

@@ -1,0 +1,120 @@
+# =============================================================================
+# docker-compose.dev.yml — Cognitive Avatar Protocol (Development)
+# =============================================================================
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# =============================================================================
+
+version: "3.9"
+
+services:
+  # ── Next.js App (Dev Override) ───────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        NODE_ENV: development
+    container_name: cognitive-avatar-app-dev
+    command: bun run dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=file:./db/dev.db
+      - NEXTAUTH_SECRET=dev-secret-do-not-use-in-production
+      - NEXTAUTH_URL=http://localhost:3000
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    ports:
+      - "3000:3000"
+      - "9229:9229"  # Node.js debugger
+
+  # ── Resonance Sim (Dev Override) ─────────────────────────────
+  resonance-sim:
+    build:
+      context: .
+      dockerfile: mini-services/resonance-sim/Dockerfile.dev
+    container_name: cognitive-avatar-resonance-sim-dev
+    command: bun --hot index.ts
+    volumes:
+      - ./mini-services/resonance-sim:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - CORS_ORIGIN=http://localhost:3000
+    ports:
+      - "3003:3003"
+      - "9230:9229"  # Node.js debugger
+
+  # ── Monitoring Sim (Dev Override) ────────────────────────────
+  monitoring-sim:
+    build:
+      context: .
+      dockerfile: mini-services/monitoring-sim/Dockerfile.dev
+    container_name: cognitive-avatar-monitoring-sim-dev
+    command: bun --hot index.ts
+    volumes:
+      - ./mini-services/monitoring-sim:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - CORS_ORIGIN=http://localhost:3000
+    ports:
+      - "3004:3004"
+      - "9231:9229"  # Node.js debugger
+
+  # ── IFD Calculator (Dev Override) ────────────────────────────
+  ifd-calculator:
+    container_name: cognitive-avatar-ifd-calculator-dev
+    volumes:
+      - ./rust-engine/ifd-calculator:/app
+    environment:
+      - NODE_ENV=development
+      - RUST_LOG=debug
+    ports:
+      - "3005:3005"
+      - "9232:9229"
+
+  # ── ECE Oracle (Dev Override) ────────────────────────────────
+  ece-oracle:
+    container_name: cognitive-avatar-ece-oracle-dev
+    volumes:
+      - ./rust-engine/ece-oracle:/app
+    environment:
+      - NODE_ENV=development
+      - RUST_LOG=debug
+    ports:
+      - "3006:3006"
+      - "9233:9229"
+
+  # ── POUE Prover (Dev Override) ───────────────────────────────
+  poue-prover:
+    container_name: cognitive-avatar-poue-prover-dev
+    volumes:
+      - ./rust-engine/poue-prover:/app
+    environment:
+      - NODE_ENV=development
+      - RUST_LOG=debug
+    ports:
+      - "3007:3007"
+      - "9234:9229"
+
+  # ── MCP Router (Dev Override) ────────────────────────────────
+  mcp-router:
+    container_name: cognitive-avatar-mcp-router-dev
+    volumes:
+      - ./rust-engine/mcp-router:/app
+    environment:
+      - NODE_ENV=development
+      - RUST_LOG=debug
+    ports:
+      - "3008:3008"
+      - "9235:9229"
+
+  # ── Caddy (Dev Override) ─────────────────────────────────────
+  caddy:
+    command: caddy run --config /etc/caddy/Caddyfile --watch
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro

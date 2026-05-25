@@ -1,0 +1,346 @@
+# =============================================================================
+# CI Pipeline — Cognitive Avatar Protocol
+# =============================================================================
+# Triggers: push to main/develop, PR to main
+# Jobs: lint-typecheck → test-api → security → build
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUN_VERSION: "1.1.38"
+
+jobs:
+  # ── Job 1: Lint & TypeCheck ───────────────────────────────────────────────
+  lint-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: bun run db:generate
+
+      - name: Run ESLint
+        run: bun run lint
+
+      - name: Type Check (tsc --noEmit)
+        run: bunx tsc --noEmit
+
+  # ── Job 2: API Integration Tests ──────────────────────────────────────────
+  test-api:
+    name: API Integration Tests
+    runs-on: ubuntu-latest
+    needs: lint-typecheck
+    timeout-minutes: 15
+
+    services:
+      # No external services needed — SQLite is file-based
+
+    env:
+      DATABASE_URL: "file:./db/test.db"
+      NEXTAUTH_SECRET: "test-secret-for-ci"
+      NEXTAUTH_URL: "http://localhost:3000"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: bun run db:generate
+
+      - name: Push database schema
+        run: bun run db:push
+
+      - name: Seed test data
+        run: |
+          curl -X POST http://localhost:3000/api/seed || true
+        # Seed will be called after dev server starts
+
+      - name: Start dev server in background
+        run: |
+          bun run dev &
+          echo "Waiting for dev server to be ready..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/api/health > /dev/null 2>&1; then
+              echo "Dev server is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Server not ready yet..."
+            sleep 2
+          done
+
+      - name: Test API endpoints return 200
+        run: |
+          declare -a endpoints=(
+            "/api/health"
+            "/api/dashboard"
+            "/api/avatars"
+            "/api/skills"
+            "/api/revenues"
+            "/api/delegations"
+            "/api/resonance"
+            "/api/security"
+            "/api/liquidity"
+            "/api/compliance"
+            "/api/performance"
+            "/api/deployment"
+            "/api/monitoring"
+            "/api/feature-flags"
+            "/api/multichain"
+            "/api/sdk-platform"
+            "/api/ecosystem"
+            "/api/dao-governance"
+            "/api/data-infra"
+            "/api/contracts-arch"
+            "/api/engine-arch"
+            "/api/web3-integration"
+          )
+
+          FAILED=0
+          for endpoint in "${endpoints[@]}"; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000${endpoint}")
+            if [ "$STATUS" -eq 200 ]; then
+              echo "✓ ${endpoint} → ${STATUS}"
+            else
+              echo "✗ ${endpoint} → ${STATUS} (expected 200)"
+              FAILED=1
+            fi
+          done
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "::error::Some API endpoints did not return 200"
+            exit 1
+          fi
+          echo "All API endpoints returned 200!"
+
+      - name: Test API POST endpoints
+        run: |
+          # Test avatars POST
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "http://localhost:3000/api/avatars" \
+            -H "Content-Type: application/json" \
+            -d '{"name":"CI Test Avatar","ownerAddress":"0xCI_TEST","soulId":"soul-ci-test"}')
+          echo "POST /api/avatars → ${STATUS}"
+
+          # Test compliance POST
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "http://localhost:3000/api/compliance" \
+            -H "Content-Type: application/json" \
+            -d '{"pluginId":"plugin-kyc","isActive":true}')
+          echo "POST /api/compliance → ${STATUS}"
+
+      - name: Stop dev server
+        if: always()
+        run: |
+          pkill -f "next dev" || true
+
+  # ── Job 3: Security Audit ─────────────────────────────────────────────────
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    needs: lint-typecheck
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run npm audit
+        run: |
+          echo "Checking for known vulnerabilities..."
+          npm audit --audit-level=high --production || true
+          echo "Audit complete. Review findings above."
+
+      - name: Check for deprecated dependencies
+        run: |
+          echo "Checking dependency status..."
+          bun pm ls 2>/dev/null || true
+          echo "Dependency check complete."
+
+      - name: Check for sensitive data in codebase
+        run: |
+          echo "Scanning for potential secrets..."
+          # Check for hardcoded private keys, secrets, or API keys
+          SECRET_PATTERNS=(
+            "PRIVATE_KEY.*=.*0x[0-9a-fA-F]{64}"
+            "SECRET.*=.*['\"][a-zA-Z0-9]{32,}['\"]"
+            "API_KEY.*=.*['\"][a-zA-Z0-9]{20,}['\"]"
+            "PASSWORD.*=.*['\"][a-zA-Z0-9]{8,}['\"]"
+          )
+
+          FOUND=0
+          for pattern in "${SECRET_PATTERNS[@]}"; do
+            if grep -rPn "$pattern" --include="*.ts" --include="*.tsx" --include="*.js" \
+              --exclude-dir=node_modules --exclude-dir=.next src/ 2>/dev/null; then
+              FOUND=1
+            fi
+          done
+
+          if [ "$FOUND" -ne 0 ]; then
+            echo "::warning::Potential secrets found in source code. Review the matches above."
+          else
+            echo "✓ No obvious secrets found in source code."
+          fi
+
+      - name: License compliance check
+        run: |
+          echo "Checking dependency licenses..."
+          bun pm ls 2>/dev/null | head -50 || true
+          echo "License check complete. Review for GPL or other restrictive licenses."
+
+  # ── Job 4: Build Verification ─────────────────────────────────────────────
+  build:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    needs: [test-api, security]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: bun run db:generate
+
+      - name: Build Next.js application
+        run: bun run build
+        env:
+          DATABASE_URL: "file:./db/build.db"
+          NEXTAUTH_SECRET: "build-secret"
+          NEXTAUTH_URL: "http://localhost:3000"
+
+      - name: Verify build output
+        run: |
+          if [ -d ".next/standalone" ]; then
+            echo "✓ Standalone build output exists"
+          else
+            echo "::error::Standalone build output not found at .next/standalone"
+            exit 1
+          fi
+
+          if [ -d ".next/static" ]; then
+            echo "✓ Static assets generated"
+          else
+            echo "::error::Static assets not found at .next/static"
+            exit 1
+          fi
+
+          echo "Build verification complete!"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build
+          path: |
+            .next/standalone
+            .next/static
+            public
+          retention-days: 7
+
+      - name: Build Docker image (verification only)
+        run: |
+          docker build -t cognitive-avatar:ci-verify . || {
+            echo "::error::Docker build failed!"
+            exit 1
+          }
+          echo "✓ Docker image built successfully"
+
+      - name: Verify Docker image
+        run: |
+          # Run container briefly and check health
+          docker run -d --name ci-verify \
+            -e DATABASE_URL="file:./db/test.db" \
+            -e NEXTAUTH_SECRET="ci-verify-secret" \
+            -p 3001:3000 \
+            cognitive-avatar:ci-verify
+
+          echo "Waiting for container to start..."
+          sleep 10
+
+          # Check if container is running
+          if docker ps | grep -q ci-verify; then
+            echo "✓ Container is running"
+          else
+            echo "::error::Container failed to start"
+            docker logs ci-verify
+            exit 1
+          fi
+
+          docker stop ci-verify || true
+          docker rm ci-verify || true

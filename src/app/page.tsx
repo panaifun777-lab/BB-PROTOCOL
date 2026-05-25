@@ -66,6 +66,8 @@ import ContractsArch from '@/components/dashboard/contracts-arch';
 import EngineArch from '@/components/dashboard/engine-arch';
 import Web3Integration from '@/components/dashboard/web3-integration';
 import DataInfra from '@/components/dashboard/data-infra';
+import EngineStatusDashboard from '@/components/dashboard/engine-status';
+import Web3Wallet from '@/components/dashboard/web3-wallet';
 
 // ── Navigation Items ──────────────────────────────────────────
 const NAV_ITEMS = [
@@ -486,7 +488,7 @@ export default function Home() {
             <ContractsArch />
           </motion.div>
 
-          {/* Row 16: Engine Arch + Web3 Integration */}
+          {/* Row 16: Engine Arch + Engine Status */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <motion.div
               id="section-engine"
@@ -497,21 +499,39 @@ export default function Home() {
               <EngineArch />
             </motion.div>
             <motion.div
-              id="section-web3"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.65 }}
             >
-              <Web3Integration />
+              <EngineStatusDashboard />
             </motion.div>
           </div>
 
-          {/* Row 17: Data Infra (full width) */}
+          {/* Row 17: Web3 Integration + Web3 Wallet */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <motion.div
+              id="section-web3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.7 }}
+            >
+              <Web3Integration />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.75 }}
+            >
+              <Web3Wallet />
+            </motion.div>
+          </div>
+
+          {/* Row 18: Data Infra (full width) */}
           <motion.div
             id="section-data"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.7 }}
+            transition={{ delay: 1.8 }}
           >
             <DataInfra />
           </motion.div>

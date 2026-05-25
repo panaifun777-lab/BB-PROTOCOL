@@ -1,0 +1,73 @@
+# =============================================================================
+# .dockerignore — Cognitive Avatar Protocol
+# =============================================================================
+
+# Dependencies
+node_modules
+bun.lock
+
+# Build outputs
+.next
+out
+dist
+build
+
+# Development files
+*.log
+dev.log
+server.log
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-compose.dev.yml
+.dockerignore
+
+# Terraform
+terraform/
+.terraform
+*.tfstate
+*.tfstate.backup
+*.tfplan
+
+# GitHub Actions
+.github/
+
+# Documentation
+*.md
+!README.md
+upload/
+worklog*.md
+agent-ctx/
+
+# Testing
+coverage
+.nyc_output
+
+# Misc
+examples/
+download/
+db/*.db
+db/*.db-journal

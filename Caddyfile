@@ -1,23 +1,123 @@
+# =============================================================================
+# Caddyfile — Cognitive Avatar Protocol Gateway Configuration
+# =============================================================================
+#
+# Gateway Routing Rules Documentation
+# ====================================
+#
+# This Caddyfile configures the reverse proxy gateway for the Cognitive Avatar
+# Protocol. It listens on port 81 (mapped to 80/443 in production via Docker)
+# and routes traffic to the appropriate backend services.
+#
+# ── Routing Logic ───────────────────────────────────────────────
+#
+# 1. Default Route (no XTransformPort query parameter):
+#    → All requests are forwarded to the Next.js app on port 3000
+#    → This includes: HTML pages, API routes (/api/*), static assets
+#
+# 2. XTransformPort Query Parameter:
+#    → When a request includes ?XTransformPort=<port>, Caddy reads the
+#      port number and reverse-proxies to localhost:<port>
+#    → This enables the Next.js frontend to communicate with microservices
+#      through the same gateway without CORS issues
+#
+# ── Port Mapping ────────────────────────────────────────────────
+#
+# Port  Service            Description
+# ────  ─────────────────  ───────────────────────────────────────
+# 3000  app                Next.js main application (App Router)
+# 3003  resonance-sim      Socket.IO resonance simulation service
+# 3004  monitoring-sim     Socket.IO monitoring simulation service
+# 3005  ifd-calculator     IFD (Fluid Democracy) calculation engine
+# 3006  ece-oracle         ECE (Emotional Consensus Engine) oracle
+# 3007  poue-prover        POUE (Proof of Understanding) prover engine
+# 3008  mcp-router         MCP (Model Context Protocol) router
+#
+# ── WebSocket Support ──────────────────────────────────────────
+#
+# Caddy natively supports WebSocket upgrades. No special configuration
+# is needed beyond the reverse_proxy directive. Socket.IO connections
+# from the frontend use the path:
+#
+#   /?XTransformPort=3003  (resonance-sim)
+#   /?XTransformPort=3004  (monitoring-sim)
+#
+# The frontend MUST use:
+#   io("/?XTransformPort=3003")  — CORRECT
+#   io("http://localhost:3003")  — PROHIBITED (bypasses gateway)
+#
+# ── CORS Headers ───────────────────────────────────────────────
+#
+# The reverse_proxy directive forwards the following headers:
+# - Host: Preserved from original request
+# - X-Forwarded-For: Client IP address
+# - X-Forwarded-Proto: Original scheme (http/https)
+# - X-Real-IP: Client real IP address
+#
+# CORS headers are handled by the backend services themselves, not
+# by Caddy. Each Socket.IO service configures its own CORS settings
+# to allow connections from the app origin.
+#
+# ── Production Considerations ──────────────────────────────────
+#
+# In production, the Caddyfile should be extended to:
+# 1. Replace :81 with the production domain (e.g., cognitive-avatar.protocol)
+# 2. Add TLS configuration (Caddy auto-provisions via Let's Encrypt)
+# 3. Add rate limiting and request size limits
+# 4. Add compression (gzip/brotli) for non-WebSocket responses
+# 5. Add security headers (X-Frame-Options, CSP, etc.)
+# 6. Add logging configuration
+#
+# Example production block:
+#
+#   cognitive-avatar.protocol {
+#       @transform_port_query {
+#           query XTransformPort=*
+#       }
+#       handle @transform_port_query {
+#           reverse_proxy localhost:{query.XTransformPort}
+#       }
+#       handle {
+#           reverse_proxy localhost:3000
+#       }
+#       encode gzip
+#       header {
+#           X-Frame-Options DENY
+#           X-Content-Type-Options nosniff
+#           Referrer-Policy strict-origin-when-cross-origin
+#       }
+#       log {
+#           output file /var/log/caddy/access.log
+#       }
+#   }
+#
+# =============================================================================
+
 :81 {
-	@transform_port_query {
-		query XTransformPort=*
-	}
+        # ── Route: XTransformPort query parameter ──────────────
+        # When the URL contains ?XTransformPort=<port>, forward
+        # the request to the specified microservice port.
+        @transform_port_query {
+                query XTransformPort=*
+        }
 
-	handle @transform_port_query {
-		reverse_proxy localhost:{query.XTransformPort} {
-			header_up Host {host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-			header_up X-Real-IP {remote_host}
-		}
-	}
+        handle @transform_port_query {
+                reverse_proxy localhost:{query.XTransformPort} {
+                        header_up Host {host}
+                        header_up X-Forwarded-For {remote_host}
+                        header_up X-Forwarded-Proto {scheme}
+                        header_up X-Real-IP {remote_host}
+                }
+        }
 
-	handle {
-		reverse_proxy localhost:3000 {
-			header_up Host {host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-			header_up X-Real-IP {remote_host}
-		}
-	}
+        # ── Default Route: Next.js App ────────────────────────
+        # All other requests go to the main Next.js application.
+        handle {
+                reverse_proxy localhost:3000 {
+                        header_up Host {host}
+                        header_up X-Forwarded-For {remote_host}
+                        header_up X-Forwarded-Proto {scheme}
+                        header_up X-Real-IP {remote_host}
+                }
+        }
 }
