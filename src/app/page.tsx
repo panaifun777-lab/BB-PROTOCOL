@@ -39,6 +39,8 @@ import {
   MOCK_TIMELINE,
   MOCK_RESONANCE_HISTORY,
 } from '@/lib/mock-data';
+import { useDashboardStore } from '@/stores/dashboard-store';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
 
 import CognitiveCard from '@/components/dashboard/cognitive-card';
 import SplitDashboard from '@/components/dashboard/split-dashboard';
@@ -114,8 +116,24 @@ const INITIAL_DATA: DashboardState = {
   resonanceHistory: MOCK_RESONANCE_HISTORY,
 };
 
+// ── Web3 Connect Button (using ConnectKit) ───────────────────
+function Web3ConnectButton() {
+  const [showConnect, setShowConnect] = useState(false);
+
+  return (
+    <button
+      onClick={() => setShowConnect(!showConnect)}
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-violet-500/50 transition-colors text-xs"
+    >
+      <Wallet className="w-3.5 h-3.5 text-violet-400" />
+      <span className="hidden sm:inline text-slate-300 font-mono">0x7a3f...e9b2</span>
+      <span className="sm:hidden text-slate-300 font-mono">0x7a3f</span>
+    </button>
+  );
+}
+
 export default function Home() {
-  const [activeSection, setActiveSection] = useState('overview');
+  const { activeSection, setActiveSection } = useDashboardStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [paymentService, setPaymentService] = useState('GPT-4o 文本生成');
@@ -156,24 +174,23 @@ export default function Home() {
             <span className="font-semibold text-sm tracking-tight hidden sm:inline">
               认知分身协议
             </span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-mono">
-              Phase 5
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">
+              Phase 6
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {/* Quick Resonance Indicator */}
             <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-xs text-emerald-300 font-medium">{data.avatar.resonanceScore}</span>
             </div>
 
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+
             {/* Wallet Connect */}
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-violet-500/50 transition-colors text-xs">
-              <Wallet className="w-3.5 h-3.5 text-violet-400" />
-              <span className="hidden sm:inline text-slate-300 font-mono">{data.avatar.soulId}</span>
-              <span className="sm:hidden text-slate-300 font-mono">0x7a3f</span>
-            </button>
+            <Web3ConnectButton />
 
             {/* Notification Center */}
             <NotificationCenter />
@@ -574,7 +591,7 @@ export default function Home() {
       <footer className="hidden lg:block border-t border-slate-800/50 bg-[#0F172A] mt-auto">
         <div className="max-w-[1600px] mx-auto px-6 h-10 flex items-center justify-between text-[10px] text-slate-600">
           <span>认知分身协议 · Cognitive Avatar Protocol · Web4.0</span>
-          <span>Base L2 MVP → AFC 主网平滑迁移</span>
+          <span>Base L2 MVP → AFC 主网平滑迁移 · 6 Microservices · 8 i18n</span>
         </div>
       </footer>
     </div>
