@@ -42,6 +42,7 @@ import {
   Cell,
 } from 'recharts';
 import { cn } from '@/lib/utils';
+import { format, parseISO } from 'date-fns';
 
 // ── Types ──────────────────────────────────────────────
 interface PerformanceMetric {
@@ -990,7 +991,7 @@ export default function PerformanceDashboard() {
                 {alert.description}
                 <span className="ml-2 text-slate-500">
                   <Clock className="inline size-2.5 mr-0.5" />
-                  {new Date(alert.timestamp).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  {format(parseISO(alert.timestamp), 'MMM d HH:mm')}
                 </span>
               </AlertDescription>
             </Alert>

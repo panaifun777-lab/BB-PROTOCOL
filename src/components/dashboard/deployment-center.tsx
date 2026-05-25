@@ -37,6 +37,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { format, parseISO } from 'date-fns';
 
 // ── Types ──────────────────────────────────────────────
 type DeployStatus = 'live' | 'deploying' | 'paused' | 'verifying';
@@ -334,14 +335,7 @@ function CopyButton({ text }: { text: string }) {
 // ── Helper: format date ────────────────────────────────
 function formatDate(timestamp: string): string {
   if (!timestamp) return '—';
-  const d = new Date(timestamp);
-  return d.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return format(parseISO(timestamp), 'yyyy/MM/dd HH:mm');
 }
 
 // ── Helper: relative time ──────────────────────────────
@@ -358,7 +352,7 @@ function getRelativeTime(timestamp: string): string {
   if (diffMin < 60) return `${diffMin}分钟前`;
   if (diffHr < 24) return `${diffHr}小时前`;
   if (diffDay < 30) return `${diffDay}天前`;
-  return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+  return format(parseISO(timestamp), 'MMM d');
 }
 
 // ── Animated Counter ───────────────────────────────────

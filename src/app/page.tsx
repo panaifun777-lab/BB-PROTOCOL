@@ -24,6 +24,9 @@ import {
   Code2,
   Vote,
   Puzzle,
+  FileCode,
+  Cog,
+  Database,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DashboardState } from '@/lib/types';
@@ -59,6 +62,10 @@ import MultichainDeploy from '@/components/dashboard/multichain-deploy';
 import SdkPlatform from '@/components/dashboard/sdk-platform';
 import DaoGovernance from '@/components/dashboard/dao-governance';
 import EcosystemHub from '@/components/dashboard/ecosystem-hub';
+import ContractsArch from '@/components/dashboard/contracts-arch';
+import EngineArch from '@/components/dashboard/engine-arch';
+import Web3Integration from '@/components/dashboard/web3-integration';
+import DataInfra from '@/components/dashboard/data-infra';
 
 // ── Navigation Items ──────────────────────────────────────────
 const NAV_ITEMS = [
@@ -81,6 +88,10 @@ const NAV_ITEMS = [
   { id: 'sdk', label: 'SDK', icon: Code2 },
   { id: 'dao', label: 'DAO', icon: Vote },
   { id: 'ecosystem', label: '生态', icon: Puzzle },
+  { id: 'contracts', label: '合约', icon: FileCode },
+  { id: 'engine', label: '引擎', icon: Cog },
+  { id: 'web3', label: 'Web3', icon: Wallet },
+  { id: 'data', label: '数据', icon: Database },
 ];
 
 // ── Mobile Bottom Nav Items ───────────────────────────────────
@@ -144,7 +155,7 @@ export default function Home() {
               认知分身协议
             </span>
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-mono">
-              Phase 4
+              Phase 5
             </span>
           </div>
 
@@ -463,6 +474,46 @@ export default function Home() {
             transition={{ delay: 1.5 }}
           >
             <EcosystemHub />
+          </motion.div>
+
+          {/* Row 15: Contracts Arch (full width) */}
+          <motion.div
+            id="section-contracts"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.55 }}
+          >
+            <ContractsArch />
+          </motion.div>
+
+          {/* Row 16: Engine Arch + Web3 Integration */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <motion.div
+              id="section-engine"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.6 }}
+            >
+              <EngineArch />
+            </motion.div>
+            <motion.div
+              id="section-web3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.65 }}
+            >
+              <Web3Integration />
+            </motion.div>
+          </div>
+
+          {/* Row 17: Data Infra (full width) */}
+          <motion.div
+            id="section-data"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.7 }}
+          >
+            <DataInfra />
           </motion.div>
         </main>
       </div>

@@ -39,6 +39,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { format, parseISO } from 'date-fns';
 
 // ===== Types =====
 interface ContractInput {
@@ -669,8 +670,7 @@ export default function ContractSimulation() {
   }, []);
 
   const formatTimestamp = (ts: string) => {
-    const d = new Date(ts);
-    return d.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+    return format(parseISO(ts), 'MM/dd HH:mm');
   };
 
   return (

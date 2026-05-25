@@ -28,6 +28,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { format, parseISO } from 'date-fns';
 
 // ── Types ──────────────────────────────────────────────
 type InvariantStatus = 'pass' | 'fail';
@@ -328,7 +329,7 @@ function getRelativeTime(timestamp: string): string {
   if (diffMin < 60) return `${diffMin}分钟前`;
   if (diffHr < 24) return `${diffHr}小时前`;
   if (diffDay < 30) return `${diffDay}天前`;
-  return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+  return format(parseISO(timestamp), 'MMM d');
 }
 
 // ── Security Score Gauge ───────────────────────────────

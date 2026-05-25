@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 
 // ── Props ──────────────────────────────────────────────
 interface X402PaymentProps {
@@ -134,6 +135,7 @@ export default function X402Payment({
   const [isProcessing, setIsProcessing] = useState(false);
   const [txHash, setTxHash] = useState('');
   const [progressValue, setProgressValue] = useState(0);
+  const [completedAt, setCompletedAt] = useState('');
 
   const gasFee = amount * 0.05; // 5% gas
   const totalAmount = amount + gasFee;
@@ -167,6 +169,7 @@ export default function X402Payment({
       setProgressValue(100);
       setIsProcessing(false);
       setTxHash(mockTxHash());
+      setCompletedAt(format(new Date(), 'yyyy-MM-dd HH:mm:ss'));
       setStep('complete');
     }, 2500);
   }, []);
@@ -188,6 +191,7 @@ export default function X402Payment({
           setIsProcessing(false);
           setTxHash('');
           setProgressValue(0);
+          setCompletedAt('');
         }
       }}
     >
@@ -391,7 +395,7 @@ export default function X402Payment({
                   <div className="flex justify-between">
                     <span className="text-slate-400">时间</span>
                     <span className="text-slate-200">
-                      {new Date().toLocaleString('zh-CN')}
+                      {completedAt || '---'}
                     </span>
                   </div>
                   <div className="flex justify-between">

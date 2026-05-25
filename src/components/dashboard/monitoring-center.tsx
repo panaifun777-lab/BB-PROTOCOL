@@ -45,6 +45,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { format, parseISO } from 'date-fns';
 import {
   useMonitoringStream,
   type SystemMetricsPayload,
@@ -656,7 +657,7 @@ export default function MonitoringCenter() {
 
                         {/* Timestamp */}
                         <span className="text-[10px] text-slate-500 shrink-0">
-                          {event.timestamp ? new Date(event.timestamp).toLocaleTimeString('zh-CN') : '--:--'}
+                          {event.timestamp ? format(parseISO(event.timestamp), 'HH:mm:ss') : '--:--'}
                         </span>
                       </motion.div>
                     ))}

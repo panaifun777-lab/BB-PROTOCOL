@@ -778,3 +778,213 @@ export interface ActivityFeedItem {
   timestamp: string;
   type: string;
 }
+
+// ===== Phase 5: 合约架构类型 =====
+
+export type ContractCategory = 'core' | 'economics' | 'security' | 'governance';
+
+export interface ContractFunctionDef {
+  name: string;
+  visibility: string;
+  mutability: string;
+  gasEstimate: number;
+  params: string[];
+  returns: string;
+}
+
+export interface ContractArchDef {
+  id: string;
+  name: string;
+  filename: string;
+  category: ContractCategory;
+  description: string;
+  version: string;
+  linesOfCode: number;
+  optimizerRuns: number;
+  bytecodeSize: string;
+  deployed: boolean;
+  address: string;
+  functions: ContractFunctionDef[];
+  events: string[];
+  stateVariables: string[];
+  inherits: string[];
+  securityPatterns: string[];
+}
+
+export interface ContractInteraction {
+  from: string;
+  to: string;
+  type: string;
+  description: string;
+}
+
+export interface InvariantTest {
+  name: string;
+  formula: string;
+  status: 'pass' | 'fail';
+  counterexamples: number;
+}
+
+export interface GasReportEntry {
+  contract: string;
+  function: string;
+  gas: number;
+  gasCost: string;
+  optimization: string;
+}
+
+export interface VerificationEntry {
+  contract: string;
+  tool: string;
+  status: string;
+  invariants?: number;
+  counterexamples?: number;
+  findings?: number;
+  highCritical?: number;
+  lastRun: string;
+}
+
+// ===== Phase 5: 引擎架构类型 =====
+
+export type EngineModuleCategory = 'core' | 'oracle' | 'zkp' | 'discovery' | 'economics' | 'monitoring';
+export type EngineModuleStatus = 'production' | 'beta' | 'alpha';
+
+export interface EngineFunction {
+  name: string;
+  signature: string;
+  description: string;
+  complexity: string;
+}
+
+export interface MathParameter {
+  symbol: string;
+  name: string;
+  value: number;
+  description: string;
+}
+
+export interface MathModel {
+  formula: string;
+  parameters: MathParameter[];
+}
+
+export interface EngineModule {
+  id: string;
+  name: string;
+  category: EngineModuleCategory;
+  description: string;
+  version: string;
+  linesOfCode: number;
+  status: EngineModuleStatus;
+  performanceMs: number;
+  throughput: string;
+  memoryUsage: string;
+  functions: EngineFunction[];
+  mathModel: MathModel;
+  tests: { unit: number; property: number; benchmark: number; passing: number };
+}
+
+export interface BenchmarkEntry {
+  operation: string;
+  p50: number;
+  p95: number;
+  p99: number;
+  unit: string;
+}
+
+// ===== Phase 5: Web3集成类型 =====
+
+export type WalletConnectionStatus = 'connected' | 'available';
+
+export interface WalletConnection {
+  wallet: string;
+  status: WalletConnectionStatus;
+  address: string;
+  chainId: number;
+  chainName: string;
+  balance: string;
+  balanceUsd: string;
+  lastConnected: string;
+}
+
+export type ContractInteractionStatus = 'available' | 'restricted';
+
+export interface ContractInteractionDef {
+  contract: string;
+  function: string;
+  status: ContractInteractionStatus;
+  gasEstimate: string;
+  gasCost: string;
+  lastCalled: string;
+  calls24h: number;
+}
+
+export interface EventSubscription {
+  event: string;
+  contract: string;
+  status: 'subscribed' | 'unsubscribed';
+  events24h: number;
+  lastEvent: string;
+}
+
+export type TxStatus = 'confirmed' | 'pending' | 'failed';
+
+export interface TransactionRecord {
+  id: string;
+  type: string;
+  contract: string;
+  function: string;
+  hash: string;
+  status: TxStatus;
+  gasUsed: number;
+  gasCost: string;
+  blockNumber: number;
+  timestamp: string;
+}
+
+// ===== Phase 5: 数据基建类型 =====
+
+export interface SubgraphEntityCount {
+  avatars: number;
+  skills: number;
+  revenueSplits: number;
+  delegations: number;
+  circuitEvents: number;
+  resonanceUpdates: number;
+}
+
+export interface EventHandler {
+  event: string;
+  entity: string;
+  field: string;
+  indexed: boolean;
+}
+
+export interface GraphQLExample {
+  name: string;
+  query: string;
+}
+
+export interface IPFSPin {
+  cid: string;
+  type: string;
+  size: string;
+  pinnedAt: string;
+  status: 'pinned' | 'pinning';
+}
+
+export interface DataFlowPath {
+  source: string;
+  target: string;
+  method: string;
+  latency: string;
+  freshness: string;
+}
+
+export interface ZustandStore {
+  name: string;
+  slices: string[];
+  persist: boolean;
+  size: string;
+  subscribers: number;
+}

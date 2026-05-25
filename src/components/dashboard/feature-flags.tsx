@@ -51,6 +51,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { format, parseISO } from 'date-fns';
 
 // ── Types ──────────────────────────────────────────────
 type FlagStatus = 'active' | 'inactive' | 'scheduled';
@@ -369,13 +370,11 @@ const INITIAL_DATA: FeatureFlagsData = {
 
 // ── Helpers ────────────────────────────────────────────
 function formatDate(ts: string): string {
-  const d = new Date(ts);
-  return d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  return format(parseISO(ts), 'MM/dd HH:mm');
 }
 
 function formatDateShort(ts: string): string {
-  const d = new Date(ts);
-  return d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+  return format(parseISO(ts), 'MMM d');
 }
 
 function getRolloutColor(pct: number): string {
