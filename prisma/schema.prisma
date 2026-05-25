@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,20 +7,131 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ===== 认知分身核心模型 =====
+
+model Avatar {
+  id             String   @id @default(cuid())
+  soulId         String   @unique                    // .soul SBT Token ID
+  ownerAddress   String                              // 本体钱包地址
+  name           String                              // 分身名称
+  cognitionRoot  String                              // 认知状态根哈希 (IPFS CID)
+  resonanceScore Int      @default(70)               // 情绪共振指数 [0,100]
+  avatarBalance  Float    @default(0)                // 分身金库余额 (AFC)
+  circuitState   String   @default("NORMAL")         // NORMAL | SOFT_LIMIT | HARD_PAUSE | RECOVERY
+  isFrozen       Boolean  @default(false)            // 认知熔断冻结
+  tier           String   @default("starter")        // starter | pro | enterprise
+  createdAt      DateTime @default(now())
+  lastActivityAt DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  skills      AvatarSkill[]
+  revenues    Revenue[]
+  delegations Delegation[]
+  timeline    TimelineEvent[]
 }
 
-model Post {
+// ===== 技能包模型 =====
+
+model Skill {
+  id          String @id @default(cuid())
+  name        String                         // 技能名称
+  description String                         // 技能描述
+  tier        Int                            // 解锁层级: 1=基础, 2=高级RAG, 3=多模态, 4=跨分身协作
+  revenueThreshold Float                     // 解锁所需累计收益 (USD)
+  mcpEndpoint String?                        // MCP能力节点地址
+  icon        String?                        // 图标标识
+  category    String   @default("general")   // 分类: general | rag | multimodal | collaboration
+
+  avatars AvatarSkill[]
+}
+
+model AvatarSkill {
+  id          String  @id @default(cuid())
+  avatarId    String
+  skillId     String
+  unlocked    Boolean @default(false)
+  usageCount  Int     @default(0)
+  satisfaction Float  @default(0)             // 满意度 0-100
+  avgCost     Float   @default(0)             // 平均使用成本
+  unlockedAt  DateTime?
+
+  avatar Avatar @relation(fields: [avatarId], references: [id])
+  skill  Skill  @relation(fields: [skillId], references: [id])
+
+  @@unique([avatarId, skillId])
+}
+
+// ===== 收益分账模型 =====
+
+model Revenue {
+  id            String   @id @default(cuid())
+  avatarId      String
+  totalAmount   Float                             // 总金额 (USD)
+  humanShare    Float                             // 人类份额
+  avatarShare   Float                             // 分身金库份额
+  protocolShare Float                             // 协议LP份额
+  humanBps      Int    @default(7000)             // 人类比例 BPS
+  avatarBps     Int    @default(2000)             // 金库比例 BPS
+  protocolBps   Int    @default(1000)             // 协议比例 BPS
+  source        String                            // 收益来源: skill_call | rental | collaboration
+  txHash        String?                           // 链上交易哈希
+  createdAt     DateTime @default(now())
+
+  avatar Avatar @relation(fields: [avatarId], references: [id])
+}
+
+// ===== 流体民主委托模型 =====
+
+model Delegation {
+  id           String   @id @default(cuid())
+  avatarId     String
+  domain       String                             // 委托领域: content_creation | contract_signing | data_analysis
+  delegateName String                             // 委托对象名称
+  delegateAddr String?                            // 委托对象地址
+  weight       Int                                // 委托权重 0-10000 BPS
+  isActive     Boolean  @default(true)
+  createdAt    DateTime  @default(now())
+  revokedAt    DateTime?
+
+  avatar Avatar @relation(fields: [avatarId], references: [id])
+}
+
+// ===== 认知时间线模型 =====
+
+model TimelineEvent {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
+  avatarId  String
+  eventType String                           // skill_invocation | revenue_received | resonance_update | delegation_change | circuit_change
+  details   String                           // 事件详情
+  txHash    String?                          // 链上哈希
+  ipfsHash  String?                          // IPFS哈希
+  amount    Float?                           // 关联金额
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  avatar Avatar @relation(fields: [avatarId], references: [id])
+}
+
+// ===== 共振分历史模型 =====
+
+model ResonanceHistory {
+  id        String   @id @default(cuid())
+  avatarId  String
+  score     Int                                // 共振分 [0,100]
+  source    String   @default("ece_oracle")    // 来源: ece_oracle | manual | auto_recovery
+  createdAt DateTime @default(now())
+}
+
+// ===== x402支付记录 =====
+
+model Payment {
+  id           String   @id @default(cuid())
+  avatarId     String
+  serviceName  String                            // 服务名称
+  amount       Float                             // 支付金额
+  currency     String   @default("USDC")         // 支付币种
+  gasFee       Float    @default(0)              // Gas费用
+  riskLevel    String   @default("low")          // low | medium | high
+  status       String   @default("pending")      // pending | confirmed | failed
+  txHash       String?
+  createdAt    DateTime @default(now())
 }

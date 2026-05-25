@@ -14,24 +14,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Z.ai Code Scaffold - AI-Powered Development",
-  description: "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
-  keywords: ["Z.ai", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI development", "React"],
-  authors: [{ name: "Z.ai Team" }],
+  title: "AI认知分身协议 · Cognitive Avatar Protocol",
+  description: "Web4.0认知所有权基础设施 — 行为即契约 · 记忆即永生 · 共性通神性 · 觉醒即自由",
+  keywords: ["AI分身", "认知所有权", "Web4.0", "Cognitive Avatar", "DID", "x402", "流体民主"],
+  authors: [{ name: "Piaoshu / Web4.0 Foundation" }],
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: "/logo.svg",
   },
   openGraph: {
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
-    url: "https://chat.z.ai",
-    siteName: "Z.ai",
+    title: "AI认知分身协议",
+    description: "Web4.0认知所有权基础设施",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
+    title: "AI认知分身协议",
+    description: "Web4.0认知所有权基础设施",
   },
 };
 
@@ -41,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="zh-CN" suppressHydrationWarning className="dark">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
