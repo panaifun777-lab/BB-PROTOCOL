@@ -20,6 +20,10 @@ import {
   Globe,
   Radio,
   Flag,
+  Link2,
+  Code2,
+  Vote,
+  Puzzle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DashboardState } from '@/lib/types';
@@ -51,6 +55,10 @@ import PerformanceDashboard from '@/components/dashboard/performance-dashboard';
 import DeploymentCenter from '@/components/dashboard/deployment-center';
 import MonitoringCenter from '@/components/dashboard/monitoring-center';
 import FeatureFlags from '@/components/dashboard/feature-flags';
+import MultichainDeploy from '@/components/dashboard/multichain-deploy';
+import SdkPlatform from '@/components/dashboard/sdk-platform';
+import DaoGovernance from '@/components/dashboard/dao-governance';
+import EcosystemHub from '@/components/dashboard/ecosystem-hub';
 
 // ── Navigation Items ──────────────────────────────────────────
 const NAV_ITEMS = [
@@ -69,6 +77,10 @@ const NAV_ITEMS = [
   { id: 'deployment', label: '部署', icon: Globe },
   { id: 'monitoring', label: '监控', icon: Radio },
   { id: 'flags', label: '灰度', icon: Flag },
+  { id: 'multichain', label: '多链', icon: Link2 },
+  { id: 'sdk', label: 'SDK', icon: Code2 },
+  { id: 'dao', label: 'DAO', icon: Vote },
+  { id: 'ecosystem', label: '生态', icon: Puzzle },
 ];
 
 // ── Mobile Bottom Nav Items ───────────────────────────────────
@@ -132,7 +144,7 @@ export default function Home() {
               认知分身协议
             </span>
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-mono">
-              Phase 3
+              Phase 4
             </span>
           </div>
 
@@ -411,6 +423,46 @@ export default function Home() {
             transition={{ delay: 1.3 }}
           >
             <FeatureFlags />
+          </motion.div>
+
+          {/* Row 12: Multichain Deploy (full width) */}
+          <motion.div
+            id="section-multichain"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.35 }}
+          >
+            <MultichainDeploy />
+          </motion.div>
+
+          {/* Row 13: SDK Platform + DAO Governance */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <motion.div
+              id="section-sdk"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.4 }}
+            >
+              <SdkPlatform />
+            </motion.div>
+            <motion.div
+              id="section-dao"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.45 }}
+            >
+              <DaoGovernance />
+            </motion.div>
+          </div>
+
+          {/* Row 14: Ecosystem Hub (full width) */}
+          <motion.div
+            id="section-ecosystem"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.5 }}
+          >
+            <EcosystemHub />
           </motion.div>
         </main>
       </div>

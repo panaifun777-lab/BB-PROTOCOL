@@ -341,3 +341,157 @@ model RollbackLog {
   operator   String                               // 操作人
   createdAt  DateTime @default(now())
 }
+
+// ===== Phase 4: 多链部署模型 =====
+
+model SupportedChain {
+  id                 String   @id @default(cuid())
+  chainId            Int                                 // Chain ID
+  name               String                              // 链名称
+  color              String                              // 主题色
+  icon               String                              // 图标
+  status             String   @default("planned")        // active | pending | planned
+  blockHeight        Int      @default(0)                // 当前区块高度
+  gasPrice           String   @default("0")              // Gas价格
+  avgBlockTime       String   @default("2s")             // 平均出块时间
+  contractsDeployed  Int      @default(0)                // 已部署合约数
+  tvl                Float    @default(0)                // 总锁仓价值
+  lastSyncAt         DateTime @default(now())            // 最后同步时间
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model CrossChainBridge {
+  id              String   @id @default(cuid())
+  name            String                              // 桥名称
+  sourceChain     String                              // 源链
+  targetChain     String                              // 目标链
+  status          String   @default("pending")        // active | pending
+  totalLocked     Float    @default(0)                // 总锁定量
+  totalMinted     Float    @default(0)                // 总铸造量
+  fee             String   @default("0.1%")           // 手续费
+  avgTime         String   @default("10m")            // 平均到账时间
+  transactions24h Int      @default(0)                // 24h交易数
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model ChainSwitchRecord {
+  id        String   @id @default(cuid())
+  fromChain String                              // 源链
+  toChain   String                              // 目标链
+  action    String                              // 操作类型
+  amount    Float                               // 金额
+  status    String   @default("pending")        // completed | pending | failed
+  txHash    String?                             // 交易哈希
+  createdAt DateTime @default(now())
+}
+
+// ===== Phase 4: SDK/API开放模型 =====
+
+model ApiKeyRecord {
+  id          String   @id @default(cuid())
+  name        String                              // 密钥名称
+  prefix      String                              // 密钥前缀
+  status      String   @default("active")        // active | revoked
+  permissions String                              // 权限列表 (JSON)
+  rateLimit   String   @default("100/min")       // 速率限制
+  usage30d    Int      @default(0)                // 30天使用量
+  lastUsedAt  DateTime?                           // 最后使用时间
+  createdAt   DateTime @default(now())
+  revokedAt   DateTime?
+}
+
+model SdkPackageRecord {
+  name        String   @id                        // 包名
+  version     String                              // 版本
+  language    String                              // 编程语言
+  downloads   Int      @default(0)                // 下载量
+  description String                              // 描述
+  status      String   @default("alpha")          // stable | beta | alpha
+  size        String                              // 包大小
+  lastUpdate  DateTime @default(now())            // 最后更新
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model WebhookRecord {
+  id            String   @id @default(cuid())
+  url           String                              // 回调URL
+  events        String                              // 订阅事件 (JSON)
+  status        String   @default("active")        // active | paused
+  successRate   Float    @default(0)                // 成功率
+  lastDelivery  DateTime?                           // 最后投递时间
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ===== Phase 4: DAO治理模型 =====
+
+model GovernanceProposalRecord {
+  id              String   @id @default(cuid())
+  title           String                               // 提案标题
+  category        String                               // economics | technical | security | compliance | community
+  status          String   @default("queued")          // active | passed | defeated | queued
+  proposer        String                               // 提案人地址
+  description     String                               // 提案描述
+  votesFor        Float    @default(0)                  // 赞成票
+  votesAgainst    Float    @default(0)                  // 反对票
+  votesAbstain    Float    @default(0)                  // 弃权票
+  totalVotingPower Float   @default(0)                  // 总投票权
+  quorum          Float    @default(0)                  // 法定人数
+  executionHash   String?                              // 执行哈希
+  riskAssessment  String   @default("medium")          // low | medium | high
+  startsAt        DateTime                             // 投票开始时间
+  endsAt          DateTime                             // 投票结束时间
+  executedAt      DateTime?                            // 执行时间
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model DelegationRecord {
+  id          String   @id @default(cuid())
+  delegator   String                              // 委托人地址
+  delegatee   String                              // 被委托人地址
+  weight      Int                                // 权重 BPS
+  domain      String                              // 委托领域
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  revokedAt   DateTime?
+}
+
+model TreasuryTransactionRecord {
+  id          String   @id @default(cuid())
+  type        String                               // income | expense
+  amount      Float                                // 金额
+  description String                               // 描述
+  txHash      String?                              // 交易哈希
+  createdAt   DateTime @default(now())
+}
+
+// ===== Phase 4: 生态集成模型 =====
+
+model ProtocolIntegrationRecord {
+  id              String   @id @default(cuid())
+  name            String                              // 协议名称
+  category        String                              // DEX | Lending | Oracle | Indexing | Staking | Identity
+  icon            String                              // 图标
+  status          String   @default("planned")        // integrated | pending | planned
+  description     String                              // 描述
+  integrationDate DateTime?                           // 集成日期
+  tvl             Float    @default(0)                 // TVL
+  volume24h       Float    @default(0)                 // 24h交易量
+  users           Int      @default(0)                 // 用户数
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model EcosystemNotificationRecord {
+  id        String   @id @default(cuid())
+  type      String                               // governance | revenue | security | bridge | skill | system | delegation | compliance
+  title     String                               // 通知标题
+  message   String                               // 通知内容
+  priority  String   @default("medium")          // critical | high | medium | low
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

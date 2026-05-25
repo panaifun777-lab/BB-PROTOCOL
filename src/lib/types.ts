@@ -512,3 +512,269 @@ export interface CanaryMetrics {
   latencyP95: number;
   crashRate: number;
 }
+
+// ===== Phase 4: 多链部署类型 =====
+
+export type ChainStatus = 'active' | 'pending' | 'planned';
+
+export interface SupportedChain {
+  id: string;
+  name: string;
+  chainId: number;
+  color: string;
+  icon: string;
+  status: ChainStatus;
+  blockHeight: number;
+  gasPrice: string;
+  avgBlockTime: string;
+  contractsDeployed: number;
+  tvl: number;
+  lastSync: string;
+}
+
+export interface CrossChainBridge {
+  id: string;
+  name: string;
+  sourceChain: string;
+  targetChain: string;
+  status: 'active' | 'pending';
+  totalLocked: number;
+  totalMinted: number;
+  fee: string;
+  avgTime: string;
+  transactions24h: number;
+}
+
+export interface ChainSwitchRecord {
+  id: string;
+  fromChain: string;
+  toChain: string;
+  action: string;
+  amount: number;
+  status: 'completed' | 'pending' | 'failed';
+  txHash: string;
+  timestamp: string;
+}
+
+export interface StateSyncRecord {
+  id: string;
+  type: string;
+  sourceChain: string;
+  targetChain: string;
+  lastSync: string;
+  status: 'synced' | 'delayed' | 'error';
+  latency: string;
+}
+
+export interface TvlHistoryPoint {
+  date: string;
+  base: number;
+  ethereum: number;
+  arbitrum: number;
+}
+
+// ===== Phase 4: SDK/API开放类型 =====
+
+export type ApiMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+export type ApiStability = 'stable' | 'beta' | 'alpha';
+
+export interface ApiEndpoint {
+  method: ApiMethod;
+  path: string;
+  description: string;
+  auth: string;
+  rateLimit: string;
+  status: ApiStability;
+  version: string;
+  category: string;
+}
+
+export interface ApiKey {
+  id: string;
+  name: string;
+  prefix: string;
+  createdAt: string;
+  lastUsed: string;
+  status: 'active' | 'revoked';
+  permissions: string[];
+  rateLimit: string;
+  usage30d: number;
+}
+
+export interface SdkPackage {
+  name: string;
+  version: string;
+  language: string;
+  downloads: number;
+  description: string;
+  status: ApiStability;
+  size: string;
+  lastUpdate: string;
+}
+
+export interface RateLimitQuota {
+  tier: string;
+  rpm: number;
+  monthlyQuota: number | string;
+  price: string;
+}
+
+export interface UsageHistoryPoint {
+  date: string;
+  calls: number;
+  errors: number;
+  avgLatency: number;
+}
+
+export interface WebhookConfig {
+  id: string;
+  url: string;
+  events: string[];
+  status: 'active' | 'paused';
+  successRate: number;
+  lastDelivery: string;
+}
+
+// ===== Phase 4: DAO治理类型 =====
+
+export type ProposalCategory = 'economics' | 'technical' | 'security' | 'compliance' | 'community';
+export type ProposalStatus = 'active' | 'passed' | 'defeated' | 'queued';
+
+export interface GovernanceProposal {
+  id: string;
+  title: string;
+  category: ProposalCategory;
+  status: ProposalStatus;
+  proposer: string;
+  createdAt: string;
+  endTime: string;
+  description: string;
+  votesFor: number;
+  votesAgainst: number;
+  votesAbstain: number;
+  totalVotingPower: number;
+  quorum: number;
+  executionHash: string;
+  riskAssessment: 'low' | 'medium' | 'high';
+  executedAt?: string;
+}
+
+export interface VotingStats {
+  totalVoters: number;
+  participationRate: number;
+  averageQuorum: number;
+  proposalsTotal: number;
+  proposalsPassed: number;
+  proposalsActive: number;
+  proposalsDefeated: number;
+}
+
+export interface DelegationEdge {
+  delegator: string;
+  delegatee: string;
+  weight: number;
+  domain: string;
+  isActive: boolean;
+}
+
+export interface TopDelegate {
+  address: string;
+  name: string;
+  votingPower: number;
+  proposalsVoted: number;
+  agreementRate: number;
+  delegators: number;
+  domains: string[];
+}
+
+export interface TreasuryTransaction {
+  type: 'income' | 'expense';
+  amount: number;
+  description: string;
+  txHash: string;
+  timestamp: string;
+}
+
+export interface TreasuryData {
+  balance: number;
+  currency: string;
+  allocated: number;
+  available: number;
+  monthlyIncome: number;
+  monthlyExpense: number;
+  recentTransactions: TreasuryTransaction[];
+}
+
+export interface GovernanceParams {
+  votingPeriod: string;
+  proposalThreshold: string;
+  quorum: string;
+  executionDelay: string;
+  timeLock: string;
+}
+
+// ===== Phase 4: 生态集成类型 =====
+
+export type ProtocolStatus = 'integrated' | 'pending' | 'planned';
+
+export interface ProtocolIntegration {
+  id: string;
+  name: string;
+  category: string;
+  icon: string;
+  status: ProtocolStatus;
+  description: string;
+  integrationDate: string;
+  tvl: number;
+  volume24h: number;
+  users: number;
+}
+
+export type WalletSupport = 'full' | 'partial' | 'planned';
+
+export interface WalletIntegration {
+  name: string;
+  icon: string;
+  support: WalletSupport;
+  users: number;
+  features: string[];
+}
+
+export interface DataSource {
+  name: string;
+  provider: string;
+  records: number;
+  freshness: string;
+  status: 'active' | 'delayed';
+}
+
+export interface PipelineStageInfo {
+  stage: string;
+  status: 'running' | 'stopped';
+  throughput: string;
+  latency: string;
+}
+
+export interface EcosystemNotification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  read: boolean;
+  createdAt: string;
+}
+
+export interface PartnerTier {
+  name: string;
+  requirements: string;
+  benefits: string;
+  partners: number;
+}
+
+export interface ActivityFeedItem {
+  protocol: string;
+  event: string;
+  timestamp: string;
+  type: string;
+}
