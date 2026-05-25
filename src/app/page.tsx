@@ -16,6 +16,10 @@ import {
   Zap,
   Scale,
   FlaskConical,
+  Gauge,
+  Globe,
+  Radio,
+  Flag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DashboardState } from '@/lib/types';
@@ -43,6 +47,10 @@ import CompliancePanel from '@/components/dashboard/compliance-panel';
 import SecurityAudit from '@/components/dashboard/security-audit';
 import LPLiquidity from '@/components/dashboard/lp-liquidity';
 import ContractSimulation from '@/components/dashboard/contract-simulation';
+import PerformanceDashboard from '@/components/dashboard/performance-dashboard';
+import DeploymentCenter from '@/components/dashboard/deployment-center';
+import MonitoringCenter from '@/components/dashboard/monitoring-center';
+import FeatureFlags from '@/components/dashboard/feature-flags';
 
 // ── Navigation Items ──────────────────────────────────────────
 const NAV_ITEMS = [
@@ -57,6 +65,10 @@ const NAV_ITEMS = [
   { id: 'timeline', label: '时间线', icon: Clock },
   { id: 'security', label: '安全', icon: Shield },
   { id: 'compliance', label: '合规', icon: Scale },
+  { id: 'performance', label: '性能', icon: Gauge },
+  { id: 'deployment', label: '部署', icon: Globe },
+  { id: 'monitoring', label: '监控', icon: Radio },
+  { id: 'flags', label: '灰度', icon: Flag },
 ];
 
 // ── Mobile Bottom Nav Items ───────────────────────────────────
@@ -120,7 +132,7 @@ export default function Home() {
               认知分身协议
             </span>
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-mono">
-              MVP
+              Phase 3
             </span>
           </div>
 
@@ -360,6 +372,46 @@ export default function Home() {
               <CompliancePanel />
             </motion.div>
           </div>
+
+          {/* Row 9: Performance Dashboard (full width) */}
+          <motion.div
+            id="section-performance"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.15 }}
+          >
+            <PerformanceDashboard />
+          </motion.div>
+
+          {/* Row 10: Deployment + Monitoring */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <motion.div
+              id="section-deployment"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2 }}
+            >
+              <DeploymentCenter />
+            </motion.div>
+            <motion.div
+              id="section-monitoring"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.25 }}
+            >
+              <MonitoringCenter />
+            </motion.div>
+          </div>
+
+          {/* Row 11: Feature Flags (full width) */}
+          <motion.div
+            id="section-flags"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.3 }}
+          >
+            <FeatureFlags />
+          </motion.div>
         </main>
       </div>
 

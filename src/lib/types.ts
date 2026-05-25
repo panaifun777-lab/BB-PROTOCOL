@@ -315,3 +315,200 @@ export interface SimulationHistoryEntry {
   gasUsed: number;
   timestamp: string;
 }
+
+// ===== Phase 3: 性能优化类型 =====
+
+export interface WebVitalMetric {
+  name: string;
+  value: number;
+  unit: string;
+  target: number;
+  status: 'good' | 'needs_improvement' | 'poor';
+}
+
+export interface CacheStrategyEntry {
+  name: string;
+  ttl: number;
+  hitRate: number;
+  swrInterval: number;
+  type: string;
+}
+
+export interface CDNConfig {
+  provider: string;
+  edgeLocations: number;
+  cacheHitRate: number;
+  bandwidthSaved: string;
+  ssl: string;
+  http2: boolean;
+  brotli: boolean;
+}
+
+export interface LazyLoadingModule {
+  name: string;
+  chunkSize: number;
+  loadTime: number;
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  loaded: boolean;
+}
+
+export interface PerformanceBudgetItem {
+  category: string;
+  current: number;
+  budget: number;
+  unit: string;
+}
+
+// ===== Phase 3: 链上部署类型 =====
+
+export type DeployStatus = 'live' | 'deploying' | 'paused' | 'verifying';
+export type ContractVerificationStatus = 'verified' | 'pending' | 'failed';
+
+export interface ContractDeployment {
+  name: string;
+  address: string;
+  version: string;
+  status: ContractVerificationStatus;
+  deployTx: string;
+  verifiedAt: string;
+  bytecodeSize: string;
+  optimizerRuns: number;
+}
+
+export interface MultiSigSigner {
+  name: string;
+  address: string;
+  confirmed: boolean;
+}
+
+export interface PendingOperation {
+  description: string;
+  confirmations: number;
+  required: number;
+}
+
+export interface StateConsistencyCheck {
+  name: string;
+  status: 'match' | 'mismatch';
+  sepoliaValue: string;
+  mainnetValue: string;
+  note?: string;
+}
+
+export interface PipelineStage {
+  name: string;
+  status: 'passed' | 'in_progress' | 'pending' | 'failed';
+  detail?: string;
+}
+
+// ===== Phase 3: 监控告警类型 =====
+
+export interface SystemMetrics {
+  cpu: number;
+  memory: number;
+  diskUsage: number;
+  networkIn: number;
+  networkOut: number;
+  activeConnections: number;
+  requestRate: number;
+  errorRate: number;
+  p50Latency: number;
+  p95Latency: number;
+  p99Latency: number;
+}
+
+export interface PrometheusMetric {
+  name: string;
+  value: number;
+  unit: string;
+  status: 'healthy' | 'warning' | 'critical';
+  threshold: string;
+  description: string;
+}
+
+export interface ChainEvent {
+  eventName: string;
+  contract: string;
+  blockNumber: number;
+  txHash: string;
+  timestamp: string;
+  data: string;
+}
+
+export type AlertSeverity = 'critical' | 'warning' | 'info';
+export type AlertStatus = 'active' | 'silenced' | 'disabled';
+
+export interface AlertRule {
+  id: string;
+  name: string;
+  condition: string;
+  severity: AlertSeverity;
+  status: AlertStatus;
+  triggerCount7d: number;
+  lastTriggered: string;
+}
+
+export interface AnomalyEntry {
+  description: string;
+  detectionMethod: string;
+  detectedAt: string;
+  severity: 'high' | 'medium' | 'low';
+  status: 'investigating' | 'resolved' | 'monitoring';
+}
+
+// ===== Phase 3: 灰度发布类型 =====
+
+export type FeatureFlagStatus = 'active' | 'inactive' | 'scheduled';
+export type FeatureFlagEnvironment = 'production' | 'staging' | 'development';
+
+export interface FeatureFlag {
+  id: string;
+  name: string;
+  key: string;
+  description: string;
+  status: FeatureFlagStatus;
+  rolloutPercentage: number;
+  targetingRules: string;
+  environment: FeatureFlagEnvironment;
+  createdAt: string;
+  updatedAt: string;
+  enabledForUsers: number;
+  totalUsers: number;
+}
+
+export type ABTestStatus = 'running' | 'completed' | 'draft';
+
+export interface ABTestVariant {
+  name: string;
+  description: string;
+  trafficPercent: number;
+  metricValue: number;
+  metricLabel: string;
+}
+
+export interface ABTest {
+  id: string;
+  name: string;
+  description: string;
+  status: ABTestStatus;
+  variants: ABTestVariant[];
+  startDate: string;
+  endDate: string;
+  winner?: string;
+  confidence: number;
+}
+
+export interface RollbackEntry {
+  id: string;
+  flagName: string;
+  action: 'deployed' | 'rolled_back' | 'paused' | 'resumed';
+  reason: string;
+  timestamp: string;
+  operator: string;
+}
+
+export interface CanaryMetrics {
+  errorRate: number;
+  latencyP95: number;
+  crashRate: number;
+}

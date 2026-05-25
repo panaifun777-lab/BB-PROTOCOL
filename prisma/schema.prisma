@@ -226,3 +226,118 @@ model ContractSimulation {
   avatarId    String?                             // 关联分身
   createdAt   DateTime @default(now())
 }
+
+// ===== Phase 3: 性能监控模型 =====
+
+model PerformanceMetric {
+  id          String   @id @default(cuid())
+  metricName  String                              // FCP | LCP | INP | CLS | TTFB
+  value       Float                               // 当前值
+  target      Float                               // 目标值
+  unit        String                              // ms | s | score
+  status      String   @default("good")           // good | needs_improvement | poor
+  source      String   @default("web_vitals")     // 数据来源
+  createdAt   DateTime @default(now())
+}
+
+model CacheStrategy {
+  id          String   @id @default(cuid())
+  name        String                              // SSR Page | API Response | Static Asset | ISR | CDN Edge
+  ttl         Int                                 // 缓存TTL (秒)
+  hitRate     Float   @default(0)                 // 命中率
+  swrInterval Int                                 // Stale-while-revalidate间隔
+  cacheType   String                              // 缓存类型
+  updatedAt   DateTime @updatedAt
+}
+
+// ===== Phase 3: 链上部署模型 =====
+
+model ContractDeploymentRecord {
+  id             String   @id @default(cuid())
+  contractName   String                              // 合约名称
+  address        String                              // 部署地址
+  version        String                              // 合约版本
+  verificationStatus String @default("pending")       // verified | pending | failed
+  deployTx       String?                             // 部署交易哈希
+  bytecodeSize   String?                             // 字节码大小
+  optimizerRuns  Int      @default(20000)            // 优化器运行次数
+  network        String   @default("base_mainnet")   // 部署网络
+  deployedAt     DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model MultiSigOperation {
+  id             String   @id @default(cuid())
+  description    String                              // 操作描述
+  confirmations  Int      @default(0)                // 已确认数
+  required       Int      @default(3)                // 需要确认数
+  status         String   @default("pending")        // pending | confirmed | executed | cancelled
+  operator       String?                             // 操作发起人
+  executedAt     DateTime?
+  createdAt      DateTime @default(now())
+}
+
+// ===== Phase 3: 监控告警模型 =====
+
+model MonitoringAlert {
+  id              String   @id @default(cuid())
+  ruleName        String                               // 告警规则名称
+  condition       String                               // 触发条件
+  severity        String   @default("warning")         // critical | warning | info
+  status          String   @default("active")          // active | silenced | disabled
+  triggerCount7d  Int      @default(0)                 // 7天触发次数
+  lastTriggeredAt DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AnomalyRecord {
+  id               String   @id @default(cuid())
+  description      String                              // 异常描述
+  detectionMethod  String                              // 检测方法
+  severity         String   @default("medium")         // high | medium | low
+  status           String   @default("monitoring")     // monitoring | investigating | resolved
+  detectedAt       DateTime @default(now())
+  resolvedAt       DateTime?
+}
+
+// ===== Phase 3: 灰度发布模型 =====
+
+model FeatureFlagRecord {
+  id               String   @id @default(cuid())
+  flagKey          String   @unique                     // 功能开关唯一键
+  name             String                              // 显示名称
+  description      String?                             // 描述
+  status           String   @default("inactive")       // active | inactive | scheduled
+  rolloutPercent   Int      @default(0)                 // 灰度百分比 0-100
+  targetingRules   String?                             // 目标规则 (JSON)
+  environment      String   @default("production")     // production | staging | development
+  enabledForUsers  Int      @default(0)                 // 已启用用户数
+  totalUsers       Int      @default(0)                 // 总用户数
+  scheduledAt      DateTime?                           // 计划激活时间
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ABTestRecord {
+  id          String   @id @default(cuid())
+  name        String                               // 测试名称
+  description String?                              // 测试描述
+  status      String   @default("draft")           // running | completed | draft
+  variants    String                               // 变体配置 (JSON)
+  startDate   DateTime?                            // 开始时间
+  endDate     DateTime?                            // 结束时间
+  winner      String?                              // 获胜变体
+  confidence  Float    @default(0)                  // 置信度
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model RollbackLog {
+  id         String   @id @default(cuid())
+  flagKey    String                               // 关联功能开关
+  action     String                               // deployed | rolled_back | paused | resumed
+  reason     String                               // 操作原因
+  operator   String                               // 操作人
+  createdAt  DateTime @default(now())
+}
