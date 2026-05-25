@@ -14,6 +14,8 @@ import {
   Menu,
   X,
   Zap,
+  Scale,
+  FlaskConical,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DashboardState } from '@/lib/types';
@@ -37,6 +39,10 @@ import CognitiveTimeline from '@/components/dashboard/cognitive-timeline';
 import X402Payment from '@/components/dashboard/x402-payment';
 import AvatarMarketplace from '@/components/dashboard/avatar-marketplace';
 import NotificationCenter from '@/components/dashboard/notification-center';
+import CompliancePanel from '@/components/dashboard/compliance-panel';
+import SecurityAudit from '@/components/dashboard/security-audit';
+import LPLiquidity from '@/components/dashboard/lp-liquidity';
+import ContractSimulation from '@/components/dashboard/contract-simulation';
 
 // ── Navigation Items ──────────────────────────────────────────
 const NAV_ITEMS = [
@@ -45,9 +51,12 @@ const NAV_ITEMS = [
   { id: 'resonance', label: '共振', icon: Activity },
   { id: 'skills', label: '技能', icon: Sparkles },
   { id: 'marketplace', label: '市场', icon: Users },
+  { id: 'liquidity', label: '流动性', icon: DollarSign },
+  { id: 'simulation', label: '模拟', icon: FlaskConical },
   { id: 'governance', label: '治理', icon: Users },
   { id: 'timeline', label: '时间线', icon: Clock },
   { id: 'security', label: '安全', icon: Shield },
+  { id: 'compliance', label: '合规', icon: Scale },
 ];
 
 // ── Mobile Bottom Nav Items ───────────────────────────────────
@@ -256,7 +265,6 @@ export default function Home() {
               />
             </motion.div>
             <motion.div
-              id="section-security"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
@@ -304,15 +312,54 @@ export default function Home() {
             />
           </motion.div>
 
-          {/* Row 5: Timeline (full width) */}
+          {/* Row 5: LP Liquidity (full width) */}
           <motion.div
-            id="section-timeline"
+            id="section-liquidity"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
           >
+            <LPLiquidity />
+          </motion.div>
+
+          {/* Row 6: Contract Simulation (full width) */}
+          <motion.div
+            id="section-simulation"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.85 }}
+          >
+            <ContractSimulation />
+          </motion.div>
+
+          {/* Row 7: Timeline (full width) */}
+          <motion.div
+            id="section-timeline"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9 }}
+          >
             <CognitiveTimeline events={data.timeline} />
           </motion.div>
+
+          {/* Row 8: Security + Compliance */}
+          <div id="section-security" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.0 }}
+            >
+              <SecurityAudit />
+            </motion.div>
+            <motion.div
+              id="section-compliance"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.1 }}
+            >
+              <CompliancePanel />
+            </motion.div>
+          </div>
         </main>
       </div>
 

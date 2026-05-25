@@ -135,3 +135,94 @@ model Payment {
   txHash       String?
   createdAt    DateTime @default(now())
 }
+
+// ===== Phase 2: 安全审计模型 =====
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  avatarId    String?                              // 关联分身(可选)
+  eventType   String                               // invariant_check | vulnerability | circuit_trigger | access_change
+  severity    String                               // critical | high | medium | low | info
+  title       String                               // 事件标题
+  details     String                               // 事件详情
+  contractRef String?                              // 关联合约
+  txHash      String?                              // 链上哈希
+  resolved    Boolean  @default(false)             // 是否已解决
+  createdAt   DateTime @default(now())
+}
+
+model SecurityInvariant {
+  id             String   @id @default(cuid())
+  name           String                               // 不变量名称
+  formula        String                               // 数学公式
+  category       String                               // split_conservation | weight_norm | circuit_intercept | sybil_resistance
+  status         String   @default("pass")            // pass | fail | unknown
+  counterexamples Int     @default(0)                 // 反例数量
+  lastVerifiedAt DateTime @default(now())             // 最后验证时间
+  proverRuns     Int      @default(0)                 // Prover运行次数
+  branchCoverage Float    @default(0)                 // 分支覆盖率
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// ===== Phase 2: LP流动性模型 =====
+
+model LiquidityPool {
+  id              String   @id @default(cuid())
+  pair            String                              // 交易对: AFC/USDC
+  totalLiquidity  Float                               // 总流动性 (USD)
+  tokenReserve    Float                               // Token储备量
+  usdcReserve     Float                               // USDC储备量
+  currentPrice    Float                               // 当前价格
+  volume24h       Float    @default(0)                // 24h交易量
+  fees24h         Float    @default(0)                // 24h手续费
+  feeRate         Float    @default(0.003)            // 手续费率
+  updatedAt       DateTime @updatedAt
+}
+
+model LpTransaction {
+  id          String   @id @default(cuid())
+  poolId      String                               // 关联流动性池
+  type        String                               // add_liquidity | remove_liquidity | swap
+  amountToken Float                                // Token数量
+  amountUsdc  Float                                // USDC数量
+  direction   String?                              // buy | sell (swap only)
+  txHash      String?
+  createdAt   DateTime @default(now())
+}
+
+// ===== Phase 2: 合规模型 =====
+
+model CompliancePlugin {
+  id                   String   @id @default(cuid())
+  pluginName           String                              // KYC | TaxLabel | ZKPrivacy | GeoCompliance | Arbitration
+  isActive             Boolean  @default(false)             // 是否激活
+  activationCondition  String?                             // 激活条件
+  config               String?                             // JSON配置
+  activatedAt          DateTime?                           // 激活时间
+  updatedAt            DateTime @updatedAt
+}
+
+model Jurisdiction {
+  id            String   @id @default(cuid())
+  code          String                              // ch | sg | us | eu | jp
+  name          String                              // 国家/地区名
+  entityName    String?                             // 实体名称
+  status        String   @default("not_required")   // in_progress | pending | active | not_required
+  lawFramework  String?                             // 法律框架
+  updatedAt     DateTime @updatedAt
+}
+
+// ===== Phase 2: 合约模拟模型 =====
+
+model ContractSimulation {
+  id          String   @id @default(cuid())
+  contract    String                              // 合约名称
+  functionName String                             // 函数名称
+  params      String                              // JSON参数
+  result      String                              // JSON结果
+  gasUsed     Int                                 // Gas消耗
+  status      String   @default("success")        // success | failed | reverted
+  avatarId    String?                             // 关联分身
+  createdAt   DateTime @default(now())
+}
