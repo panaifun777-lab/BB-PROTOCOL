@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { useDashboardStore } from '@/stores/dashboard-store';
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -62,6 +63,8 @@ export function useResonanceStream() {
   const reconnectAttemptsRef = useRef(0);
   const maxReconnectAttempts = 10;
 
+  const setResonanceConnected = useDashboardStore((s) => s.setResonanceConnected);
+
   const [state, setState] = useState<ResonanceStreamState>({
     isConnected: false,
     resonanceScore: null,
@@ -99,11 +102,13 @@ export function useResonanceStream() {
       console.log('[ResonanceStream] Connected');
       reconnectAttemptsRef.current = 0;
       setState((prev) => ({ ...prev, isConnected: true }));
+      setResonanceConnected(true);
     });
 
     socket.on('disconnect', (reason) => {
       console.log('[ResonanceStream] Disconnected:', reason);
       setState((prev) => ({ ...prev, isConnected: false }));
+      setResonanceConnected(false);
     });
 
     socket.on('connect_error', (error) => {
@@ -167,7 +172,7 @@ export function useResonanceStream() {
         lastCircuitChange: data,
       }));
     });
-  }, []);
+  }, [setResonanceConnected]);
 
   const disconnect = useCallback(() => {
     if (socketRef.current) {
@@ -175,7 +180,8 @@ export function useResonanceStream() {
       socketRef.current = null;
     }
     setState((prev) => ({ ...prev, isConnected: false }));
-  }, []);
+    setResonanceConnected(false);
+  }, [setResonanceConnected]);
 
   // Auto-connect on mount, disconnect on unmount
   useEffect(() => {

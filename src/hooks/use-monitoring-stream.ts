@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { useDashboardStore } from '@/stores/dashboard-store';
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -67,6 +68,8 @@ export function useMonitoringStream() {
   const reconnectAttemptsRef = useRef(0);
   const maxReconnectAttempts = 10;
 
+  const setMonitoringConnected = useDashboardStore((s) => s.setMonitoringConnected);
+
   const [state, setState] = useState<MonitoringStreamState>({
     isConnected: false,
     systemMetrics: null,
@@ -102,11 +105,13 @@ export function useMonitoringStream() {
       console.log('[MonitoringStream] Connected');
       reconnectAttemptsRef.current = 0;
       setState((prev) => ({ ...prev, isConnected: true }));
+      setMonitoringConnected(true);
     });
 
     socket.on('disconnect', (reason) => {
       console.log('[MonitoringStream] Disconnected:', reason);
       setState((prev) => ({ ...prev, isConnected: false }));
+      setMonitoringConnected(false);
     });
 
     socket.on('connect_error', (error) => {
@@ -162,7 +167,7 @@ export function useMonitoringStream() {
         };
       });
     });
-  }, []);
+  }, [setMonitoringConnected]);
 
   const disconnect = useCallback(() => {
     if (socketRef.current) {
@@ -170,7 +175,8 @@ export function useMonitoringStream() {
       socketRef.current = null;
     }
     setState((prev) => ({ ...prev, isConnected: false }));
-  }, []);
+    setMonitoringConnected(false);
+  }, [setMonitoringConnected]);
 
   // Auto-connect on mount, disconnect on unmount
   useEffect(() => {

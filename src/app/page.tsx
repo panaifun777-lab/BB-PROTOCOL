@@ -40,6 +40,10 @@ import {
   MOCK_RESONANCE_HISTORY,
 } from '@/lib/mock-data';
 import { useDashboardStore } from '@/stores/dashboard-store';
+import { useWeb3Store } from '@/stores/web3-store';
+import { useI18n } from '@/hooks/use-i18n';
+import { useDashboardData } from '@/hooks/use-dashboard-data';
+import { useEngineStatus } from '@/hooks/use-engine-status';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 
 import CognitiveCard from '@/components/dashboard/cognitive-card';
@@ -73,37 +77,37 @@ import Web3Wallet from '@/components/dashboard/web3-wallet';
 
 // ── Navigation Items ──────────────────────────────────────────
 const NAV_ITEMS = [
-  { id: 'overview', label: '总览', icon: Brain },
-  { id: 'revenue', label: '收益', icon: DollarSign },
-  { id: 'resonance', label: '共振', icon: Activity },
-  { id: 'skills', label: '技能', icon: Sparkles },
-  { id: 'marketplace', label: '市场', icon: Users },
-  { id: 'liquidity', label: '流动性', icon: DollarSign },
-  { id: 'simulation', label: '模拟', icon: FlaskConical },
-  { id: 'governance', label: '治理', icon: Users },
-  { id: 'timeline', label: '时间线', icon: Clock },
-  { id: 'security', label: '安全', icon: Shield },
-  { id: 'compliance', label: '合规', icon: Scale },
-  { id: 'performance', label: '性能', icon: Gauge },
-  { id: 'deployment', label: '部署', icon: Globe },
-  { id: 'monitoring', label: '监控', icon: Radio },
-  { id: 'flags', label: '灰度', icon: Flag },
-  { id: 'multichain', label: '多链', icon: Link2 },
-  { id: 'sdk', label: 'SDK', icon: Code2 },
-  { id: 'dao', label: 'DAO', icon: Vote },
-  { id: 'ecosystem', label: '生态', icon: Puzzle },
-  { id: 'contracts', label: '合约', icon: FileCode },
-  { id: 'engine', label: '引擎', icon: Cog },
-  { id: 'web3', label: 'Web3', icon: Wallet },
-  { id: 'data', label: '数据', icon: Database },
+  { id: 'overview', navKey: 'nav.overview', icon: Brain },
+  { id: 'revenue', navKey: 'nav.split', icon: DollarSign },
+  { id: 'resonance', navKey: 'nav.resonance', icon: Activity },
+  { id: 'skills', navKey: 'nav.skills', icon: Sparkles },
+  { id: 'marketplace', navKey: 'nav.marketplace', icon: Users },
+  { id: 'liquidity', navKey: 'nav.liquidity', icon: DollarSign },
+  { id: 'simulation', navKey: 'nav.simulation', icon: FlaskConical },
+  { id: 'governance', navKey: 'nav.governance', icon: Users },
+  { id: 'timeline', navKey: 'nav.timeline', icon: Clock },
+  { id: 'security', navKey: 'nav.security', icon: Shield },
+  { id: 'compliance', navKey: 'nav.compliance', icon: Scale },
+  { id: 'performance', navKey: 'nav.performance', icon: Gauge },
+  { id: 'deployment', navKey: 'nav.deployment', icon: Globe },
+  { id: 'monitoring', navKey: 'nav.monitoring', icon: Radio },
+  { id: 'flags', navKey: 'nav.featureFlags', icon: Flag },
+  { id: 'multichain', navKey: 'nav.multichain', icon: Link2 },
+  { id: 'sdk', navKey: 'nav.sdk', icon: Code2 },
+  { id: 'dao', navKey: 'nav.dao', icon: Vote },
+  { id: 'ecosystem', navKey: 'nav.ecosystem', icon: Puzzle },
+  { id: 'contracts', navKey: 'nav.contracts', icon: FileCode },
+  { id: 'engine', navKey: 'nav.engine', icon: Cog },
+  { id: 'web3', navKey: 'nav.web3', icon: Wallet },
+  { id: 'data', navKey: 'nav.data', icon: Database },
 ];
 
 // ── Mobile Bottom Nav Items ───────────────────────────────────
 const MOBILE_NAV = [
-  { id: 'overview', label: '总览', icon: Brain },
-  { id: 'revenue', label: '收益', icon: DollarSign },
-  { id: 'marketplace', label: '市场', icon: Users },
-  { id: 'security', label: '安全', icon: Shield },
+  { id: 'overview', navKey: 'nav.overview', icon: Brain },
+  { id: 'revenue', navKey: 'nav.split', icon: DollarSign },
+  { id: 'marketplace', navKey: 'nav.marketplace', icon: Users },
+  { id: 'security', navKey: 'nav.security', icon: Shield },
 ];
 
 const INITIAL_DATA: DashboardState = {
@@ -116,31 +120,55 @@ const INITIAL_DATA: DashboardState = {
   resonanceHistory: MOCK_RESONANCE_HISTORY,
 };
 
-// ── Web3 Connect Button (using ConnectKit) ───────────────────
+// ── Web3 Connect Button (using Web3Store) ────────────────────
 function Web3ConnectButton() {
-  const [showConnect, setShowConnect] = useState(false);
+  const { address, isConnected } = useWeb3Store();
+  const truncated = address
+    ? `${address.slice(0, 6)}...${address.slice(-4)}`
+    : 'Connect';
+  const truncatedShort = address
+    ? `${address.slice(0, 6)}...`
+    : 'Connect';
 
   return (
     <button
-      onClick={() => setShowConnect(!showConnect)}
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-violet-500/50 transition-colors text-xs"
     >
       <Wallet className="w-3.5 h-3.5 text-violet-400" />
-      <span className="hidden sm:inline text-slate-300 font-mono">0x7a3f...e9b2</span>
-      <span className="sm:hidden text-slate-300 font-mono">0x7a3f</span>
+      {isConnected ? (
+        <>
+          <span className="hidden sm:inline text-slate-300 font-mono">{truncated}</span>
+          <span className="sm:hidden text-slate-300 font-mono">{truncatedShort}</span>
+        </>
+      ) : (
+        <span className="text-slate-300">{truncated}</span>
+      )}
     </button>
   );
 }
 
 export default function Home() {
   const { activeSection, setActiveSection } = useDashboardStore();
+  const { t } = useI18n();
+  const {
+    avatar, skills, revenueSummary, recentRevenues,
+    delegations, timeline, resonanceHistory, isLoading,
+  } = useDashboardData();
+  const engineStatus = useEngineStatus();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [paymentService, setPaymentService] = useState('GPT-4o 文本生成');
   const [paymentAmount, setPaymentAmount] = useState(0.02);
-  const [data] = useState<DashboardState>(INITIAL_DATA);
 
-  if (!data) {
+  // Construct DashboardState from store data, falling back to mock
+  const dashboardData: DashboardState = (avatar && revenueSummary)
+    ? { avatar, skills, revenueSummary, recentRevenues, delegations, timeline, resonanceHistory }
+    : INITIAL_DATA;
+
+  // Suppress unused variable warnings (will be used for real-time indicators)
+  void engineStatus;
+
+  if (isLoading && !avatar) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0F172A]">
         <motion.div
@@ -149,7 +177,7 @@ export default function Home() {
           className="flex flex-col items-center gap-4"
         >
           <Brain className="w-12 h-12 text-violet-400 animate-pulse" />
-          <p className="text-slate-400 text-sm">正在加载认知分身系统...</p>
+          <p className="text-slate-400 text-sm">{t('dashboard.loadingSystem')}</p>
         </motion.div>
       </div>
     );
@@ -172,10 +200,10 @@ export default function Home() {
               <Brain className="w-4 h-4 text-white" />
             </div>
             <span className="font-semibold text-sm tracking-tight hidden sm:inline">
-              认知分身协议
+              {t('dashboard.title')}
             </span>
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">
-              Phase 6
+              {t('dashboard.phase')} 6
             </span>
           </div>
 
@@ -183,7 +211,7 @@ export default function Home() {
             {/* Quick Resonance Indicator */}
             <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs text-emerald-300 font-medium">{data.avatar.resonanceScore}</span>
+              <span className="text-xs text-emerald-300 font-medium">{dashboardData.avatar.resonanceScore}</span>
             </div>
 
             {/* Language Switcher */}
@@ -205,7 +233,7 @@ export default function Home() {
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 transition-all text-xs font-medium"
             >
               <Zap className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">x402 支付</span>
+              <span className="hidden sm:inline">{t('nav.payment')}</span>
             </button>
 
             {/* Mobile Menu Toggle */}
@@ -239,16 +267,16 @@ export default function Home() {
                   'w-4 h-4',
                   activeSection === item.id ? 'text-violet-400' : 'text-slate-500'
                 )} />
-                {item.label}
+                {t(item.navKey)}
               </button>
             ))}
           </nav>
 
           {/* Tier Badge */}
           <div className="mt-auto p-3 rounded-xl bg-gradient-to-br from-violet-500/10 to-blue-500/10 border border-violet-500/20">
-            <div className="text-[10px] text-violet-300/60 uppercase tracking-widest mb-1">当前方案</div>
+            <div className="text-[10px] text-violet-300/60 uppercase tracking-widest mb-1">{t('dashboard.currentPlan')}</div>
             <div className="text-sm font-semibold text-violet-200">Pro</div>
-            <div className="text-[10px] text-slate-500 mt-0.5">3 个分身 · 优先算力</div>
+            <div className="text-[10px] text-slate-500 mt-0.5">{t('dashboard.avatarsCount', { count: 3 })}</div>
           </div>
         </aside>
 
@@ -275,7 +303,7 @@ export default function Home() {
                     )}
                   >
                     <item.icon className="w-4 h-4" />
-                    {item.label}
+                    {t(item.navKey)}
                   </button>
                 ))}
               </nav>
@@ -292,7 +320,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <CognitiveCard avatar={data.avatar} skills={data.skills} />
+              <CognitiveCard avatar={dashboardData.avatar} skills={dashboardData.skills} />
             </motion.div>
             <motion.div
               id="section-revenue"
@@ -300,7 +328,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <SplitDashboard summary={data.revenueSummary} recentRevenues={data.recentRevenues} />
+              <SplitDashboard summary={dashboardData.revenueSummary} recentRevenues={dashboardData.recentRevenues} />
             </motion.div>
           </div>
 
@@ -313,9 +341,9 @@ export default function Home() {
               transition={{ delay: 0.3 }}
             >
               <ResonanceWave
-                data={data.resonanceHistory}
-                currentScore={data.avatar.resonanceScore}
-                circuitState={data.avatar.circuitState}
+                data={dashboardData.resonanceHistory}
+                currentScore={dashboardData.avatar.resonanceScore}
+                circuitState={dashboardData.avatar.circuitState}
               />
             </motion.div>
             <motion.div
@@ -323,7 +351,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <CircuitPanel avatar={data.avatar} />
+              <CircuitPanel avatar={dashboardData.avatar} />
             </motion.div>
           </div>
 
@@ -335,9 +363,9 @@ export default function Home() {
               transition={{ delay: 0.5 }}
             >
               <SkillVault
-                skills={data.skills}
-                cumulativeRevenue={data.revenueSummary.totalRevenue}
-                currentTier={data.avatar.tier}
+                skills={dashboardData.skills}
+                cumulativeRevenue={dashboardData.revenueSummary.totalRevenue}
+                currentTier={dashboardData.avatar.tier}
               />
             </motion.div>
             <motion.div
@@ -346,7 +374,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
             >
-              <IFDDelegation delegations={data.delegations} />
+              <IFDDelegation delegations={dashboardData.delegations} />
             </motion.div>
           </div>
 
@@ -393,7 +421,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9 }}
           >
-            <CognitiveTimeline events={data.timeline} />
+            <CognitiveTimeline events={dashboardData.timeline} />
           </motion.div>
 
           {/* Row 8: Security + Compliance */}
@@ -573,7 +601,7 @@ export default function Home() {
                 'w-5 h-5',
                 activeSection === item.id && 'text-violet-400'
               )} />
-              <span className="text-[10px]">{item.label}</span>
+              <span className="text-[10px]">{t(item.navKey)}</span>
             </button>
           ))}
         </div>
@@ -590,8 +618,8 @@ export default function Home() {
       {/* ── Footer ────────────────────────────────── */}
       <footer className="hidden lg:block border-t border-slate-800/50 bg-[#0F172A] mt-auto">
         <div className="max-w-[1600px] mx-auto px-6 h-10 flex items-center justify-between text-[10px] text-slate-600">
-          <span>认知分身协议 · Cognitive Avatar Protocol · Web4.0</span>
-          <span>Base L2 MVP → AFC 主网平滑迁移 · 6 Microservices · 8 i18n</span>
+          <span>{t('dashboard.footer')}</span>
+          <span>{t('dashboard.migration')} · 6 Microservices · 8 i18n</span>
         </div>
       </footer>
     </div>
