@@ -250,7 +250,8 @@
     "subNegotiationName": "谈判分身.soul",
     "subDataName": "数据分身.soul",
     "subServiceName": "客服分身.soul",
-    "primaryAvatar": "{name} (本体)"
+    "primaryAvatar": "{name} (本体)",
+    "primaryAvatarName": "飘叔.soul"
   },
   "circuit": {
     "title": "认知熔断面板",
@@ -349,7 +350,12 @@
     "lowRisk": "低风险",
     "mediumRisk": "中风险",
     "highRisk": "高风险",
-    "accessibility": "无障碍审计"
+    "accessibility": "无障碍审计",
+    "lawChFinma": "FINMA / DLT法案",
+    "lawSgMas": "MAS / PSA法案",
+    "lawUsSec": "SEC / CFTC",
+    "lawEuMica": "MiCA法规",
+    "lawJpFsa": "FSA / 支付服务法"
   },
   "security": {
     "title": "安全审计面板",
@@ -391,7 +397,12 @@
     "paused": "已暂停",
     "deploying": "部署中",
     "bytecodeSize": "字节码大小",
-    "optimizerRuns": "优化器运行次数"
+    "optimizerRuns": "优化器运行次数",
+    "justNow": "刚刚",
+    "minutesAgo": "{n}分钟前",
+    "hoursAgo": "{n}小时前",
+    "daysAgo": "{n}天前",
+    "copyBtn": "复制"
   },
   "monitoring": {
     "title": "监控与告警中心",
@@ -415,7 +426,8 @@
     "critical": "严重",
     "silenced": "已静默",
     "disabled": "已禁用",
-    "realtimeMonitor": "实时监控中"
+    "realtimeMonitor": "实时监控中",
+    "neverTriggered": "从未触发"
   },
   "performance": {
     "title": "性能优化面板",
@@ -470,7 +482,19 @@
     "startLabel": "开始",
     "endLabel": "结束",
     "rolloutProgress": "灰度进度",
-    "statusVoting": "投票中"
+    "statusVoting": "投票中",
+    "done": "完成",
+    "editLabel": "编辑",
+    "apply": "应用",
+    "usersLabel": "用户",
+    "resetFilters": "重置筛选",
+    "createNewTest": "创建新测试",
+    "rollbackBtn": "回滚",
+    "emergencyRollback": "紧急全量回滚",
+    "confirmEmergencyRollback": "确认紧急全量回滚",
+    "emergencyRollbackDesc": "此操作将回滚所有活跃功能开关至0%，确认执行？",
+    "confirmRollback": "确认回滚",
+    "advanceCanary": "推进灰度"
   },
   "multichain": {
     "title": "多链部署中心",
@@ -491,7 +515,9 @@
     "transactions24h": "24h交易",
     "synced": "已同步",
     "delayed": "延迟",
-    "latency": "延迟"
+    "latency": "延迟",
+    "initiateTransfer": "发起跨链转账",
+    "resync": "重新同步"
   },
   "sdk": {
     "title": "SDK/API开放平台",
@@ -508,7 +534,14 @@
     "revoked": "已吊销",
     "downloads": "下载量",
     "install": "安装命令",
-    "successRate": "成功率"
+    "successRate": "成功率",
+    "copyKey": "复制密钥",
+    "revokeBtn": "吊销",
+    "viewDocs": "查看文档",
+    "upgrade": "升级",
+    "createKey": "创建新密钥",
+    "addWebhook": "添加 Webhook",
+    "avgLatencyShort": "平均延迟"
   },
   "ecosystem": {
     "title": "生态集成中心",

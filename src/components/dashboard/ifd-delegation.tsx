@@ -113,7 +113,7 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
   const weightEntries = useMemo<WeightEntry[]>(() => {
     const domainSelected = selected[activeDomain];
     const primaryWeight = primaryWeights[activeDomain];
-    const primaryLabel = t('delegation.primaryAvatar', { name: '飘叔.soul' });
+    const primaryLabel = t('delegation.primaryAvatar', { name: t('delegation.primaryAvatarName') });
 
     if (domainSelected.length === 0) {
       return [{ id: 'primary', name: primaryLabel, weight: 100, isPrimary: true }];

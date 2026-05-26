@@ -227,8 +227,8 @@ const MOCK_RECOMMENDATIONS: OptimizationRecommendation[] = [
   { id: 'rec_1', title: 'performance.rec1Title', priority: 'high', estimatedSavings: '12KB / 200ms', description: 'performance.rec1Desc' },
   { id: 'rec_2', title: 'performance.rec2Title', priority: 'medium', estimatedSavings: '25KB / img', description: 'performance.rec2Desc' },
   { id: 'rec_3', title: 'performance.rec3Title', priority: 'medium', estimatedSavings: '100ms TTFB', description: 'performance.rec3Desc' },
-  { id: 'rec_4', title: 'performance.rec4Title', priority: 'low', estimatedSavings: '2个请求', description: 'performance.rec4Desc' },
-  { id: 'rec_5', title: 'performance.rec5Title', priority: 'high', estimatedSavings: '15% 缓存命中率', description: 'performance.rec5Desc' },
+  { id: 'rec_4', title: 'performance.rec4Title', priority: 'low', estimatedSavings: '2 requests', description: 'performance.rec4Desc' },
+  { id: 'rec_5', title: 'performance.rec5Title', priority: 'high', estimatedSavings: '15% cache hit rate', description: 'performance.rec5Desc' },
 ];
 
 const MOCK_ALERTS: PerformanceAlert[] = [

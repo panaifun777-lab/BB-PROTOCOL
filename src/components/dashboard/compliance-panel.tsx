@@ -52,7 +52,7 @@ interface Jurisdiction {
   entityName: string;
   status: JurisdictionStatus;
   statusLabelKey: string;
-  lawFramework: string;
+  lawFrameworkKey: string;
 }
 
 interface LegalStatus {
@@ -145,11 +145,11 @@ const INITIAL_PLUGINS: CompliancePlugin[] = [
 ];
 
 const JURISDICTIONS: Jurisdiction[] = [
-  { id: 'ch', name: 'compliance.switzerland', flag: '🇨🇭', entityName: 'Cognitive Avatar Foundation', status: 'in_progress', statusLabelKey: 'compliance.statusInProgress', lawFramework: 'FINMA / DLT法案' },
-  { id: 'sg', name: 'compliance.singapore', flag: '🇸🇬', entityName: 'Cognitive Avatar Pte. Ltd.', status: 'pending', statusLabelKey: 'compliance.statusPendingSetup', lawFramework: 'MAS / PSA法案' },
-  { id: 'us', name: 'compliance.usa', flag: '🇺🇸', entityName: '—', status: 'not_required', statusLabelKey: 'compliance.statusNotRequired', lawFramework: 'SEC / CFTC' },
-  { id: 'eu', name: 'compliance.eu', flag: '🇪🇺', entityName: '—', status: 'not_required', statusLabelKey: 'compliance.statusNotRequired', lawFramework: 'MiCA法规' },
-  { id: 'jp', name: 'compliance.japan', flag: '🇯🇵', entityName: '—', status: 'not_required', statusLabelKey: 'compliance.statusNotRequired', lawFramework: 'FSA / 支付服务法' },
+  { id: 'ch', name: 'compliance.switzerland', flag: '🇨🇭', entityName: 'Cognitive Avatar Foundation', status: 'in_progress', statusLabelKey: 'compliance.statusInProgress', lawFrameworkKey: 'compliance.lawChFinma' },
+  { id: 'sg', name: 'compliance.singapore', flag: '🇸🇬', entityName: 'Cognitive Avatar Pte. Ltd.', status: 'pending', statusLabelKey: 'compliance.statusPendingSetup', lawFrameworkKey: 'compliance.lawSgMas' },
+  { id: 'us', name: 'compliance.usa', flag: '🇺🇸', entityName: '—', status: 'not_required', statusLabelKey: 'compliance.statusNotRequired', lawFrameworkKey: 'compliance.lawUsSec' },
+  { id: 'eu', name: 'compliance.eu', flag: '🇪🇺', entityName: '—', status: 'not_required', statusLabelKey: 'compliance.statusNotRequired', lawFrameworkKey: 'compliance.lawEuMica' },
+  { id: 'jp', name: 'compliance.japan', flag: '🇯🇵', entityName: '—', status: 'not_required', statusLabelKey: 'compliance.statusNotRequired', lawFrameworkKey: 'compliance.lawJpFsa' },
 ];
 
 const LEGAL_STATUS: LegalStatus = {
@@ -569,7 +569,7 @@ export default function CompliancePanel() {
                           </div>
                           <div className="text-right">
                             <p className="text-[10px] text-slate-500">{t('compliance.legalFramework')}</p>
-                            <p className="text-[10px] text-slate-400 font-mono">{j.lawFramework}</p>
+                            <p className="text-[10px] text-slate-400 font-mono">{t(j.lawFrameworkKey)}</p>
                           </div>
                         </div>
                       </motion.div>

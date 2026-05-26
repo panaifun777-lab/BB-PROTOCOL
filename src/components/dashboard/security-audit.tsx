@@ -121,7 +121,7 @@ const MOCK_INVARIANTS: CertoraInvariant[] = [
   {
     id: 'inv_4',
     name: 'security.invSybilDecay',
-    formula: 'dS/dt ≤ 0 (无新参与)',
+    formula: 'dS/dt ≤ 0 (no new participation)',
     status: 'pass',
     proofMethod: 'security.lyapunovProof',
     lastVerified: '2026-03-04T10:00:00Z',

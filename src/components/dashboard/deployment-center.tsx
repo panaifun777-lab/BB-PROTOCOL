@@ -310,6 +310,7 @@ function truncateAddress(address: string): string {
 
 // ── Helper: copy to clipboard ─────────────────────────
 function CopyButton({ text }: { text: string }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -350,10 +351,10 @@ function getRelativeTime(timestamp: string, now?: Date | null, translate?: (key:
   const diffHr = Math.floor(diffMs / 3600000);
   const diffDay = Math.floor(diffMs / 86400000);
 
-  if (diffMin < 1) return translate ? translate('deployment.justNow') : '刚刚';
-  if (diffMin < 60) return translate ? translate('deployment.minutesAgo', { n: diffMin }) : `${diffMin}分钟前`;
-  if (diffHr < 24) return translate ? translate('deployment.hoursAgo', { n: diffHr }) : `${diffHr}小时前`;
-  if (diffDay < 30) return translate ? translate('deployment.daysAgo', { n: diffDay }) : `${diffDay}天前`;
+  if (diffMin < 1) return translate ? translate('deployment.justNow') : 'just now';
+  if (diffMin < 60) return translate ? translate('deployment.minutesAgo', { n: diffMin }) : `${diffMin} min ago`;
+  if (diffHr < 24) return translate ? translate('deployment.hoursAgo', { n: diffHr }) : `${diffHr}h ago`;
+  if (diffDay < 30) return translate ? translate('deployment.daysAgo', { n: diffDay }) : `${diffDay}d ago`;
   return format(parseISO(timestamp), 'MMM d');
 }
 
@@ -1110,6 +1111,7 @@ function ConsistencyTab({ data }: { data: DeploymentData }) {
 
 // ── Main Component ─────────────────────────────────────
 export default function DeploymentCenter() {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const data = MOCK_DATA;
 

@@ -200,18 +200,18 @@ function TrendArrow({ current, previous }: { current: number; previous: number }
 
 // ── Relative Time ────────────────────────────────────────────
 
-function relativeTime(dateStr: string, t?: (key: string, params?: Record<string, string | number>) => string): string {
-  if (dateStr === (t ? t('monitoring.neverTriggered') : '从未触发')) return t ? t('monitoring.neverTriggered') : dateStr;
+function relativeTime(dateStr: string, t: (key: string, params?: Record<string, string | number>) => string): string {
+  if (dateStr === t('monitoring.neverTriggered')) return t('monitoring.neverTriggered');
   try {
     const date = new Date(dateStr);
     const now = new Date('2026-05-25T18:55:00Z');
     const diffMs = now.getTime() - date.getTime();
     const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin < 60) return t ? t('deployment.minutesAgo', { n: diffMin }) : `${diffMin}分钟前`;
+    if (diffMin < 60) return t('deployment.minutesAgo', { n: diffMin });
     const diffH = Math.floor(diffMin / 60);
-    if (diffH < 24) return t ? t('deployment.hoursAgo', { n: diffH }) : `${diffH}小时前`;
+    if (diffH < 24) return t('deployment.hoursAgo', { n: diffH });
     const diffD = Math.floor(diffH / 24);
-    return t ? t('deployment.daysAgo', { n: diffD }) : `${diffD}天前`;
+    return t('deployment.daysAgo', { n: diffD });
   } catch {
     return dateStr;
   }

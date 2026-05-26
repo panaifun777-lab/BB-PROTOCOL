@@ -336,7 +336,7 @@ export default function ContractsArch() {
               </TabsTrigger>
             </TabsList>
 
-            {/* ====== TAB 1: 合约架构 ====== */}
+            {/* ====== TAB 1: Architecture ====== */}
             <TabsContent value="architecture" className="space-y-4 mt-3">
               {/* Overview Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -630,7 +630,7 @@ export default function ContractsArch() {
               </div>
             </TabsContent>
 
-            {/* ====== TAB 2: 交互图谱 ====== */}
+            {/* ====== TAB 2: Interaction Graph ====== */}
             <TabsContent value="interactions" className="space-y-4 mt-3">
               {/* Interaction Diagram (Visual) */}
               <div className="rounded-lg border border-slate-700/50 bg-slate-900/40 p-4 space-y-4">
@@ -818,7 +818,7 @@ export default function ContractsArch() {
               </div>
             </TabsContent>
 
-            {/* ====== TAB 3: 测试覆盖 ====== */}
+            {/* ====== TAB 3: Test Coverage ====== */}
             <TabsContent value="coverage" className="space-y-4 mt-3">
               {/* Overall Coverage Gauges */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -1047,7 +1047,7 @@ export default function ContractsArch() {
               </div>
             </TabsContent>
 
-            {/* ====== TAB 4: 形式化验证 ====== */}
+            {/* ====== TAB 4: Formal Verification ====== */}
             <TabsContent value="verification" className="space-y-4 mt-3">
               {/* Verification Overview */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">

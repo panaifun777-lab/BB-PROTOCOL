@@ -50,13 +50,15 @@ interface DashboardUIState {
   setActiveSection: (s: string) => void;
   sidebarCollapsed: boolean;
   toggleSidebar: () => void;
-  theme: 'dark' | 'light';
-  setTheme: (t: 'dark' | 'light') => void;
-  locale: string;
-  setLocale: (l: string) => void;
+  // NOTE: theme/setTheme removed — superseded by next-themes (useTheme hook)
+  // NOTE: locale/setLocale removed — superseded by useI18n hook
+  /** Reserved for future WebSocket notification integration */
   unreadCount: number;
+  /** Reserved for future WebSocket notification integration */
   setUnreadCount: (n: number) => void;
+  /** Reserved for future WebSocket notification integration */
   incrementUnread: () => void;
+  /** Reserved for future WebSocket notification integration */
   resetUnread: () => void;
   resonanceConnected: boolean;
   monitoringConnected: boolean;
@@ -143,6 +145,7 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
     }
   },
 
+  // Granular setters — reserved for real-time WebSocket/SSE updates
   setAvatar: (avatar) => set({ avatar }),
   setSkills: (skills) => set({ skills }),
   setRevenueSummary: (summary) => set({ revenueSummary: summary }),
@@ -157,12 +160,6 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
 
   sidebarCollapsed: false,
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
-
-  theme: 'dark',
-  setTheme: (t) => set({ theme: t }),
-
-  locale: 'zh',
-  setLocale: (l) => set({ locale: l }),
 
   unreadCount: 0,
   setUnreadCount: (n) => set({ unreadCount: n }),

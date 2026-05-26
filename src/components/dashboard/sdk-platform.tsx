@@ -198,6 +198,7 @@ function UsageChartTooltip({ active, payload, label, t }: { active?: boolean; pa
 
 // ── Copy Button ────────────────────────────────────────
 function CopyButton({ text, className }: { text: string; className?: string }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
@@ -370,11 +371,11 @@ function ApiKeyCard({ apiKey }: { apiKey: ApiKeyEntry }) {
 
       <div className="flex gap-2 mt-3 pt-3 border-t border-slate-700/30">
         <Button variant="outline" size="sm" className="h-7 text-[10px] border-slate-600 bg-slate-700/30 text-slate-300 hover:bg-slate-600/30">
-          <Copy className="mr-1 size-3" /> 复制密钥
+          <Copy className="mr-1 size-3" /> {t('sdk.copyKey')}
         </Button>
         {!isRevoked && (
           <Button variant="outline" size="sm" className="h-7 text-[10px] border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20 hover:text-red-200">
-            <XCircle className="mr-1 size-3" /> 吊销
+            <XCircle className="mr-1 size-3" /> {t('sdk.revokeBtn')}
           </Button>
         )}
       </div>
@@ -429,7 +430,7 @@ function SdkPackageCard({ pkg }: { pkg: SdkPackage }) {
       <div className="flex items-center justify-between">
         <span className="text-[9px] text-slate-500"> {t('sdk.updatedOn')} {pkg.lastUpdate}</span>
         <Button variant="outline" size="sm" className="h-6 text-[10px] border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 hover:text-violet-200">
-          <FileText className="mr-1 size-3" /> 查看文档
+          <FileText className="mr-1 size-3" /> {t('sdk.viewDocs')}
         </Button>
       </div>
     </motion.div>
@@ -537,7 +538,7 @@ function TierCard({ quota, isCurrent }: { quota: RateLimitQuota; isCurrent: bool
           <Badge className="w-full justify-center bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px]">{t('sdk.currentPlan')}</Badge>
         ) : (
           <Button variant="outline" size="sm" className="w-full h-7 text-[10px] border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 hover:text-violet-200">
-            升级
+            {t('sdk.upgrade')}
           </Button>
         )}
       </div>
@@ -756,7 +757,7 @@ export default function SdkPlatform() {
           size="sm"
           className="border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 hover:text-emerald-200"
         >
-          <Plus className="mr-1.5 size-3.5" /> 创建新密钥
+          <Plus className="mr-1.5 size-3.5" /> {t('sdk.createKey')}
         </Button>
       </div>
 
@@ -832,7 +833,7 @@ export default function SdkPlatform() {
             </div>
           </div>
           <Button variant="outline" size="sm" className="h-7 text-[10px] border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 hover:text-violet-200">
-            <Plus className="mr-1 size-3" /> 添加 Webhook
+            <Plus className="mr-1 size-3" /> {t('sdk.addWebhook')}
           </Button>
         </div>
 
@@ -928,7 +929,7 @@ export default function SdkPlatform() {
               </div>
               <div>
                 <p className="text-sm font-bold text-violet-400 tabular-nums">{Math.round(data.usageHistory.reduce((s, d) => s + d.avgLatency, 0) / data.usageHistory.length)}ms</p>
-                <p className="text-[9px] text-slate-500">平均延迟</p>
+                <p className="text-[9px] text-slate-500">{t('sdk.avgLatencyShort')}</p>
               </div>
             </div>
           </div>

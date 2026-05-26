@@ -430,6 +430,7 @@ function FlagCard({
   onToggle: (id: string) => void;
   onRolloutChange: (id: string, pct: number) => void;
 }) {
+  const { t } = useI18n();
   const statusConfig = STATUS_CONFIG[flag.status];
   const envConfig = ENV_CONFIG[flag.environment];
   const [editingRollout, setEditingRollout] = useState(false);
@@ -505,7 +506,7 @@ function FlagCard({
                       onClick={() => setEditingRollout(!editingRollout)}
                       className="text-[10px] text-violet-400 hover:text-violet-300 transition-colors"
                     >
-                      {editingRollout ? '完成' : '编辑'}
+                      {editingRollout ? t('features.done') : t('features.editLabel')}
                     </button>
                   </div>
                   {editingRollout ? (
@@ -525,7 +526,7 @@ function FlagCard({
                           className="h-5 text-[10px] text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 px-2"
                           onClick={handleRolloutCommit}
                         >
-                          应用
+                          {t('features.apply')}
                         </Button>
                       </div>
                     </div>
@@ -537,7 +538,7 @@ function FlagCard({
                 {/* Users */}
                 <div className="mt-2 flex items-center gap-1 text-[10px] text-slate-500">
                   <Users className="size-3" />
-                  <span>{flag.enabledForUsers.toLocaleString()} / {flag.totalUsers.toLocaleString()} 用户</span>
+                  <span>{flag.enabledForUsers.toLocaleString()} / {flag.totalUsers.toLocaleString()} {t('features.usersLabel')}</span>
                 </div>
               </div>
             </div>
@@ -1082,7 +1083,7 @@ export default function FeatureFlags() {
             className="h-7 text-[10px] text-slate-400 hover:text-slate-200"
             onClick={() => { setFilterStatus('all'); setFilterEnv('all'); }}
           >
-            重置筛选
+            {t('features.resetFilters')}
           </Button>
         )}
       </div>
@@ -1127,7 +1128,7 @@ export default function FeatureFlags() {
           className="h-7 text-[10px] border-violet-500/30 text-violet-300 hover:bg-violet-500/10 hover:text-violet-200"
         >
           <FlaskConical className="size-3 mr-1" />
-          创建新测试
+          {t('features.createNewTest')}
         </Button>
       </div>
 
@@ -1192,7 +1193,7 @@ export default function FeatureFlags() {
                   disabled={loading}
                 >
                   <RotateCcw className="size-3 mr-1" />
-                  回滚
+                  {t('features.rollbackBtn')}
                 </Button>
               </div>
             ))}
@@ -1254,17 +1255,17 @@ export default function FeatureFlags() {
             className="w-full h-10 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/70"
           >
             <AlertOctagon className="size-4 mr-2" />
-            紧急全量回滚
+            {t('features.emergencyRollback')}
           </Button>
         </DialogTrigger>
         <DialogContent className="bg-slate-900 border-slate-700">
           <DialogHeader>
             <DialogTitle className="text-red-400 flex items-center gap-2">
               <AlertOctagon className="size-5" />
-              确认紧急全量回滚
+              {t('features.confirmEmergencyRollback')}
             </DialogTitle>
             <DialogDescription className="text-slate-400">
-              此操作将回滚所有活跃功能开关至0%，确认执行？
+              {t('features.emergencyRollbackDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -1288,7 +1289,7 @@ export default function FeatureFlags() {
               className="text-slate-400 hover:text-slate-200"
               onClick={() => setRollbackDialogOpen(false)}
             >
-              取消
+              {t('common.cancel')}
             </Button>
             <Button
               variant="outline"
@@ -1303,7 +1304,7 @@ export default function FeatureFlags() {
               disabled={loading}
             >
               <AlertOctagon className="size-3.5 mr-1" />
-              确认回滚
+              {t('features.confirmRollback')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1419,7 +1420,7 @@ export default function FeatureFlags() {
               disabled={pipeline.canaryPercentage >= 100}
             >
               <FastForward className="size-3.5 mr-1" />
-              推进灰度
+              {t('features.advanceCanary')}
             </Button>
           </div>
         </div>
@@ -1485,7 +1486,7 @@ export default function FeatureFlags() {
         <CardHeader className="pb-0 pt-5">
           <CardTitle className="flex items-center gap-2 text-base text-slate-100">
             <Flag className="size-5 text-violet-400" />
-            功能开关与灰度发布
+            {t('features.title')}
           </CardTitle>
         </CardHeader>
 

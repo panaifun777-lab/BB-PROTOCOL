@@ -46,22 +46,22 @@ interface MarketplaceAvatar {
 
 // ── Mock Data ──────────────────────────────────────────
 const MARKETPLACE_DATA: MarketplaceAvatar[] = [
-  { id: 'm1', name: '文案大师.soul', soulId: '0xa1b2...c3d4', resonanceScore: 85, hourlyRate: 5, skills: ['文案生成', 'SEO优化', '内容策划'], domain: '内容创作' },
-  { id: 'm2', name: '数据猎手.soul', soulId: '0xe5f6...g7h8', resonanceScore: 68, hourlyRate: 8, skills: ['数据分析', 'BI报表', '预测建模'], domain: '数据分析' },
-  { id: 'm3', name: '谈判专家.soul', soulId: '0xi9j0...k1l2', resonanceScore: 92, hourlyRate: 12, skills: ['商务谈判', '合同审核', '风险评估'], domain: '商务谈判' },
-  { id: 'm4', name: '视觉匠人.soul', soulId: '0xm3n4...o5p6', resonanceScore: 78, hourlyRate: 6, skills: ['图像生成', '视频剪辑', 'UI设计'], domain: '内容创作' },
-  { id: 'm5', name: '客服精灵.soul', soulId: '0xq7r8...s9t0', resonanceScore: 88, hourlyRate: 3, skills: ['客户服务', 'FAQ生成', '工单处理'], domain: '客户服务' },
-  { id: 'm6', name: '全栈架构.soul', soulId: '0xu1v2...w3x4', resonanceScore: 75, hourlyRate: 15, skills: ['代码生成', '架构设计', '代码审查'], domain: '技术开发' },
+  { id: 'm1', name: 'CopyMaster.soul', soulId: '0xa1b2...c3d4', resonanceScore: 85, hourlyRate: 5, skills: ['copyGen', 'seo', 'contentPlan'], domain: 'content' },
+  { id: 'm2', name: 'DataHunter.soul', soulId: '0xe5f6...g7h8', resonanceScore: 68, hourlyRate: 8, skills: ['dataAnalysis', 'biReport', 'predictModel'], domain: 'data' },
+  { id: 'm3', name: 'Negotiator.soul', soulId: '0xi9j0...k1l2', resonanceScore: 92, hourlyRate: 12, skills: ['bizNegotiate', 'contractReview', 'riskAssess'], domain: 'business' },
+  { id: 'm4', name: 'VisualArtisan.soul', soulId: '0xm3n4...o5p6', resonanceScore: 78, hourlyRate: 6, skills: ['imageGen', 'videoEdit', 'uiDesign'], domain: 'content' },
+  { id: 'm5', name: 'ServiceElf.soul', soulId: '0xq7r8...s9t0', resonanceScore: 88, hourlyRate: 3, skills: ['customerService', 'faqGen', 'ticketProcess'], domain: 'customer' },
+  { id: 'm6', name: 'FullStack.soul', soulId: '0xu1v2...w3x4', resonanceScore: 75, hourlyRate: 15, skills: ['codeGen', 'archDesign', 'codeReview'], domain: 'tech' },
 ];
 
 // ── Domain options (values used as filter keys) ────────
 const DOMAIN_OPTIONS = [
   { value: 'all', labelKey: 'marketplace.allDomains' },
-  { value: '内容创作', labelKey: 'marketplace.domainContent' },
-  { value: '数据分析', labelKey: 'marketplace.domainData' },
-  { value: '商务谈判', labelKey: 'marketplace.domainBusiness' },
-  { value: '客户服务', labelKey: 'marketplace.domainCustomer' },
-  { value: '技术开发', labelKey: 'marketplace.domainTech' },
+  { value: 'content', labelKey: 'marketplace.domainContent' },
+  { value: 'data', labelKey: 'marketplace.domainData' },
+  { value: 'business', labelKey: 'marketplace.domainBusiness' },
+  { value: 'customer', labelKey: 'marketplace.domainCustomer' },
+  { value: 'tech', labelKey: 'marketplace.domainTech' },
 ];
 
 const SORT_OPTIONS = [
@@ -73,11 +73,11 @@ const SORT_OPTIONS = [
 
 // ── Domain icon mapping ────────────────────────────────
 const DOMAIN_ICONS: Record<string, React.ElementType> = {
-  '内容创作': Palette,
-  '数据分析': BarChart3,
-  '商务谈判': MessageSquare,
-  '客户服务': Users,
-  '技术开发': Code2,
+  content: Palette,
+  data: BarChart3,
+  business: MessageSquare,
+  customer: Users,
+  tech: Code2,
 };
 
 // ── Resonance color helper ─────────────────────────────
@@ -89,32 +89,32 @@ function getResonanceColor(score: number) {
 
 // ── Translation key mappings ───────────────────────────
 const DOMAIN_LABEL_KEYS: Record<string, string> = {
-  '内容创作': 'marketplace.domainContent',
-  '数据分析': 'marketplace.domainData',
-  '商务谈判': 'marketplace.domainBusiness',
-  '客户服务': 'marketplace.domainCustomer',
-  '技术开发': 'marketplace.domainTech',
+  content: 'marketplace.domainContent',
+  data: 'marketplace.domainData',
+  business: 'marketplace.domainBusiness',
+  customer: 'marketplace.domainCustomer',
+  tech: 'marketplace.domainTech',
 };
 
 const SKILL_LABEL_KEYS: Record<string, string> = {
-  '文案生成': 'marketplace.skillCopyGen',
-  'SEO优化': 'marketplace.skillSeo',
-  '内容策划': 'marketplace.skillContentPlan',
-  '数据分析': 'marketplace.skillDataAnalysis',
-  'BI报表': 'marketplace.skillBiReport',
-  '预测建模': 'marketplace.skillPredictModel',
-  '商务谈判': 'marketplace.skillBizNegotiate',
-  '合同审核': 'marketplace.skillContractReview',
-  '风险评估': 'marketplace.skillRiskAssess',
-  '图像生成': 'marketplace.skillImageGen',
-  '视频剪辑': 'marketplace.skillVideoEdit',
-  'UI设计': 'marketplace.skillUiDesign',
-  '客户服务': 'marketplace.skillCustomerService',
-  'FAQ生成': 'marketplace.skillFaqGen',
-  '工单处理': 'marketplace.skillTicketProcess',
-  '代码生成': 'marketplace.skillCodeGen',
-  '架构设计': 'marketplace.skillArchDesign',
-  '代码审查': 'marketplace.skillCodeReview',
+  copyGen: 'marketplace.skillCopyGen',
+  seo: 'marketplace.skillSeo',
+  contentPlan: 'marketplace.skillContentPlan',
+  dataAnalysis: 'marketplace.skillDataAnalysis',
+  biReport: 'marketplace.skillBiReport',
+  predictModel: 'marketplace.skillPredictModel',
+  bizNegotiate: 'marketplace.skillBizNegotiate',
+  contractReview: 'marketplace.skillContractReview',
+  riskAssess: 'marketplace.skillRiskAssess',
+  imageGen: 'marketplace.skillImageGen',
+  videoEdit: 'marketplace.skillVideoEdit',
+  uiDesign: 'marketplace.skillUiDesign',
+  customerService: 'marketplace.skillCustomerService',
+  faqGen: 'marketplace.skillFaqGen',
+  ticketProcess: 'marketplace.skillTicketProcess',
+  codeGen: 'marketplace.skillCodeGen',
+  archDesign: 'marketplace.skillArchDesign',
+  codeReview: 'marketplace.skillCodeReview',
 };
 
 const AVATAR_NAME_KEYS: Record<string, string> = {

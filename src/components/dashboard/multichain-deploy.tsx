@@ -252,6 +252,7 @@ function getChainIcon(chains: SupportedChain[], id: string): string {
 
 // ── Copy Button ────────────────────────────────────────
 function CopyButton({ text }: { text: string }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -514,7 +515,7 @@ function CrossChainBridgeTab({ bridges, chains }: { bridges: CrossChainBridge[];
                 disabled={bridge.status !== 'active'}
               >
                 <ArrowLeftRight className="mr-1.5 size-3" />
-                发起跨链转账
+                {t('multichain.initiateTransfer')}
               </Button>
             </motion.div>
           );
@@ -623,7 +624,7 @@ function StateSyncTab({
                       className="h-6 text-[9px] shrink-0 border-amber-600/30 text-amber-300 hover:bg-amber-500/10"
                     >
                       <RefreshCw className="mr-1 size-2.5" />
-                      重新同步
+                      {t('multichain.resync')}
                     </Button>
                   )}
                 </div>
@@ -1007,28 +1008,28 @@ export default function MultiChainDeploy() {
                 className="text-[11px] data-[state=active]:bg-violet-500/15 data-[state=active]:text-violet-300 px-3 py-1.5"
               >
                 <Globe className="size-3 mr-1.5" />
-                链管理
+                {t('multichain.chainManagement')}
               </TabsTrigger>
               <TabsTrigger
                 value="bridges"
                 className="text-[11px] data-[state=active]:bg-violet-500/15 data-[state=active]:text-violet-300 px-3 py-1.5"
               >
                 <Link2 className="size-3 mr-1.5" />
-                跨链桥
+                {t('multichain.bridge')}
               </TabsTrigger>
               <TabsTrigger
                 value="sync"
                 className="text-[11px] data-[state=active]:bg-violet-500/15 data-[state=active]:text-violet-300 px-3 py-1.5"
               >
                 <Activity className="size-3 mr-1.5" />
-                状态同步
+                {t('multichain.stateSync')}
               </TabsTrigger>
               <TabsTrigger
                 value="switch"
                 className="text-[11px] data-[state=active]:bg-violet-500/15 data-[state=active]:text-violet-300 px-3 py-1.5"
               >
                 <ArrowLeftRight className="size-3 mr-1.5" />
-                链切换
+                {t('multichain.chainSwitch')}
               </TabsTrigger>
             </TabsList>
 
