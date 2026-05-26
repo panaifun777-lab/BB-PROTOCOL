@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "rules": [
+    {
+      "agent": "*",
+      "allow": ["/", "/api/health", "/api/dashboard"],
+      "rate_limit": "60/minute"
+    },
+    {
+      "agent": "GPTBot",
+      "allow": ["/"],
+      "rate_limit": "30/minute"
+    },
+    {
+      "agent": "ClaudeBot",
+      "allow": ["/"],
+      "rate_limit": "30/minute"
+    },
+    {
+      "agent": "CCBot",
+      "allow": ["/"],
+      "rate_limit": "30/minute"
+    }
+  ],
+  "preferred_api": "/api/health",
+  "documentation": "/llms.txt",
+  "skills": "/AGENTS.md"
+}

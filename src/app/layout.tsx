@@ -13,25 +13,138 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL = "https://bb-protocol.dev";
+
 export const metadata: Metadata = {
-  title: "AI认知分身协议 · Cognitive Avatar Protocol",
-  description: "Web4.0认知所有权基础设施 — 行为即契约 · 记忆即永生 · 共性通神性 · 觉醒即自由",
-  keywords: ["AI分身", "认知所有权", "Web4.0", "Cognitive Avatar", "DID", "x402", "流体民主"],
-  authors: [{ name: "Piaoshu / Web4.0 Foundation" }],
-  icons: {
-    icon: "/logo.svg",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "BB Protocol — Cognitive Avatar Protocol | Web4.0 Infrastructure",
+    template: "%s | BB Protocol",
+  },
+  description:
+    "Web4.0 Cognitive Ownership Infrastructure — Build AI-powered cognitive avatars as on-chain digital twins. Behavior as Contract, Memory as Eternity, Resonance as Divinity, Awakening as Freedom.",
+  keywords: [
+    "AI Avatar",
+    "Cognitive Avatar",
+    "Web4.0",
+    "Cognitive Ownership",
+    "DeFi",
+    "Base L2",
+    "DID",
+    "x402",
+    "Fluid Democracy",
+    "Resonance Score",
+    "Smart Contract",
+    "DAO Governance",
+    "Multi-chain",
+    "On-chain AI",
+    "Digital Twin",
+    "ERC-721",
+    "Micro-payment",
+    "Intent-Followed-Protocol",
+    "Blockchain",
+    "Web3",
+  ],
+  authors: [{ name: "Piaoshu / Web4.0 Foundation", url: SITE_URL }],
+  creator: "BB Protocol Team",
+  publisher: "Web4.0 Foundation",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: SITE_URL,
   },
   openGraph: {
-    title: "AI认知分身协议",
-    description: "Web4.0认知所有权基础设施",
     type: "website",
+    locale: "zh_CN",
+    url: SITE_URL,
+    siteName: "BB Protocol",
+    title: "BB Protocol — Cognitive Avatar Protocol",
+    description:
+      "Web4.0 Cognitive Ownership Infrastructure — Build AI-powered cognitive avatars as on-chain digital twins",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI认知分身协议",
-    description: "Web4.0认知所有权基础设施",
+    title: "BB Protocol — Cognitive Avatar Protocol",
+    description:
+      "Web4.0 Cognitive Ownership Infrastructure — AI cognitive avatars on-chain",
+  },
+  icons: {
+    icon: "/logo.svg",
   },
 };
+
+function JsonLd() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        name: "BB Protocol",
+        alternateName: "Cognitive Avatar Protocol",
+        url: SITE_URL,
+        description:
+          "Web4.0 Cognitive Ownership Infrastructure — AI-powered cognitive avatars as on-chain digital twins with resonance scoring, fluid democracy delegation, and micro-payment skill unlocking.",
+        applicationCategory: "BlockchainApplication",
+        operatingSystem: "Web",
+        browserRequirements: "Requires JavaScript. Requires Web3 wallet.",
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "USD",
+        },
+        featureList: [
+          "Cognitive Avatar Creation",
+          "On-chain Identity (DID)",
+          "Resonance Score Computation",
+          "IFP Fluid Democracy Delegation",
+          "x402 Micro-payment Protocol",
+          "Multi-chain Deployment",
+          "DAO Governance",
+          "Revenue Split Dashboard",
+          "Skill Vault System",
+          "Security Audit Monitoring",
+        ],
+      },
+      {
+        "@type": "SoftwareApplication",
+        name: "BB Protocol Dashboard",
+        applicationCategory: "FinanceApplication",
+        operatingSystem: "Web",
+        programmingLanguage: "TypeScript",
+        runtimePlatform: "Next.js 16",
+      },
+      {
+        "@type": "Organization",
+        name: "Web4.0 Foundation",
+        alternateName: "BB Protocol Team",
+        url: SITE_URL,
+        description: "Building Web4.0 Cognitive Ownership Infrastructure",
+      },
+      {
+        "@type": "Blockchain",
+        name: "Base L2",
+        description:
+          "Ethereum Layer 2 blockchain for BB Protocol smart contracts",
+      },
+    ],
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+    />
+  );
+}
 
 export default function RootLayout({
   children,
@@ -40,6 +153,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN" suppressHydrationWarning className="dark">
+      <head>
+        <JsonLd />
+        <link rel="canonical" href={SITE_URL} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >

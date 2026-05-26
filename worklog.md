@@ -1559,3 +1559,170 @@ Stage Summary:
   - src/components/dashboard/deployment-center.tsx (English fallbacks)
   - src/components/dashboard/feature-flags.tsx (13 strings → t() + useI18n fix)
   - src/lib/messages/zh.json, en.json, ja.json, ko.json, es.json, fr.json, de.json, ar.json (22 new keys each)
+
+---
+Task ID: 5
+Agent: aeo-metadata
+Task: Upgrade layout.tsx metadata + Add JSON-LD structured data for AEO (Agentic Engine Optimization)
+
+Work Log:
+
+### Problem
+layout.tsx had basic metadata but was missing critical AEO elements:
+- No canonical URL or metadataBase
+- No alternates.canonical
+- OpenGraph missing url, siteName, locale
+- Twitter card missing proper description
+- No robots directive for AI indexing
+- Limited keywords for AI discoverability
+- No Schema.org JSON-LD structured data
+- No `<head>` element for canonical link + JSON-LD script
+
+### Fix Applied
+
+#### 1. Upgraded metadata export in layout.tsx:
+- Added `SITE_URL = "https://bb-protocol.dev"` constant
+- Added `metadataBase: new URL(SITE_URL)` for resolving relative URLs
+- Changed `title` from string to object with `default` + `template` pattern:
+  - default: "BB Protocol — Cognitive Avatar Protocol | Web4.0 Infrastructure"
+  - template: "%s | BB Protocol" (for sub-pages)
+- Enhanced `description` with full English tagline
+- Expanded `keywords` from 7 to 20 entries covering AI/DeFi/Blockchain/Web4.0 domains
+- Added `authors` with url field pointing to SITE_URL
+- Added `creator: "BB Protocol Team"` and `publisher: "Web4.0 Foundation"`
+- Added `robots` directive with full googleBot config (index, follow, max-video-preview, max-image-preview, max-snippet)
+- Added `alternates.canonical: SITE_URL`
+- Upgraded `openGraph` with: type, locale ("zh_CN"), url, siteName ("BB Protocol"), enhanced title/description
+- Upgraded `twitter` with proper card title and description
+- Kept existing `icons.icon: "/logo.svg"`
+
+#### 2. Added Schema.org JSON-LD structured data:
+Created `JsonLd()` component rendering `<script type="application/ld+json">` with `@graph` containing 4 entities:
+- **WebApplication**: name, alternateName, url, description, applicationCategory ("BlockchainApplication"), operatingSystem ("Web"), browserRequirements, offers (free), featureList (10 features)
+- **SoftwareApplication**: name ("BB Protocol Dashboard"), applicationCategory ("FinanceApplication"), operatingSystem ("Web"), programmingLanguage ("TypeScript"), runtimePlatform ("Next.js 16")
+- **Organization**: name ("Web4.0 Foundation"), alternateName ("BB Protocol Team"), url, description
+- **Blockchain**: name ("Base L2"), description (Ethereum L2 for BB Protocol smart contracts)
+
+#### 3. Updated RootLayout JSX:
+- Added `<head>` element containing `<JsonLd />` component and `<link rel="canonical" href={SITE_URL} />`
+- Kept existing html lang="zh-CN", suppressHydrationWarning, className="dark"
+- Kept existing body with font variables, antialiased, bg-background, text-foreground
+
+### Verification:
+- `bun run lint` → zero errors
+- Dev server compiling normally
+
+Stage Summary:
+- AEO metadata fully upgraded with canonical URLs, robots directives, comprehensive keywords, and social sharing metadata
+- Schema.org JSON-LD structured data added with 4 entity types for AI agent discoverability
+- Canonical link tag added in `<head>` for SEO consistency
+- Files modified:
+  - src/app/layout.tsx (complete metadata upgrade + JsonLd component + head element)
+
+---
+Task ID: 2-4
+Agent: aeo-static-files
+Task: Create AEO static files and metadata (robots.txt upgrade, llms.txt, sitemap.xml, sitemap.md, AGENTS.md, agent-permissions.json)
+
+Work Log:
+
+### Task 1: Upgrade robots.txt
+- Replaced basic robots.txt (only had Googlebot, Bingbot, Twitterbot, facebookexternalhit + wildcard) with AEO-optimized version
+- Added explicit Allow directives for 8 AI agent crawlers: GPTBot, ChatGPT-User, ClaudeBot, CCBot, Google-Extended, PerplexityBot, YouBot, Amazonbot
+- Added Sitemap directive pointing to https://bb-protocol.dev/sitemap.xml
+- Added AEO Discovery section allowing /llms.txt, /AGENTS.md, /sitemap.md
+- File: public/robots.txt (35 lines)
+
+### Task 2: Create llms.txt
+- Created AI agent sitemap at public/llms.txt (43 lines)
+- Includes project tagline, overview section with Home + API Health links
+- Lists all 26 API endpoints with descriptions
+- Documents 6 key domain concepts (Cognitive Avatar, Resonance Score, IFP Delegation, x402 Payment, DID, Multi-chain)
+
+### Task 3: Create sitemap.xml
+- Created XML sitemap at public/sitemap.xml (15 lines)
+- 2 URL entries: homepage (priority 1.0, daily) and /api/health (priority 0.8, hourly)
+- Uses https://bb-protocol.dev domain
+
+### Task 4: Create sitemap.md
+- Created markdown sitemap at public/sitemap.md (30 lines)
+- Lists all 24 API endpoints with short descriptions
+- Human-readable alternative to sitemap.xml for AI crawlers
+
+### Task 5: Create AGENTS.md
+- Created comprehensive agent context file at public/AGENTS.md (78 lines)
+- Documents: project overview, full tech stack, installation instructions, configuration, API architecture, 8 key domain concepts, 5 smart contracts, 6 microservices, i18n setup, development commands, constraints
+- Provides everything an AI agent needs to understand and interact with the project
+
+### Task 6: Create agent-permissions.json
+- Created structured permissions file at public/agent-permissions.json (28 lines)
+- 4 rules: wildcard (limited to /, /api/health, /api/dashboard at 60/min), GPTBot (full access at 30/min), ClaudeBot (full access at 30/min), CCBot (full access at 30/min)
+- Points to preferred_api (/api/health), documentation (/llms.txt), skills (/AGENTS.md)
+
+### Verification
+- All 6 files verified to exist with content (229 total lines)
+- `bun run lint` → zero errors
+- No source code changes; all files are static assets in public/
+
+Stage Summary:
+- Complete AEO infrastructure deployed: 6 static files for AI agent discoverability
+- robots.txt upgraded from basic SEO to AEO-optimized with explicit AI crawler allowances
+- llms.txt provides structured API catalog for AI agents
+- AGENTS.md provides comprehensive project context for autonomous agents
+- agent-permissions.json defines access control and rate limits
+- sitemap.xml + sitemap.md provide dual-format sitemap (machine + human/AI readable)
+- Files created/modified:
+  - public/robots.txt (upgraded: added 8 AI crawlers + AEO discovery directives)
+  - public/llms.txt (new: AI agent sitemap with API catalog)
+  - public/sitemap.xml (new: XML sitemap)
+  - public/sitemap.md (new: markdown sitemap)
+  - public/AGENTS.md (new: agent context file)
+  - public/agent-permissions.json (new: agent access control)
+
+---
+Task ID: 6
+Agent: aeo-api-routes
+Task: Create 3 AEO API routes for agent-discoverable content
+
+Work Log:
+
+### Route 1: `/api/llms-txt/route.ts`
+- Created `src/app/api/llms-txt/route.ts`
+- Dynamically generates llms.txt file from central `API_ENDPOINTS` config array (24 endpoints)
+- Returns Content-Type: text/plain with Cache-Control: public, max-age=3600
+- Includes token count estimates per endpoint (e.g., ~200 for /api/health, ~2K for /api/dashboard)
+- Includes X-Token-Estimate header (~500 tokens total)
+- Content sections: Overview, API Reference (with token estimates), Key Concepts, Smart Contracts, Constraints
+- try/catch error handling returning 500 JSON on failure
+
+### Route 2: `/api/agent-info/route.ts`
+- Created `src/app/api/agent-info/route.ts`
+- Serves machine-readable JSON summary of platform capabilities for AI agents
+- Returns structured object with: protocol, version, description, capabilities (6 items), smart_contracts, rate_limits, documentation links
+- 6 capability definitions: cognitive-avatar, resonance-scoring, ifp-delegation, x402-payment, dao-governance, multi-chain
+- Each capability includes: name, description, endpoints, required_inputs, constraints
+- Smart contracts section: BBAvatar, BBResonance, BBRevenueSplit, BBGovernance, BBx402
+- Rate limits: general 60/min, ai_agents 30/min
+- Headers: Cache-Control, X-Content-Type-Options: nosniff
+
+### Route 3: `/api/sitemap/route.ts`
+- Created `src/app/api/sitemap/route.ts`
+- Dynamically generates JSON sitemap for AI agents
+- 25 pages with priority (0.5-1.0) and changefreq (hourly/daily/weekly/realtime)
+- Includes generatedAt timestamp, site base URL, full URLs with lastmod
+- discovery_files section links to: llms.txt, AGENTS.md, sitemap.xml, sitemap.md, robots.txt
+- Cache-Control: public, max-age=3600
+
+Verification:
+- `bun run lint` → zero errors
+- All 3 routes follow established patterns: NextResponse, try/catch, console.error logging
+
+Stage Summary:
+- 3 AEO API routes created for agent-discoverable content
+- /api/llms-txt: Dynamic text/plain llms.txt generation with token estimates
+- /api/agent-info: Machine-readable JSON capability summary for AI agents
+- /api/sitemap: Dynamic JSON sitemap with discovery file references
+- Files created:
+  - src/app/api/llms-txt/route.ts (new - llms.txt dynamic generation)
+  - src/app/api/agent-info/route.ts (new - agent capabilities JSON)
+  - src/app/api/sitemap/route.ts (new - dynamic sitemap JSON)
