@@ -87,7 +87,10 @@
     "footer": "Cognitive Avatar Protocol · Web4.0",
     "migration": "Base L2 MVP → AFC Mainnet Smooth Migration",
     "quickPay": "x402 Pay",
-    "mobileNav": "Mobile Nav"
+    "mobileNav": "Mobile Nav",
+    "defaultService": "GPT-4o Text Generation",
+    "proTier": "Pro",
+    "rentAvatar": "Rent"
   },
   "avatar": {
     "title": "Cognitive Identity Card",

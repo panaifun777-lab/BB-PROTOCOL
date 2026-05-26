@@ -394,7 +394,7 @@ export default function X402Payment({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">时间</span>
-                    <span className="text-slate-200">
+                    <span className="text-slate-200" suppressHydrationWarning>
                       {completedAt || '---'}
                     </span>
                   </div>

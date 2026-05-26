@@ -1313,7 +1313,7 @@ export default function ContractSimulation() {
                         <div className="text-[9px] text-slate-600 mt-0.5 font-mono">
                           {item.gasUsed.toLocaleString()} gas
                         </div>
-                        <div className="text-[9px] text-slate-600">
+                        <div className="text-[9px] text-slate-600" suppressHydrationWarning>
                           {formatTimestamp(item.timestamp)}
                         </div>
                       </div>

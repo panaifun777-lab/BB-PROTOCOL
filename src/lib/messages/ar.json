@@ -87,7 +87,10 @@
     "footer": "بروتوكول الصورة الرمزية المعرفية · Web4.0",
     "migration": "Base L2 MVP → ترحيل سلس إلى الشبكة الرئيسية AFC",
     "quickPay": "دفع x402",
-    "mobileNav": "التنقل المحمول"
+    "mobileNav": "التنقل المحمول",
+    "defaultService": "توليد نص GPT-4o",
+    "proTier": "احترافي",
+    "rentAvatar": "استئجار"
   },
   "avatar": {
     "title": "بطاقة الهوية المعرفية",

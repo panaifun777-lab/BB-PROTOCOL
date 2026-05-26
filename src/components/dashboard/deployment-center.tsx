@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useClientTime } from '@/hooks/use-client-time';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield,
@@ -339,11 +340,11 @@ function formatDate(timestamp: string): string {
 }
 
 // ── Helper: relative time ──────────────────────────────
-function getRelativeTime(timestamp: string): string {
+function getRelativeTime(timestamp: string, now?: Date | null): string {
   if (!timestamp) return '—';
-  const now = new Date();
+  const currentDate = now ?? new Date('2026-03-04');
   const date = new Date(timestamp);
-  const diffMs = now.getTime() - date.getTime();
+  const diffMs = currentDate.getTime() - date.getTime();
   const diffMin = Math.floor(diffMs / 60000);
   const diffHr = Math.floor(diffMs / 3600000);
   const diffDay = Math.floor(diffMs / 86400000);
@@ -372,6 +373,7 @@ function AnimatedCounter({ value }: { value: number }) {
 
 // ── Tab 1: Overview ────────────────────────────────────
 function OverviewTab({ data }: { data: DeploymentData }) {
+  const now = useClientTime();
   const ds = data.deploymentStatus;
   const statusConfig = DEPLOY_STATUS_CONFIG[ds.deployStatus];
 
@@ -410,7 +412,7 @@ function OverviewTab({ data }: { data: DeploymentData }) {
             </div>
             <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
               <Clock className="size-3" />
-              <span>上次部署: {getRelativeTime(ds.lastDeployAt)}</span>
+              <span suppressHydrationWarning>上次部署: {getRelativeTime(ds.lastDeployAt, now)}</span>
             </div>
           </div>
         </div>

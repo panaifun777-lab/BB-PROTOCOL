@@ -87,7 +87,10 @@
     "footer": "认知分身协议 · Cognitive Avatar Protocol · Web4.0",
     "migration": "Base L2 MVP → AFC 主网平滑迁移",
     "quickPay": "x402 支付",
-    "mobileNav": "移动导航"
+    "mobileNav": "移动导航",
+    "defaultService": "GPT-4o 文本生成",
+    "proTier": "专业版",
+    "rentAvatar": "租用"
   },
   "avatar": {
     "title": "认知身份卡片",

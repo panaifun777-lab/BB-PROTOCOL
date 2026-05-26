@@ -87,7 +87,10 @@
     "footer": "인지 아바타 프로토콜 · Web4.0",
     "migration": "Base L2 MVP → AFC 메인넷 마이그레이션",
     "quickPay": "x402 결제",
-    "mobileNav": "모바일 내비게이션"
+    "mobileNav": "모바일 내비게이션",
+    "defaultService": "GPT-4o 텍스트 생성",
+    "proTier": "프로",
+    "rentAvatar": "대여"
   },
   "avatar": {
     "title": "인지 아이덴티티 카드",

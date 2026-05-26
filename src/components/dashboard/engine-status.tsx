@@ -220,9 +220,22 @@ function ModuleCard({ module, index }: { module: EngineModuleStatus; index: numb
   )
 }
 
+// ── Props ────────────────────────────────────────────────────
+
+interface EngineStatusDashboardProps {
+  /** Real-time Socket.IO engine status from useEngineStatus() hook */
+  engineStatus?: {
+    connected: Record<string, boolean>;
+    allConnected: boolean;
+    connectedCount: number;
+    totalServices: number;
+    reconnect: (serviceName?: string) => void;
+  };
+}
+
 // ── Main Dashboard Component ─────────────────────────────────
 
-export default function EngineStatusDashboard() {
+export default function EngineStatusDashboard({ engineStatus }: EngineStatusDashboardProps) {
   const [data, setData] = useState<EngineStatusData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -294,7 +307,14 @@ export default function EngineStatusDashboard() {
           </div>
           <div>
             <h3 className="text-white font-semibold text-base">Off-Chain Engine Status</h3>
-            <p className="text-xs text-slate-400">Real-time monitoring of 4 engine microservices</p>
+            <p className="text-xs text-slate-400">
+              Real-time monitoring of 4 engine microservices
+              {engineStatus && (
+                <> · <span className={engineStatus.allConnected ? 'text-emerald-400' : 'text-amber-400'}>
+                  {engineStatus.connectedCount}/{engineStatus.totalServices} live
+                </span></>
+              )}
+            </p>
           </div>
         </div>
 

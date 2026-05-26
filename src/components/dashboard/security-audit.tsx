@@ -29,6 +29,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
+import { useClientTime } from '@/hooks/use-client-time';
 
 // ── Types ──────────────────────────────────────────────
 type InvariantStatus = 'pass' | 'fail';
@@ -317,8 +318,8 @@ const LOG_TYPE_CONFIG: Record<AuditLogType, { label: string; icon: React.Element
 };
 
 // ── Helper: relative time ──────────────────────────────
-function getRelativeTime(timestamp: string): string {
-  const now = new Date();
+function getRelativeTime(timestamp: string, now: Date | null): string {
+  if (!now) return '...';  // SSR placeholder to avoid hydration mismatch
   const date = new Date(timestamp);
   const diffMs = now.getTime() - date.getTime();
   const diffMin = Math.floor(diffMs / 60000);
@@ -334,6 +335,7 @@ function getRelativeTime(timestamp: string): string {
 
 // ── Security Score Gauge ───────────────────────────────
 function SecurityScoreGauge({ score }: { score: number }) {
+  const now = useClientTime();
   const radius = 54;
   const circumference = 2 * Math.PI * radius;
   const progress = (score / 100) * circumference;
@@ -405,8 +407,8 @@ function SecurityScoreGauge({ score }: { score: number }) {
         <p className={cn('text-sm font-semibold', scoreColor)}>
           {score >= 90 ? '安全等级: 优秀' : score >= 70 ? '安全等级: 良好' : '安全等级: 需关注'}
         </p>
-        <p className="mt-0.5 text-[10px] text-slate-500">
-          上次全量审计: {getRelativeTime(MOCK_DATA.lastFullAudit)}
+        <p className="mt-0.5 text-[10px] text-slate-500" suppressHydrationWarning>
+          上次全量审计: {getRelativeTime(MOCK_DATA.lastFullAudit, now)}
         </p>
       </div>
     </div>
@@ -415,6 +417,7 @@ function SecurityScoreGauge({ score }: { score: number }) {
 
 // ── Invariant Card ─────────────────────────────────────
 function InvariantCard({ invariant }: { invariant: CertoraInvariant }) {
+  const now = useClientTime();
   const isPass = invariant.status === 'pass';
   const StatusIcon = isPass ? ShieldCheck : ShieldX;
 
@@ -509,7 +512,7 @@ function InvariantCard({ invariant }: { invariant: CertoraInvariant }) {
           {/* Last verified */}
           <div className="mt-2 flex items-center gap-1 text-[10px] text-slate-500">
             <Clock className="size-3" />
-            <span>最后验证: {getRelativeTime(invariant.lastVerified)}</span>
+            <span suppressHydrationWarning>最后验证: {getRelativeTime(invariant.lastVerified, now)}</span>
           </div>
         </CardContent>
       </Card>
@@ -571,6 +574,7 @@ function FindingRow({ finding }: { finding: SlitherFinding }) {
 
 // ── Audit Log Row ──────────────────────────────────────
 function AuditLogRow({ entry }: { entry: AuditLogEntry }) {
+  const now = useClientTime();
   const typeConfig = LOG_TYPE_CONFIG[entry.type];
   const sevConfig = SEVERITY_CONFIG[entry.severity];
   const TypeIcon = typeConfig.icon;
@@ -590,8 +594,8 @@ function AuditLogRow({ entry }: { entry: AuditLogEntry }) {
           <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0', sevConfig.badge)}>
             {typeConfig.label}
           </Badge>
-          <span className="text-[10px] text-slate-500">
-            {getRelativeTime(entry.createdAt)}
+          <span className="text-[10px] text-slate-500" suppressHydrationWarning>
+            {getRelativeTime(entry.createdAt, now)}
           </span>
         </div>
         <p className="mt-1 text-[11px] text-slate-300 leading-relaxed">{entry.details}</p>
@@ -608,6 +612,7 @@ function AuditLogRow({ entry }: { entry: AuditLogEntry }) {
 export default function SecurityAudit() {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [expandedInvariant, setExpandedInvariant] = useState<string | null>(null);
+  const now = useClientTime();
 
   const data = MOCK_DATA;
   const passedCount = data.invariants.filter((inv) => inv.status === 'pass').length;
@@ -745,8 +750,8 @@ export default function SecurityAudit() {
       <Alert className="border-violet-500/20 bg-violet-500/5">
         <Eye className="size-4 text-violet-400" />
         <AlertTitle className="text-violet-300 text-xs">下次审计</AlertTitle>
-        <AlertDescription className="text-violet-300/70 text-[11px]">
-          全量安全审计计划于 {getRelativeTime(data.nextScheduledAudit)} 后执行
+        <AlertDescription className="text-violet-300/70 text-[11px]" suppressHydrationWarning>
+          全量安全审计计划于 {getRelativeTime(data.nextScheduledAudit, now)} 后执行
         </AlertDescription>
       </Alert>
     </div>

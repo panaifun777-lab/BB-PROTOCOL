@@ -87,7 +87,10 @@
     "footer": "認知アバタープロトコル · Web4.0",
     "migration": "Base L2 MVP → AFCメインネット移行",
     "quickPay": "x402支払い",
-    "mobileNav": "モバイルナビ"
+    "mobileNav": "モバイルナビ",
+    "defaultService": "GPT-4o テキスト生成",
+    "proTier": "プロ",
+    "rentAvatar": "レンタル"
   },
   "avatar": {
     "title": "認識アイデンティティカード",

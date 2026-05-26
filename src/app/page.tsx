@@ -132,7 +132,8 @@ function Web3ConnectButton() {
 
   return (
     <button
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-violet-500/50 transition-colors text-xs"
+      aria-label="Connect wallet"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-violet-500/50 transition-colors text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
     >
       <Wallet className="w-3.5 h-3.5 text-violet-400" />
       {isConnected ? (
@@ -164,9 +165,6 @@ export default function Home() {
   const dashboardData: DashboardState = (avatar && revenueSummary)
     ? { avatar, skills, revenueSummary, recentRevenues, delegations, timeline, resonanceHistory }
     : INITIAL_DATA;
-
-  // Suppress unused variable warnings (will be used for real-time indicators)
-  void engineStatus;
 
   if (isLoading && !avatar) {
     return (
@@ -214,6 +212,15 @@ export default function Home() {
               <span className="text-xs text-emerald-300 font-medium">{dashboardData.avatar.resonanceScore}</span>
             </div>
 
+            {/* Service Health Indicator */}
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+              <div className={cn(
+                "w-1.5 h-1.5 rounded-full",
+                engineStatus.allConnected ? "bg-emerald-400 animate-pulse" : "bg-amber-400 animate-pulse"
+              )} />
+              <span className="text-xs text-slate-300 font-mono">{engineStatus.connectedCount}/{engineStatus.totalServices}</span>
+            </div>
+
             {/* Language Switcher */}
             <LanguageSwitcher />
 
@@ -225,12 +232,13 @@ export default function Home() {
 
             {/* x402 Quick Pay */}
             <button
+              aria-label="Quick payment"
               onClick={() => {
-                setPaymentService('GPT-4o 文本生成');
+                setPaymentService(t('dashboard.defaultService'));
                 setPaymentAmount(0.02);
                 setPaymentOpen(true);
               }}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 transition-all text-xs font-medium"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 transition-all text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
             >
               <Zap className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{t('nav.payment')}</span>
@@ -238,7 +246,8 @@ export default function Home() {
 
             {/* Mobile Menu Toggle */}
             <button
-              className="lg:hidden p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+              aria-label="Toggle menu"
+              className="lg:hidden p-1.5 rounded-lg hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -255,9 +264,10 @@ export default function Home() {
             {NAV_ITEMS.map((item) => (
               <button
                 key={item.id}
+                aria-label={t(item.navKey)}
                 onClick={() => scrollTo(item.id)}
                 className={cn(
-                  'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all',
+                  'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
                   activeSection === item.id
                     ? 'bg-violet-500/15 text-violet-300 font-medium'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -275,7 +285,7 @@ export default function Home() {
           {/* Tier Badge */}
           <div className="mt-auto p-3 rounded-xl bg-gradient-to-br from-violet-500/10 to-blue-500/10 border border-violet-500/20">
             <div className="text-[10px] text-violet-300/60 uppercase tracking-widest mb-1">{t('dashboard.currentPlan')}</div>
-            <div className="text-sm font-semibold text-violet-200">Pro</div>
+            <div className="text-sm font-semibold text-violet-200">{t('dashboard.proTier')}</div>
             <div className="text-[10px] text-slate-500 mt-0.5">{t('dashboard.avatarsCount', { count: 3 })}</div>
           </div>
         </aside>
@@ -294,9 +304,10 @@ export default function Home() {
                 {NAV_ITEMS.map((item) => (
                   <button
                     key={item.id}
+                    aria-label={t(item.navKey)}
                     onClick={() => scrollTo(item.id)}
                     className={cn(
-                      'flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all',
+                      'flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
                       activeSection === item.id
                         ? 'bg-violet-500/15 text-violet-300 font-medium'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -387,7 +398,7 @@ export default function Home() {
           >
             <AvatarMarketplace
               onRent={(avatar) => {
-                setPaymentService(`租用 ${avatar.name}`);
+                setPaymentService(`${t('dashboard.rentAvatar')} ${avatar.name}`);
                 setPaymentAmount(avatar.hourlyRate * 0.01);
                 setPaymentOpen(true);
               }}
@@ -548,7 +559,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.65 }}
             >
-              <EngineStatusDashboard />
+              <EngineStatusDashboard engineStatus={engineStatus} />
             </motion.div>
           </div>
 
@@ -589,9 +600,10 @@ export default function Home() {
           {MOBILE_NAV.map((item) => (
             <button
               key={item.id}
+              aria-label={t(item.navKey)}
               onClick={() => scrollTo(item.id)}
               className={cn(
-                'flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all',
+                'flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
                 activeSection === item.id
                   ? 'text-violet-300'
                   : 'text-slate-500 hover:text-slate-300'

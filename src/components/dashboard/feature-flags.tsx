@@ -782,7 +782,7 @@ function TimelineEntry({ entry, isLast }: { entry: RollbackHistoryEntry; isLast:
             {actionConfig.label}
           </Badge>
           <span className="text-xs font-medium text-slate-200">{entry.flagName}</span>
-          <span className="text-[10px] text-slate-500">{formatDate(entry.timestamp)}</span>
+          <span className="text-[10px] text-slate-500" suppressHydrationWarning>{formatDate(entry.timestamp)}</span>
         </div>
         <p className="mt-1 text-[11px] text-slate-400">{entry.reason}</p>
         <div className="mt-1 text-[10px] text-slate-500">

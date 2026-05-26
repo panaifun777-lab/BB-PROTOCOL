@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useClientTime } from '@/hooks/use-client-time';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bell,
@@ -77,10 +78,10 @@ const TYPE_CONFIG: Record<
 };
 
 // ── Relative time helper ───────────────────────────────
-function getRelativeTime(timestamp: string): string {
-  const now = new Date();
+function getRelativeTime(timestamp: string, now?: Date | null): string {
+  const currentDate = now ?? new Date('2026-03-04');
   const date = new Date(timestamp);
-  const diffMs = now.getTime() - date.getTime();
+  const diffMs = currentDate.getTime() - date.getTime();
   const diffMin = Math.floor(diffMs / 60000);
   const diffHr = Math.floor(diffMs / 3600000);
   const diffDay = Math.floor(diffMs / 86400000);
@@ -100,6 +101,7 @@ function NotificationItem({
   notification: Notification;
   onMarkRead: (id: string) => void;
 }) {
+  const now = useClientTime();
   const config = TYPE_CONFIG[notification.type];
   const IconComp = config.icon;
 
@@ -142,8 +144,8 @@ function NotificationItem({
           >
             {notification.title}
           </p>
-          <span className="shrink-0 text-[10px] text-slate-500">
-            {getRelativeTime(notification.timestamp)}
+          <span className="shrink-0 text-[10px] text-slate-500" suppressHydrationWarning>
+            {getRelativeTime(notification.timestamp, now)}
           </span>
         </div>
         <p className="mt-0.5 text-[11px] leading-relaxed text-slate-400">

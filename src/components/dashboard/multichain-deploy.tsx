@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useClientTime } from '@/hooks/use-client-time';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeftRight,
@@ -220,11 +221,11 @@ function formatNumber(value: number): string {
   return value.toLocaleString();
 }
 
-function getRelativeTime(timestamp: string): string {
+function getRelativeTime(timestamp: string, now?: Date | null): string {
   if (!timestamp) return '—';
-  const now = new Date();
+  const currentDate = now ?? new Date('2026-03-04');
   const date = new Date(timestamp);
-  const diffMs = now.getTime() - date.getTime();
+  const diffMs = currentDate.getTime() - date.getTime();
   const diffMin = Math.floor(diffMs / 60000);
   const diffHr = Math.floor(diffMs / 3600000);
   const diffDay = Math.floor(diffMs / 86400000);
@@ -276,6 +277,7 @@ function CopyButton({ text }: { text: string }) {
 
 // ── Tab 1: Chain Management ────────────────────────────
 function ChainManagementTab({ chains }: { chains: SupportedChain[] }) {
+  const now = useClientTime();
   const activeCount = chains.filter(c => c.status === 'active').length;
   const pendingCount = chains.filter(c => c.status === 'pending').length;
   const plannedCount = chains.filter(c => c.status === 'planned').length;
@@ -364,7 +366,7 @@ function ChainManagementTab({ chains }: { chains: SupportedChain[] }) {
               {/* Last Sync */}
               <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mb-3">
                 <Clock className="size-3" />
-                <span>最近同步: {getRelativeTime(chain.lastSync)}</span>
+                <span suppressHydrationWarning>最近同步: {getRelativeTime(chain.lastSync, now)}</span>
               </div>
 
               {/* Action Button */}
@@ -531,6 +533,7 @@ function StateSyncTab({
   tvlHistory: TvlHistoryPoint[];
   chains: SupportedChain[];
 }) {
+  const now = useClientTime();
   const allSynced = stateSync.every(s => s.status === 'synced');
   const hasDelayed = stateSync.some(s => s.status === 'delayed');
 
@@ -600,7 +603,7 @@ function StateSyncTab({
                 <div className="flex items-center gap-4 sm:gap-6">
                   <div className="text-center">
                     <span className="text-[9px] text-slate-500 block">最近同步</span>
-                    <span className="text-[10px] text-slate-400">{getRelativeTime(entry.lastSync)}</span>
+                    <span className="text-[10px] text-slate-400" suppressHydrationWarning>{getRelativeTime(entry.lastSync, now)}</span>
                   </div>
                   <div className="text-center">
                     <span className="text-[9px] text-slate-500 block">延迟</span>
@@ -774,6 +777,7 @@ function ChainSwitchTab({
   chains: SupportedChain[];
   switchHistory: ChainSwitchHistory[];
 }) {
+  const now = useClientTime();
   const activeChains = chains.filter(c => c.status === 'active');
   const [selectedChain, setSelectedChain] = useState('base');
   const currentChain = chains.find(c => c.id === selectedChain);
@@ -920,7 +924,7 @@ function ChainSwitchTab({
 
                   <div className="flex items-center gap-1.5 mt-2 text-[10px] text-slate-500">
                     <Clock className="size-2.5" />
-                    <span>{getRelativeTime(entry.timestamp)}</span>
+                    <span suppressHydrationWarning>{getRelativeTime(entry.timestamp, now)}</span>
                   </div>
                 </motion.div>
               );

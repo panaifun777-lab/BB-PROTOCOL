@@ -87,7 +87,10 @@
     "footer": "Protocole d'Avatar Cognitif · Web4.0",
     "migration": "Base L2 MVP → Migration Fluide vers Mainnet AFC",
     "quickPay": "Paiement x402",
-    "mobileNav": "Navigation Mobile"
+    "mobileNav": "Navigation Mobile",
+    "defaultService": "Génération de texte GPT-4o",
+    "proTier": "Pro",
+    "rentAvatar": "Louer"
   },
   "avatar": {
     "title": "Carte d'Identité Cognitive",
