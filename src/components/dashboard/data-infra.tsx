@@ -36,6 +36,7 @@ import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { useI18n, type TranslateFn } from '@/hooks/use-i18n';
 
 // ── Types ──────────────────────────────────────────────
 interface EventHandler {
@@ -143,15 +144,17 @@ interface DataInfraData {
   superset: SupersetData;
 }
 
-// ── Config Maps ────────────────────────────────────────
-const ENTITY_LABELS: Record<string, string> = {
-  avatars: '分身',
-  skills: '技能',
-  revenueSplits: '收益分账',
-  delegations: '委托',
-  circuitEvents: '熔断事件',
-  resonanceUpdates: '共振更新',
-};
+// ── Config Map Functions (require t) ───────────────────
+function getEntityLabels(t: TranslateFn): Record<string, string> {
+  return {
+    avatars: t('dataInfra.entityAvatars'),
+    skills: t('dataInfra.entitySkills'),
+    revenueSplits: t('dataInfra.entityRevenueSplits'),
+    delegations: t('dataInfra.entityDelegations'),
+    circuitEvents: t('dataInfra.entityCircuitEvents'),
+    resonanceUpdates: t('dataInfra.entityResonanceUpdates'),
+  };
+}
 
 const ENTITY_COLORS: Record<string, string> = {
   avatars: 'text-violet-400',
@@ -171,17 +174,21 @@ const ENTITY_BG: Record<string, string> = {
   resonanceUpdates: 'bg-pink-500/10 border-pink-500/20',
 };
 
-const PIN_TYPE_CONFIG: Record<string, { label: string; badge: string }> = {
-  cognition_root: { label: '认知根', badge: 'bg-violet-500/20 text-violet-300 border-violet-500/30' },
-  memory_snapshot: { label: '记忆快照', badge: 'bg-sky-500/20 text-sky-300 border-sky-500/30' },
-  skill_config: { label: '技能配置', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
-  delegation_snapshot: { label: '委托快照', badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
-};
+function getPinTypeConfig(t: TranslateFn): Record<string, { label: string; badge: string }> {
+  return {
+    cognition_root: { label: t('dataInfra.pinCognitionRoot'), badge: 'bg-violet-500/20 text-violet-300 border-violet-500/30' },
+    memory_snapshot: { label: t('dataInfra.pinMemorySnapshot'), badge: 'bg-sky-500/20 text-sky-300 border-sky-500/30' },
+    skill_config: { label: t('dataInfra.pinSkillConfig'), badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
+    delegation_snapshot: { label: t('dataInfra.pinDelegationSnapshot'), badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
+  };
+}
 
-const PIN_STATUS_CONFIG: Record<string, { label: string; badge: string }> = {
-  pinned: { label: '已固定', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
-  pinning: { label: '固定中', badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
-};
+function getPinStatusConfig(t: TranslateFn): Record<string, { label: string; badge: string }> {
+  return {
+    pinned: { label: t('dataInfra.pinned'), badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
+    pinning: { label: t('dataInfra.pinning'), badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
+  };
+}
 
 // ── Helpers ────────────────────────────────────────────
 function formatNumber(n: number): string {
@@ -190,7 +197,7 @@ function formatNumber(n: number): string {
   return n.toLocaleString();
 }
 
-function getRelativeTime(ts: string): string {
+function getRelativeTime(ts: string, t: TranslateFn): string {
   const now = new Date('2026-03-10T15:00:00Z');
   const d = new Date(ts);
   const diffMs = now.getTime() - d.getTime();
@@ -198,10 +205,10 @@ function getRelativeTime(ts: string): string {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return '刚刚';
-  if (diffMins < 60) return `${diffMins}分钟前`;
-  if (diffHours < 24) return `${diffHours}小时前`;
-  return `${diffDays}天前`;
+  if (diffMins < 1) return t('dataInfra.justNow');
+  if (diffMins < 60) return t('dataInfra.minutesAgo', { count: diffMins });
+  if (diffHours < 24) return t('dataInfra.hoursAgo', { count: diffHours });
+  return t('dataInfra.daysAgo', { count: diffDays });
 }
 
 function getLatencyColor(latency: string): string {
@@ -244,17 +251,20 @@ interface FreshnessCell {
   frontend: string;
 }
 
-const FRESHNESS_MATRIX: FreshnessCell[] = [
-  { dataType: 'Avatar Profile', onChain: '2s', theGraph: '4s', apiLayer: '30s', frontend: '实时' },
-  { dataType: 'Revenue Split', onChain: '2s', theGraph: '4s', apiLayer: '30s', frontend: '实时' },
-  { dataType: 'Circuit State', onChain: '2s', theGraph: '4s', apiLayer: '30s', frontend: '实时' },
-  { dataType: 'Resonance Score', onChain: '2s', theGraph: '4s', apiLayer: '30s', frontend: '实时' },
-  { dataType: 'Delegations', onChain: '2s', theGraph: '4s', apiLayer: '30s', frontend: '实时' },
-  { dataType: 'Skills', onChain: '2s', theGraph: '4s', apiLayer: '30s', frontend: '实时' },
-];
+function getFreshnessMatrix(t: TranslateFn): FreshnessCell[] {
+  const rt = t('dataInfra.realtime');
+  return [
+    { dataType: 'Avatar Profile', onChain: '2s', theGraph: '4s', apiLayer: '30s', frontend: rt },
+    { dataType: 'Revenue Split', onChain: '2s', theGraph: '4s', apiLayer: '30s', frontend: rt },
+    { dataType: 'Circuit State', onChain: '2s', theGraph: '4s', apiLayer: '30s', frontend: rt },
+    { dataType: 'Resonance Score', onChain: '2s', theGraph: '4s', apiLayer: '30s', frontend: rt },
+    { dataType: 'Delegations', onChain: '2s', theGraph: '4s', apiLayer: '30s', frontend: rt },
+    { dataType: 'Skills', onChain: '2s', theGraph: '4s', apiLayer: '30s', frontend: rt },
+  ];
+}
 
-function getCellFreshnessColor(val: string): string {
-  if (val === '实时') return 'text-emerald-400 bg-emerald-500/10';
+function getCellFreshnessColor(val: string, t: TranslateFn): string {
+  if (val === t('dataInfra.realtime')) return 'text-emerald-400 bg-emerald-500/10';
   const numVal = parseFloat(val);
   if (numVal <= 5) return 'text-emerald-400 bg-emerald-500/10';
   if (numVal <= 30) return 'text-amber-400 bg-amber-500/10';
@@ -287,9 +297,9 @@ const FALLBACK_DATA: DataInfraData = {
       { event: 'SkillUnlocked(uint256,uint256)', entity: 'SkillUnlock', field: 'soulId, skillId, timestamp', indexed: false },
     ],
     queryExamples: [
-      { name: '获取分身列表', query: '{ avatars(first: 10, orderBy: createdAt, orderDirection: desc) { soulId owner resonanceScore } }' },
-      { name: '查询收益分账', query: '{ revenueSplits(where: { soulId: "1" }, first: 20) { amount humanShare timestamp } }' },
-      { name: '熔断事件历史', query: '{ circuitEvents(where: { newState: 2 }) { soulId newState timestamp } }' },
+      { name: 'queryGetAvatarList', query: '{ avatars(first: 10, orderBy: createdAt, orderDirection: desc) { soulId owner resonanceScore } }' },
+      { name: 'queryRevenueSplits', query: '{ revenueSplits(where: { soulId: "1" }, first: 20) { amount humanShare timestamp } }' },
+      { name: 'queryCircuitHistory', query: '{ circuitEvents(where: { newState: 2 }) { soulId newState timestamp } }' },
     ],
   },
   ipfs: {
@@ -329,10 +339,10 @@ const FALLBACK_DATA: DataInfraData = {
   ],
   superset: {
     dashboards: [
-      { id: 1, name: '核心指标总览', charts: 12, refreshRate: '30s', lastAccessed: '2026-03-10T14:00:00Z', status: 'active' },
-      { id: 2, name: '收益趋势分析', charts: 8, refreshRate: '1m', lastAccessed: '2026-03-10T12:30:00Z', status: 'active' },
-      { id: 3, name: '链上活动监控', charts: 15, refreshRate: '10s', lastAccessed: '2026-03-10T14:28:00Z', status: 'active' },
-      { id: 4, name: '用户行为分析', charts: 10, refreshRate: '5m', lastAccessed: '2026-03-09T18:00:00Z', status: 'active' },
+      { id: 1, name: 'dashboardCoreMetrics', charts: 12, refreshRate: '30s', lastAccessed: '2026-03-10T14:00:00Z', status: 'active' },
+      { id: 2, name: 'dashboardRevenueTrend', charts: 8, refreshRate: '1m', lastAccessed: '2026-03-10T12:30:00Z', status: 'active' },
+      { id: 3, name: 'dashboardOnchainActivity', charts: 15, refreshRate: '10s', lastAccessed: '2026-03-10T14:28:00Z', status: 'active' },
+      { id: 4, name: 'dashboardUserBehavior', charts: 10, refreshRate: '5m', lastAccessed: '2026-03-09T18:00:00Z', status: 'active' },
     ],
     totalQueries: 45,
     avgQueryTime: '1.2s',
@@ -341,7 +351,7 @@ const FALLBACK_DATA: DataInfraData = {
 };
 
 // ── Tab 1: The Graph Subgraph ──────────────────────────
-function SubgraphTab({ subgraph }: { subgraph: SubgraphData }) {
+function SubgraphTab({ subgraph, t }: { subgraph: SubgraphData; t: TranslateFn }) {
   const [copiedQuery, setCopiedQuery] = useState<string | null>(null);
 
   const handleCopyQuery = useCallback((query: string, idx: number) => {
@@ -351,6 +361,7 @@ function SubgraphTab({ subgraph }: { subgraph: SubgraphData }) {
   }, []);
 
   const pinnedRatio = subgraph.syncLag === 0;
+  const entityLabels = getEntityLabels(t);
 
   return (
     <div className="space-y-4">
@@ -375,7 +386,7 @@ function SubgraphTab({ subgraph }: { subgraph: SubgraphData }) {
                     </Badge>
                   </div>
                   <p className="text-[11px] text-slate-400 mt-0.5">
-                    同步区块 <span className="text-emerald-400 font-mono tabular-nums">{subgraph.syncedBlock.toLocaleString()}</span>
+                    {t('dataInfra.syncBlocks')} <span className="text-emerald-400 font-mono tabular-nums">{subgraph.syncedBlock.toLocaleString()}</span>
                     <span className="text-slate-600 mx-1">/</span>
                     <span className="text-slate-300 font-mono tabular-nums">{subgraph.latestBlock.toLocaleString()}</span>
                   </p>
@@ -383,7 +394,7 @@ function SubgraphTab({ subgraph }: { subgraph: SubgraphData }) {
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-center">
-                  <p className="text-[9px] text-slate-500 uppercase">同步延迟</p>
+                  <p className="text-[9px] text-slate-500 uppercase">{t('dataInfra.syncLag')}</p>
                   <p className={cn('text-sm font-bold tabular-nums', subgraph.syncLag === 0 ? 'text-emerald-400' : 'text-amber-400')}>
                     {subgraph.syncLag} blocks
                   </p>
@@ -410,7 +421,7 @@ function SubgraphTab({ subgraph }: { subgraph: SubgraphData }) {
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <Layers className="size-3.5 text-emerald-400" />
-          实体数量
+          {t('dataInfra.entityCount')}
         </h4>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
           {Object.entries(subgraph.entityCount).map(([key, count], idx) => (
@@ -422,7 +433,7 @@ function SubgraphTab({ subgraph }: { subgraph: SubgraphData }) {
             >
               <Card className={cn('border backdrop-blur-sm', ENTITY_BG[key])}>
                 <CardContent className="p-3 text-center">
-                  <p className="text-[10px] text-slate-500 mb-1">{ENTITY_LABELS[key]}</p>
+                  <p className="text-[10px] text-slate-500 mb-1">{entityLabels[key]}</p>
                   <p className={cn('text-base font-bold tabular-nums', ENTITY_COLORS[key])}>
                     {formatNumber(count)}
                   </p>
@@ -437,16 +448,16 @@ function SubgraphTab({ subgraph }: { subgraph: SubgraphData }) {
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <Zap className="size-3.5 text-amber-400" />
-          事件处理器
+          {t('dataInfra.eventHandlers')}
         </h4>
         <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-[11px]">
               <thead>
                 <tr className="border-b border-slate-700/50">
-                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">事件签名</th>
-                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">实体</th>
-                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">字段</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">{t('dataInfra.eventSignature')}</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">{t('dataInfra.entity')}</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">{t('dataInfra.field')}</th>
                   <th className="text-center px-4 py-2.5 text-slate-400 font-medium">Indexed</th>
                 </tr>
               </thead>
@@ -489,7 +500,7 @@ function SubgraphTab({ subgraph }: { subgraph: SubgraphData }) {
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <Search className="size-3.5 text-violet-400" />
-          GraphQL 查询示例
+          {t('dataInfra.graphqlExamples')}
         </h4>
         <div className="space-y-2">
           {subgraph.queryExamples.map((example, idx) => (
@@ -502,7 +513,7 @@ function SubgraphTab({ subgraph }: { subgraph: SubgraphData }) {
               <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm">
                 <CardContent className="p-3">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium text-slate-200">{example.name}</span>
+                    <span className="text-xs font-medium text-slate-200">{t(`dataInfra.${example.name}`)}</span>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -510,9 +521,9 @@ function SubgraphTab({ subgraph }: { subgraph: SubgraphData }) {
                       onClick={() => handleCopyQuery(example.query, idx)}
                     >
                       {copiedQuery === `query-${idx}` ? (
-                        <><Check className="size-3 mr-1 text-emerald-400" /> 已复制</>
+                        <><Check className="size-3 mr-1 text-emerald-400" /> {t('dataInfra.copied')}</>
                       ) : (
-                        <><Copy className="size-3 mr-1" /> 复制</>
+                        <><Copy className="size-3 mr-1" /> {t('dataInfra.copy')}</>
                       )}
                     </Button>
                   </div>
@@ -530,7 +541,7 @@ function SubgraphTab({ subgraph }: { subgraph: SubgraphData }) {
       <div className="flex justify-end">
         <Button className="bg-violet-600 hover:bg-violet-500 text-white h-9 text-xs px-4">
           <Search className="size-3.5 mr-1.5" />
-          查询子图
+          {t('dataInfra.querySubgraph')}
           <ChevronRight className="size-3.5 ml-1" />
         </Button>
       </div>
@@ -539,7 +550,7 @@ function SubgraphTab({ subgraph }: { subgraph: SubgraphData }) {
 }
 
 // ── Tab 2: IPFS Storage ────────────────────────────────
-function IpfsTab({ ipfs }: { ipfs: IpfsData }) {
+function IpfsTab({ ipfs, t }: { ipfs: IpfsData; t: TranslateFn }) {
   const [copiedCid, setCopiedCid] = useState<string | null>(null);
 
   const handleCopyCid = useCallback((cid: string) => {
@@ -549,15 +560,17 @@ function IpfsTab({ ipfs }: { ipfs: IpfsData }) {
   }, []);
 
   const pinnedRatio = ((ipfs.pinnedFiles / ipfs.totalPins) * 100).toFixed(1);
+  const pinTypeConfig = getPinTypeConfig(t);
+  const pinStatusConfig = getPinStatusConfig(t);
 
   return (
     <div className="space-y-4">
       {/* Storage Overview */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {[
-          { label: '总 Pin 数', value: ipfs.totalPins.toLocaleString(), icon: HardDrive, color: 'text-violet-400' },
-          { label: '总大小', value: ipfs.totalSize, icon: Database, color: 'text-emerald-400' },
-          { label: '固定率', value: `${pinnedRatio}%`, icon: CheckCircle2, color: 'text-emerald-400' },
+          { label: t('dataInfra.totalPins'), value: ipfs.totalPins.toLocaleString(), icon: HardDrive, color: 'text-violet-400' },
+          { label: t('dataInfra.totalSize'), value: ipfs.totalSize, icon: Database, color: 'text-emerald-400' },
+          { label: t('dataInfra.pinRate'), value: `${pinnedRatio}%`, icon: CheckCircle2, color: 'text-emerald-400' },
         ].map((item, idx) => (
           <motion.div
             key={item.label}
@@ -582,7 +595,7 @@ function IpfsTab({ ipfs }: { ipfs: IpfsData }) {
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <FileText className="size-3.5 text-sky-400" />
-          最近固定
+          {t('dataInfra.recentPins')}
         </h4>
         <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm overflow-hidden">
           <div className="overflow-x-auto">
@@ -590,16 +603,16 @@ function IpfsTab({ ipfs }: { ipfs: IpfsData }) {
               <thead>
                 <tr className="border-b border-slate-700/50">
                   <th className="text-left px-4 py-2.5 text-slate-400 font-medium">CID</th>
-                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">类型</th>
-                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">大小</th>
-                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">时间</th>
-                  <th className="text-center px-4 py-2.5 text-slate-400 font-medium">状态</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">{t('dataInfra.type')}</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">{t('dataInfra.size')}</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">{t('dataInfra.time')}</th>
+                  <th className="text-center px-4 py-2.5 text-slate-400 font-medium">{t('dataInfra.status')}</th>
                 </tr>
               </thead>
               <tbody>
                 {ipfs.recentPins.map((pin, idx) => {
-                  const typeConfig = PIN_TYPE_CONFIG[pin.type] || { label: pin.type, badge: 'bg-slate-500/20 text-slate-300 border-slate-500/30' };
-                  const statusConfig = PIN_STATUS_CONFIG[pin.status] || { label: pin.status, badge: 'bg-slate-500/20 text-slate-300 border-slate-500/30' };
+                  const typeConfig = pinTypeConfig[pin.type] || { label: pin.type, badge: 'bg-slate-500/20 text-slate-300 border-slate-500/30' };
+                  const statusConfig = pinStatusConfig[pin.status] || { label: pin.status, badge: 'bg-slate-500/20 text-slate-300 border-slate-500/30' };
                   return (
                     <motion.tr
                       key={pin.cid}
@@ -616,7 +629,7 @@ function IpfsTab({ ipfs }: { ipfs: IpfsData }) {
                           <button
                             onClick={() => handleCopyCid(pin.cid)}
                             className="p-0.5 rounded hover:bg-slate-700 transition-colors"
-                            title="复制CID"
+                            title={t('dataInfra.copyCid')}
                           >
                             {copiedCid === pin.cid ? (
                               <Check className="size-3 text-emerald-400" />
@@ -632,7 +645,7 @@ function IpfsTab({ ipfs }: { ipfs: IpfsData }) {
                         </Badge>
                       </td>
                       <td className="px-4 py-2.5 text-slate-300 tabular-nums">{pin.size}</td>
-                      <td className="px-4 py-2.5 text-slate-400">{getRelativeTime(pin.pinnedAt)}</td>
+                      <td className="px-4 py-2.5 text-slate-400">{getRelativeTime(pin.pinnedAt, t)}</td>
                       <td className="px-4 py-2.5 text-center">
                         <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0', statusConfig.badge)}>
                           {pin.status === 'pinning' && <RefreshCw className="size-2.5 mr-0.5 animate-spin" />}
@@ -660,17 +673,17 @@ function IpfsTab({ ipfs }: { ipfs: IpfsData }) {
             <CardHeader className="pb-2 pt-3 px-4">
               <CardTitle className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
                 <Server className="size-3.5 text-emerald-400" />
-                复制状态
+                {t('dataInfra.replicationStatus')}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-3">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-slate-400">目标节点</span>
+                  <span className="text-[11px] text-slate-400">{t('dataInfra.targetNodes')}</span>
                   <span className="text-sm font-semibold text-slate-200 tabular-nums">{ipfs.replication.targetNodes}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-slate-400">当前副本</span>
+                  <span className="text-[11px] text-slate-400">{t('dataInfra.currentReplicas')}</span>
                   <span className="text-sm font-semibold text-emerald-400 tabular-nums">{ipfs.replication.currentReplicas}</span>
                 </div>
                 <Progress value={(ipfs.replication.currentReplicas / ipfs.replication.targetNodes) * 100} className="h-1.5" />
@@ -692,26 +705,26 @@ function IpfsTab({ ipfs }: { ipfs: IpfsData }) {
             <CardHeader className="pb-2 pt-3 px-4">
               <CardTitle className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
                 <Lock className="size-3.5 text-amber-400" />
-                加密信息
+                {t('dataInfra.encryptionInfo')}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-3">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-slate-400">算法</span>
+                  <span className="text-[11px] text-slate-400">{t('dataInfra.algorithm')}</span>
                   <code className="text-[10px] text-amber-300 font-mono bg-amber-500/10 px-1.5 py-0.5 rounded">
                     {ipfs.encryption.algorithm}
                   </code>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-slate-400">密钥管理</span>
+                  <span className="text-[11px] text-slate-400">{t('dataInfra.keyManagement')}</span>
                   <span className="text-[11px] text-slate-200 flex items-center gap-1">
                     <Key className="size-3 text-violet-400" />
                     {ipfs.encryption.keyManagement}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-slate-400">分片大小</span>
+                  <span className="text-[11px] text-slate-400">{t('dataInfra.shardSize')}</span>
                   <span className="text-[11px] text-slate-200 tabular-nums">{ipfs.encryption.shardSize}</span>
                 </div>
               </div>
@@ -724,7 +737,7 @@ function IpfsTab({ ipfs }: { ipfs: IpfsData }) {
       <div className="flex justify-end">
         <Button className="bg-emerald-600 hover:bg-emerald-500 text-white h-9 text-xs px-4">
           <Upload className="size-3.5 mr-1.5" />
-          上传到 IPFS
+          {t('dataInfra.uploadToIpfs')}
         </Button>
       </div>
     </div>
@@ -732,7 +745,7 @@ function IpfsTab({ ipfs }: { ipfs: IpfsData }) {
 }
 
 // ── Tab 3: State Synchronization ───────────────────────
-function StateSyncTab({ stateSync, zustandStores, superset }: { stateSync: StateSyncData; zustandStores: ZustandStore[]; superset: SupersetData }) {
+function StateSyncTab({ stateSync, zustandStores, superset, t }: { stateSync: StateSyncData; zustandStores: ZustandStore[]; superset: SupersetData; t: TranslateFn }) {
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
 
   return (
@@ -753,11 +766,11 @@ function StateSyncTab({ stateSync, zustandStores, superset }: { stateSync: State
                 <h4 className="text-sm font-medium text-slate-100">{stateSync.strategy}</h4>
                 <div className="flex flex-wrap gap-3 text-[11px]">
                   <span className="text-slate-400">
-                    一致性模型: <span className="text-emerald-300">{stateSync.consistencyModel}</span>
+                    {t('dataInfra.consistencyModel')}: <span className="text-emerald-300">{stateSync.consistencyModel}</span>
                   </span>
                   <span className="text-slate-600">|</span>
                   <span className="text-slate-400">
-                    冲突解决: <span className="text-amber-300">{stateSync.conflictResolution}</span>
+                    {t('dataInfra.conflictResolution')}: <span className="text-amber-300">{stateSync.conflictResolution}</span>
                   </span>
                 </div>
               </div>
@@ -770,17 +783,17 @@ function StateSyncTab({ stateSync, zustandStores, superset }: { stateSync: State
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <Activity className="size-3.5 text-emerald-400" />
-          数据流
+          {t('dataInfra.dataFlow')}
         </h4>
         <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-[11px]">
               <thead>
                 <tr className="border-b border-slate-700/50">
-                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">源 → 目标</th>
-                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">方法</th>
-                  <th className="text-right px-4 py-2.5 text-slate-400 font-medium">延迟</th>
-                  <th className="text-right px-4 py-2.5 text-slate-400 font-medium">新鲜度</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">{t('dataInfra.sourceToTarget')}</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">{t('dataInfra.method')}</th>
+                  <th className="text-right px-4 py-2.5 text-slate-400 font-medium">{t('dataInfra.latency')}</th>
+                  <th className="text-right px-4 py-2.5 text-slate-400 font-medium">{t('dataInfra.freshness')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -826,7 +839,7 @@ function StateSyncTab({ stateSync, zustandStores, superset }: { stateSync: State
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <Layers className="size-3.5 text-violet-400" />
-          Zustand 状态仓库
+          {t('dataInfra.zustandStores')}
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {zustandStores.map((store, idx) => (
@@ -876,7 +889,7 @@ function StateSyncTab({ stateSync, zustandStores, superset }: { stateSync: State
                     <span className="text-[10px] text-slate-500 tabular-nums">{store.size}</span>
                     <span className="text-[10px] text-slate-400 flex items-center gap-1">
                       <Eye className="size-2.5" />
-                      {store.subscribers} 订阅者
+                      {store.subscribers} {t('dataInfra.subscribers')}
                     </span>
                   </div>
 
@@ -887,7 +900,7 @@ function StateSyncTab({ stateSync, zustandStores, superset }: { stateSync: State
                     className="w-full h-6 text-[10px] text-slate-400 hover:text-slate-200 hover:bg-slate-700/50"
                     onClick={() => setSelectedStore(selectedStore === store.name ? null : store.name)}
                   >
-                    查看状态
+                    {t('dataInfra.viewState')}
                     <ChevronRight className={cn('size-3 ml-1 transition-transform', selectedStore === store.name && 'rotate-90')} />
                   </Button>
                 </CardContent>
@@ -901,7 +914,7 @@ function StateSyncTab({ stateSync, zustandStores, superset }: { stateSync: State
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <BarChart3 className="size-3.5 text-amber-400" />
-          Superset 仪表盘
+          {t('dataInfra.supersetDashboards')}
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {superset.dashboards.map((dashboard, idx) => (
@@ -914,24 +927,24 @@ function StateSyncTab({ stateSync, zustandStores, superset }: { stateSync: State
               <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm h-full">
                 <CardContent className="p-3 space-y-2">
                   <div className="flex items-start justify-between gap-2">
-                    <h5 className="text-xs font-medium text-slate-100">{dashboard.name}</h5>
+                    <h5 className="text-xs font-medium text-slate-100">{t(`dataInfra.${dashboard.name}`)}</h5>
                     <Badge variant="outline" className="text-[9px] px-1.5 py-0 shrink-0 bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
                       {dashboard.status}
                     </Badge>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-[10px]">
                     <div>
-                      <p className="text-slate-500">图表数</p>
+                      <p className="text-slate-500">{t('dataInfra.chartsCount')}</p>
                       <p className="text-slate-200 font-semibold tabular-nums">{dashboard.charts}</p>
                     </div>
                     <div>
-                      <p className="text-slate-500">刷新率</p>
+                      <p className="text-slate-500">{t('dataInfra.refreshRate')}</p>
                       <p className="text-slate-200 tabular-nums">{dashboard.refreshRate}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 text-[10px] text-slate-500 pt-1.5 border-t border-slate-700/50">
                     <Clock className="size-2.5" />
-                    <span>{getRelativeTime(dashboard.lastAccessed)}</span>
+                    <span>{getRelativeTime(dashboard.lastAccessed, t)}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -944,8 +957,9 @@ function StateSyncTab({ stateSync, zustandStores, superset }: { stateSync: State
 }
 
 // ── Tab 4: Data Pipeline ───────────────────────────────
-function DataPipelineTab({ superset }: { superset: SupersetData }) {
+function DataPipelineTab({ superset, t }: { superset: SupersetData; t: TranslateFn }) {
   const [refreshing, setRefreshing] = useState(false);
+  const freshnessMatrix = getFreshnessMatrix(t);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -958,7 +972,7 @@ function DataPipelineTab({ superset }: { superset: SupersetData }) {
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <Globe className="size-3.5 text-violet-400" />
-          数据管道流
+          {t('dataInfra.dataPipelineFlow')}
         </h4>
         <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm p-4">
           {/* Desktop: horizontal */}
@@ -1033,14 +1047,14 @@ function DataPipelineTab({ superset }: { superset: SupersetData }) {
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <Clock className="size-3.5 text-amber-400" />
-          数据新鲜度矩阵
+          {t('dataInfra.dataFreshnessMatrix')}
         </h4>
         <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-[11px]">
               <thead>
                 <tr className="border-b border-slate-700/50">
-                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">数据类型</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">{t('dataInfra.dataType')}</th>
                   <th className="text-center px-3 py-2.5 text-slate-400 font-medium">On-chain</th>
                   <th className="text-center px-3 py-2.5 text-slate-400 font-medium">The Graph</th>
                   <th className="text-center px-3 py-2.5 text-slate-400 font-medium">API Layer</th>
@@ -1048,7 +1062,7 @@ function DataPipelineTab({ superset }: { superset: SupersetData }) {
                 </tr>
               </thead>
               <tbody>
-                {FRESHNESS_MATRIX.map((row, idx) => (
+                {freshnessMatrix.map((row, idx) => (
                   <motion.tr
                     key={row.dataType}
                     initial={{ opacity: 0, x: -8 }}
@@ -1058,22 +1072,22 @@ function DataPipelineTab({ superset }: { superset: SupersetData }) {
                   >
                     <td className="px-4 py-2.5 text-slate-200 font-medium">{row.dataType}</td>
                     <td className="px-3 py-2.5 text-center">
-                      <span className={cn('text-[10px] px-2 py-0.5 rounded-md font-medium tabular-nums', getCellFreshnessColor(row.onChain))}>
+                      <span className={cn('text-[10px] px-2 py-0.5 rounded-md font-medium tabular-nums', getCellFreshnessColor(row.onChain, t))}>
                         {row.onChain}
                       </span>
                     </td>
                     <td className="px-3 py-2.5 text-center">
-                      <span className={cn('text-[10px] px-2 py-0.5 rounded-md font-medium tabular-nums', getCellFreshnessColor(row.theGraph))}>
+                      <span className={cn('text-[10px] px-2 py-0.5 rounded-md font-medium tabular-nums', getCellFreshnessColor(row.theGraph, t))}>
                         {row.theGraph}
                       </span>
                     </td>
                     <td className="px-3 py-2.5 text-center">
-                      <span className={cn('text-[10px] px-2 py-0.5 rounded-md font-medium tabular-nums', getCellFreshnessColor(row.apiLayer))}>
+                      <span className={cn('text-[10px] px-2 py-0.5 rounded-md font-medium tabular-nums', getCellFreshnessColor(row.apiLayer, t))}>
                         {row.apiLayer}
                       </span>
                     </td>
                     <td className="px-3 py-2.5 text-center">
-                      <span className={cn('text-[10px] px-2 py-0.5 rounded-md font-medium tabular-nums', getCellFreshnessColor(row.frontend))}>
+                      <span className={cn('text-[10px] px-2 py-0.5 rounded-md font-medium tabular-nums', getCellFreshnessColor(row.frontend, t))}>
                         {row.frontend}
                       </span>
                     </td>
@@ -1089,7 +1103,7 @@ function DataPipelineTab({ superset }: { superset: SupersetData }) {
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <Shield className="size-3.5 text-emerald-400" />
-          Superset 缓存统计
+          {t('dataInfra.supersetCacheStats')}
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <motion.div
@@ -1099,7 +1113,7 @@ function DataPipelineTab({ superset }: { superset: SupersetData }) {
           >
             <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm">
               <CardContent className="p-3">
-                <p className="text-[10px] text-slate-500 mb-1">总查询数</p>
+                <p className="text-[10px] text-slate-500 mb-1">{t('dataInfra.totalQueries')}</p>
                 <p className="text-lg font-bold text-violet-400 tabular-nums">{superset.totalQueries}</p>
               </CardContent>
             </Card>
@@ -1111,7 +1125,7 @@ function DataPipelineTab({ superset }: { superset: SupersetData }) {
           >
             <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm">
               <CardContent className="p-3">
-                <p className="text-[10px] text-slate-500 mb-1">平均查询时间</p>
+                <p className="text-[10px] text-slate-500 mb-1">{t('dataInfra.avgQueryTime')}</p>
                 <p className="text-lg font-bold text-amber-400 tabular-nums">{superset.avgQueryTime}</p>
               </CardContent>
             </Card>
@@ -1123,7 +1137,7 @@ function DataPipelineTab({ superset }: { superset: SupersetData }) {
           >
             <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm">
               <CardContent className="p-3">
-                <p className="text-[10px] text-slate-500 mb-1">缓存命中率</p>
+                <p className="text-[10px] text-slate-500 mb-1">{t('dataInfra.cacheHitRate')}</p>
                 <div className="flex items-center gap-2 mb-1.5">
                   <p className="text-lg font-bold text-emerald-400 tabular-nums">{superset.cacheHitRate}%</p>
                 </div>
@@ -1155,12 +1169,12 @@ function DataPipelineTab({ superset }: { superset: SupersetData }) {
                 transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                 className="size-3.5 border-2 border-white/30 border-t-white rounded-full mr-1.5"
               />
-              刷新中...
+              {t('dataInfra.refreshing')}
             </>
           ) : (
             <>
               <RefreshCw className="size-3.5 mr-1.5" />
-              刷新数据
+              {t('dataInfra.refreshData')}
             </>
           )}
         </Button>
@@ -1173,6 +1187,7 @@ function DataPipelineTab({ superset }: { superset: SupersetData }) {
 export default function DataInfra() {
   const [data, setData] = useState<DataInfraData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useI18n();
 
   useEffect(() => {
     fetch('/api/data-infra')
@@ -1201,7 +1216,7 @@ export default function DataInfra() {
               transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
               className="size-8 border-2 border-violet-500/30 border-t-violet-400 rounded-full"
             />
-            <p className="text-xs text-slate-400">加载数据基础设施...</p>
+            <p className="text-xs text-slate-400">{t('dataInfra.dataInfraLoading')}</p>
           </motion.div>
         </CardContent>
       </Card>
@@ -1222,13 +1237,13 @@ export default function DataInfra() {
                 <Database className="size-4 text-violet-400" />
               </div>
               <div>
-                <CardTitle className="text-sm font-semibold text-slate-100">数据基础设施</CardTitle>
-                <p className="text-[10px] text-slate-500">The Graph · IPFS · 状态同步 · 数据管道</p>
+                <CardTitle className="text-sm font-semibold text-slate-100">{t('dataInfra.title')}</CardTitle>
+                <p className="text-[10px] text-slate-500">{t('dataInfra.dataInfraSubtitle')}</p>
               </div>
             </div>
             <Badge variant="outline" className="text-[10px] px-2 py-0.5 bg-emerald-500/10 text-emerald-300 border-emerald-500/20">
               <span className="inline-block size-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse" />
-              运行中
+              {t('dataInfra.running')}
             </Badge>
           </div>
         </CardHeader>
@@ -1240,28 +1255,28 @@ export default function DataInfra() {
                 className="text-[11px] px-3 py-1.5 data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300 flex items-center gap-1.5"
               >
                 <Database className="size-3" />
-                <span className="hidden sm:inline">The Graph</span> 子图
+                <span className="hidden sm:inline">The Graph </span>{t('dataInfra.tabSubgraphLabel')}
               </TabsTrigger>
               <TabsTrigger
                 value="ipfs"
                 className="text-[11px] px-3 py-1.5 data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-300 flex items-center gap-1.5"
               >
                 <HardDrive className="size-3" />
-                <span className="hidden sm:inline">IPFS</span> 存储
+                <span className="hidden sm:inline">IPFS </span>{t('dataInfra.tabIpfsLabel')}
               </TabsTrigger>
               <TabsTrigger
                 value="sync"
                 className="text-[11px] px-3 py-1.5 data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-300 flex items-center gap-1.5"
               >
                 <RefreshCw className="size-3" />
-                <span className="hidden sm:inline">状态</span> 同步
+                <span className="hidden sm:inline">{t('dataInfra.tabSyncPrefix')} </span>{t('dataInfra.tabSyncLabel')}
               </TabsTrigger>
               <TabsTrigger
                 value="pipeline"
                 className="text-[11px] px-3 py-1.5 data-[state=active]:bg-sky-500/20 data-[state=active]:text-sky-300 flex items-center gap-1.5"
               >
                 <Globe className="size-3" />
-                <span className="hidden sm:inline">数据</span> 管道
+                <span className="hidden sm:inline">{t('dataInfra.tabPipelinePrefix')} </span>{t('dataInfra.tabPipelineLabel')}
               </TabsTrigger>
             </TabsList>
 
@@ -1275,7 +1290,7 @@ export default function DataInfra() {
                     exit={{ opacity: 0, x: 10 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <SubgraphTab subgraph={data.subgraph} />
+                    <SubgraphTab subgraph={data.subgraph} t={t} />
                   </motion.div>
                 </TabsContent>
                 <TabsContent value="ipfs" className="mt-0">
@@ -1286,7 +1301,7 @@ export default function DataInfra() {
                     exit={{ opacity: 0, x: 10 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <IpfsTab ipfs={data.ipfs} />
+                    <IpfsTab ipfs={data.ipfs} t={t} />
                   </motion.div>
                 </TabsContent>
                 <TabsContent value="sync" className="mt-0">
@@ -1297,7 +1312,7 @@ export default function DataInfra() {
                     exit={{ opacity: 0, x: 10 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <StateSyncTab stateSync={data.stateSync} zustandStores={data.zustandStores} superset={data.superset} />
+                    <StateSyncTab stateSync={data.stateSync} zustandStores={data.zustandStores} superset={data.superset} t={t} />
                   </motion.div>
                 </TabsContent>
                 <TabsContent value="pipeline" className="mt-0">
@@ -1308,7 +1323,7 @@ export default function DataInfra() {
                     exit={{ opacity: 0, x: 10 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <DataPipelineTab superset={data.superset} />
+                    <DataPipelineTab superset={data.superset} t={t} />
                   </motion.div>
                 </TabsContent>
               </AnimatePresence>

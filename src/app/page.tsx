@@ -27,6 +27,8 @@ import {
   FileCode,
   Cog,
   Database,
+  ChevronsLeft,
+  ChevronsRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DashboardState } from '@/lib/types';
@@ -149,7 +151,7 @@ function Web3ConnectButton() {
 }
 
 export default function Home() {
-  const { activeSection, setActiveSection } = useDashboardStore();
+  const { activeSection, setActiveSection, sidebarCollapsed, toggleSidebar } = useDashboardStore();
   const { t } = useI18n();
   const {
     avatar, skills, revenueSummary, recentRevenues,
@@ -259,7 +261,10 @@ export default function Home() {
       {/* ── Main Content ────────────────────────────── */}
       <div className="flex-1 flex max-w-[1600px] mx-auto w-full">
         {/* ── Desktop Sidebar ─────────────────────── */}
-        <aside className="hidden lg:flex flex-col w-[220px] shrink-0 border-r border-slate-800/50 py-6 px-3 sticky top-14 h-[calc(100vh-3.5rem)]">
+        <aside className={cn(
+          "hidden lg:flex flex-col shrink-0 border-r border-slate-800/50 py-6 sticky top-14 h-[calc(100vh-3.5rem)] transition-all duration-300",
+          sidebarCollapsed ? "w-[60px] px-1.5" : "w-[220px] px-3"
+        )}>
           <nav className="flex flex-col gap-1">
             {NAV_ITEMS.map((item) => (
               <button
@@ -267,27 +272,44 @@ export default function Home() {
                 aria-label={t(item.navKey)}
                 onClick={() => scrollTo(item.id)}
                 className={cn(
-                  'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+                  'flex items-center gap-2.5 rounded-lg text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+                  sidebarCollapsed ? 'px-2 py-2 justify-center' : 'px-3 py-2',
                   activeSection === item.id
                     ? 'bg-violet-500/15 text-violet-300 font-medium'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 )}
+                title={sidebarCollapsed ? t(item.navKey) : undefined}
               >
                 <item.icon className={cn(
-                  'w-4 h-4',
+                  'w-4 h-4 shrink-0',
                   activeSection === item.id ? 'text-violet-400' : 'text-slate-500'
                 )} />
-                {t(item.navKey)}
+                {!sidebarCollapsed && t(item.navKey)}
               </button>
             ))}
           </nav>
 
+          {/* Collapse toggle button */}
+          <button
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            onClick={toggleSidebar}
+            className="mt-2 mx-auto flex items-center justify-center w-7 h-7 rounded-md bg-slate-800/60 border border-slate-700/50 hover:bg-slate-700/60 hover:border-slate-600/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+          >
+            {sidebarCollapsed ? (
+              <ChevronsRight className="w-3.5 h-3.5 text-slate-400" />
+            ) : (
+              <ChevronsLeft className="w-3.5 h-3.5 text-slate-400" />
+            )}
+          </button>
+
           {/* Tier Badge */}
-          <div className="mt-auto p-3 rounded-xl bg-gradient-to-br from-violet-500/10 to-blue-500/10 border border-violet-500/20">
-            <div className="text-[10px] text-violet-300/60 uppercase tracking-widest mb-1">{t('dashboard.currentPlan')}</div>
-            <div className="text-sm font-semibold text-violet-200">{t('dashboard.proTier')}</div>
-            <div className="text-[10px] text-slate-500 mt-0.5">{t('dashboard.avatarsCount', { count: 3 })}</div>
-          </div>
+          {!sidebarCollapsed && (
+            <div className="mt-auto p-3 rounded-xl bg-gradient-to-br from-violet-500/10 to-blue-500/10 border border-violet-500/20">
+              <div className="text-[10px] text-violet-300/60 uppercase tracking-widest mb-1">{t('dashboard.currentPlan')}</div>
+              <div className="text-sm font-semibold text-violet-200">{t('dashboard.proTier')}</div>
+              <div className="text-[10px] text-slate-500 mt-0.5">{t('dashboard.avatarsCount', { count: 3 })}</div>
+            </div>
+          )}
         </aside>
 
         {/* ── Mobile Slide-out Menu ────────────────── */}

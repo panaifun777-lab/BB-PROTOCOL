@@ -40,6 +40,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
+import { useI18n } from '@/hooks/use-i18n';
 
 // ===== Types =====
 interface ContractInput {
@@ -76,7 +77,7 @@ const CONTRACTS: ContractInfo[] = [
   {
     id: 'AvatarCore',
     name: 'AvatarCore',
-    description: '认知身份核心合约',
+    description: 'simulation.descAvatarCore',
     address: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
     functions: [
       { name: 'createAvatar', inputs: [{ name: 'soulId', type: 'uint256' }, { name: 'cognitionRoot', type: 'bytes32' }], gasEstimate: 185000 },
@@ -87,7 +88,7 @@ const CONTRACTS: ContractInfo[] = [
   {
     id: 'DynamicSplitter',
     name: 'DynamicSplitter',
-    description: '动态分账合约',
+    description: 'simulation.descDynamicSplitter',
     address: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
     functions: [
       { name: 'executeSplit', inputs: [{ name: 'amount', type: 'uint256' }, { name: 'resonanceScore', type: 'uint256' }, { name: 'complexity', type: 'uint8' }], gasEstimate: 65000 },
@@ -97,7 +98,7 @@ const CONTRACTS: ContractInfo[] = [
   {
     id: 'CircuitGuard',
     name: 'CircuitGuard',
-    description: '认知熔断合约',
+    description: 'simulation.descCircuitGuard',
     address: '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
     functions: [
       { name: 'evaluateState', inputs: [{ name: 'resonanceScore', type: 'uint256' }], gasEstimate: 35000 },
@@ -107,7 +108,7 @@ const CONTRACTS: ContractInfo[] = [
   {
     id: 'SkillVault',
     name: 'SkillVault',
-    description: '技能库合约',
+    description: 'simulation.descSkillVault',
     address: '0xDc64a140Aa8E0C49f1C6cC7F9E3aA15E0B2D6e2F',
     functions: [
       { name: 'unlockSkill', inputs: [{ name: 'soulId', type: 'uint256' }, { name: 'tier', type: 'uint8' }, { name: 'cumulativeRevenue', type: 'uint256' }], gasEstimate: 78000 },
@@ -117,7 +118,7 @@ const CONTRACTS: ContractInfo[] = [
   {
     id: 'IFDRouter',
     name: 'IFDRouter',
-    description: '流体民主路由合约',
+    description: 'simulation.descIfdRouter',
     address: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
     functions: [
       { name: 'delegateVote', inputs: [{ name: 'domain', type: 'string' }, { name: 'weight', type: 'uint256' }], gasEstimate: 45000 },
@@ -127,7 +128,7 @@ const CONTRACTS: ContractInfo[] = [
   {
     id: 'TokenVault',
     name: 'TokenVault',
-    description: '代币金库合约',
+    description: 'simulation.descTokenVault',
     address: '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707',
     functions: [
       { name: 'deposit', inputs: [{ name: 'amount', type: 'uint256' }], gasEstimate: 42000 },
@@ -479,6 +480,7 @@ function ResultViewer({ data, depth = 0 }: { data: unknown; depth?: number }) {
 
 // ===== Main Component =====
 export default function ContractSimulation() {
+  const { t } = useI18n();
   const [selectedContractId, setSelectedContractId] = useState<string>('DynamicSplitter');
   const [selectedFunctionName, setSelectedFunctionName] = useState<string>('executeSplit');
   const [paramValues, setParamValues] = useState<Record<string, string>>({ amount: '100', resonanceScore: '72', complexity: '1' });
@@ -522,19 +524,19 @@ export default function ContractSimulation() {
     if (!selectedFunction) return [];
     const tips: string[] = [];
     if (selectedFunction.gasEstimate > 100000) {
-      tips.push('高Gas函数 — 考虑批量操作降低均摊成本');
+      tips.push('simulation.tipHighGas');
     }
     if (selectedFunction.name.includes('update') || selectedFunction.name.includes('write')) {
-      tips.push('写入操作 — 可在Gas低谷时段执行以节省成本');
+      tips.push('simulation.tipWriteOp');
     }
     if (selectedFunction.inputs.length > 2) {
-      tips.push('多参数函数 — 可使用 multicall 合并调用');
+      tips.push('simulation.tipMultiParam');
     }
     if (selectedFunction.name.includes('get') || selectedFunction.name.includes('view')) {
-      tips.push('只读操作 — 链下模拟无需Gas消耗');
+      tips.push('simulation.tipReadOnly');
     }
     if (tips.length === 0) {
-      tips.push('Gas消耗在合理范围内');
+      tips.push('simulation.tipGasNormal');
     }
     return tips;
   }, [selectedFunction]);
@@ -688,10 +690,10 @@ export default function ContractSimulation() {
             <div>
               <CardTitle className="flex items-center gap-2 text-base text-slate-100">
                 <FlaskConical className="w-4 h-4 text-violet-400" />
-                合约模拟器
+                {t('simulation.title')}
               </CardTitle>
               <CardDescription className="text-xs text-slate-400 mt-0.5">
-                链下模拟合约交互 · Gas估算 · 分账验证
+                {t('simulation.subtitle')}
               </CardDescription>
             </div>
             <Badge
@@ -711,21 +713,21 @@ export default function ContractSimulation() {
                 className="text-[11px] data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100 text-slate-400 px-3 h-6"
               >
                 <Code2 className="w-3 h-3 mr-1" />
-                函数模拟
+                {t('simulation.functionSim')}
               </TabsTrigger>
               <TabsTrigger
                 value="verify"
                 className="text-[11px] data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100 text-slate-400 px-3 h-6"
               >
                 <Calculator className="w-3 h-3 mr-1" />
-                分账验证
+                {t('simulation.splitVerify')}
               </TabsTrigger>
               <TabsTrigger
                 value="history"
                 className="text-[11px] data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100 text-slate-400 px-3 h-6"
               >
                 <Clock className="w-3 h-3 mr-1" />
-                历史
+                {t('simulation.history')}
               </TabsTrigger>
             </TabsList>
 
@@ -735,7 +737,7 @@ export default function ContractSimulation() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Contract */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] text-slate-400 font-medium">合约选择</label>
+                  <label className="text-[11px] text-slate-400 font-medium">{t('simulation.contractSelect')}</label>
                   <Select value={selectedContractId} onValueChange={handleContractChange}>
                     <SelectTrigger className="w-full bg-slate-900/60 border-slate-700 text-slate-200 text-xs h-9">
                       <SelectValue />
@@ -746,7 +748,7 @@ export default function ContractSimulation() {
                           <div className="flex items-center gap-2">
                             <Code2 className="w-3 h-3 text-violet-400" />
                             <span>{contract.name}</span>
-                            <span className="text-slate-500">— {contract.description}</span>
+                            <span className="text-slate-500">— {t(contract.description)}</span>
                           </div>
                         </SelectItem>
                       ))}
@@ -756,7 +758,7 @@ export default function ContractSimulation() {
 
                 {/* Function */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] text-slate-400 font-medium">函数选择</label>
+                  <label className="text-[11px] text-slate-400 font-medium">{t('simulation.functionSelect')}</label>
                   <Select value={selectedFunctionName} onValueChange={handleFunctionChange}>
                     <SelectTrigger className="w-full bg-slate-900/60 border-slate-700 text-slate-200 text-xs h-9">
                       <SelectValue />
@@ -794,9 +796,9 @@ export default function ContractSimulation() {
               {selectedFunction && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] text-slate-400 font-medium">函数参数</span>
+                    <span className="text-[11px] text-slate-400 font-medium">{t('simulation.functionParams')}</span>
                     <Badge variant="outline" className="text-[9px] px-1 py-0 bg-slate-700/50 text-slate-400 border-slate-600">
-                      {selectedFunction.inputs.length} 个参数
+                      {t('simulation.paramCount', { count: selectedFunction.inputs.length })}
                     </Badge>
                   </div>
 
@@ -838,12 +840,12 @@ export default function ContractSimulation() {
                       className="flex items-center gap-1.5"
                     >
                       <FlaskConical className="w-3.5 h-3.5" />
-                      模拟中...
+                      {t('simulation.simulating')}
                     </motion.span>
                   ) : (
                     <>
                       <Play className="w-3.5 h-3.5 mr-1.5" />
-                      执行模拟
+                      {t('simulation.executeSim')}
                     </>
                   )}
                 </Button>
@@ -867,25 +869,25 @@ export default function ContractSimulation() {
                 <div className="rounded-lg border border-slate-700/50 bg-slate-900/40 p-3 space-y-2">
                   <div className="flex items-center gap-1.5 text-xs text-slate-300 font-medium">
                     <Fuel className="w-3.5 h-3.5 text-amber-400" />
-                    Gas 估算详情
+                    {t('simulation.gasEstDetail')}
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <span className="text-[10px] text-slate-500">预估Gas单位</span>
+                      <span className="text-[10px] text-slate-500">{t('simulation.estimatedGas')}</span>
                       <p className="text-sm font-mono text-slate-200">{gasEstimate.units.toLocaleString()}</p>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500">预估成本 (USD)</span>
+                      <span className="text-[10px] text-slate-500">{t('simulation.estimatedCost')}</span>
                       <p className="text-sm font-mono text-amber-300">${gasEstimate.costUsd.toFixed(8)}</p>
                     </div>
                   </div>
                   {gasOptimizationTips.length > 0 && (
                     <div className="space-y-1 pt-1 border-t border-slate-700/30">
-                      <span className="text-[10px] text-slate-500">优化建议</span>
+                      <span className="text-[10px] text-slate-500">{t('simulation.optimizationTips')}</span>
                       {gasOptimizationTips.map((tip, i) => (
                         <div key={i} className="flex items-start gap-1.5 text-[10px]">
                           <Zap className="w-3 h-3 text-amber-400 shrink-0 mt-0.5" />
-                          <span className="text-slate-400">{tip}</span>
+                          <span className="text-slate-400">{t(tip)}</span>
                         </div>
                       ))}
                     </div>
@@ -914,7 +916,7 @@ export default function ContractSimulation() {
                         <XCircle className="w-4 h-4 text-red-400" />
                       )}
                       <span className="text-sm font-medium text-slate-200">
-                        模拟结果
+                        {t('simulation.simResult')}
                       </span>
                       {simulationResult.status && (
                         <Badge
@@ -941,7 +943,7 @@ export default function ContractSimulation() {
                     {/* Split visualization (DynamicSplitter only) */}
                     {selectedContractId === 'DynamicSplitter' && selectedFunctionName === 'executeSplit' && simulationResult.split && (
                       <div className="space-y-2">
-                        <div className="text-[11px] text-slate-400 font-medium">分账可视化</div>
+                        <div className="text-[11px] text-slate-400 font-medium">{t('simulation.splitVisualization')}</div>
                         {(() => {
                           const split = simulationResult.split as { humanBps: number; avatarBps: number; protocolBps: number; humanShare: number; avatarShare: number; protocolShare: number };
                           return (
@@ -972,7 +974,7 @@ export default function ContractSimulation() {
                                 <div className="text-center">
                                   <div className="flex items-center justify-center gap-1">
                                     <div className="w-2 h-2 rounded-full bg-blue-500" />
-                                    <span className="text-[10px] text-slate-400">人类</span>
+                                    <span className="text-[10px] text-slate-400">{t('simulation.human')}</span>
                                   </div>
                                   <p className="text-xs font-mono text-blue-300">{(split.humanBps / 100).toFixed(0)}%</p>
                                   <p className="text-[10px] text-slate-500">${split.humanShare.toFixed(2)}</p>
@@ -980,7 +982,7 @@ export default function ContractSimulation() {
                                 <div className="text-center">
                                   <div className="flex items-center justify-center gap-1">
                                     <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                                    <span className="text-[10px] text-slate-400">分身</span>
+                                    <span className="text-[10px] text-slate-400">{t('simulation.avatar')}</span>
                                   </div>
                                   <p className="text-xs font-mono text-emerald-300">{(split.avatarBps / 100).toFixed(0)}%</p>
                                   <p className="text-[10px] text-slate-500">${split.avatarShare.toFixed(2)}</p>
@@ -988,7 +990,7 @@ export default function ContractSimulation() {
                                 <div className="text-center">
                                   <div className="flex items-center justify-center gap-1">
                                     <div className="w-2 h-2 rounded-full bg-amber-500" />
-                                    <span className="text-[10px] text-slate-400">协议</span>
+                                    <span className="text-[10px] text-slate-400">{t('simulation.protocol')}</span>
                                   </div>
                                   <p className="text-xs font-mono text-amber-300">{(split.protocolBps / 100).toFixed(0)}%</p>
                                   <p className="text-[10px] text-slate-500">${split.protocolShare.toFixed(2)}</p>
@@ -1003,13 +1005,13 @@ export default function ContractSimulation() {
                     {/* Dynamic Adjustment Info (DynamicSplitter only) */}
                     {selectedContractId === 'DynamicSplitter' && selectedFunctionName === 'executeSplit' && simulationResult.dynamicAdjustment && (
                       <div className="rounded-md border border-slate-700/50 bg-slate-900/40 p-2.5">
-                        <div className="text-[10px] text-slate-400 font-medium mb-1">动态调整公式</div>
+                        <div className="text-[10px] text-slate-400 font-medium mb-1">{t('simulation.dynamicFormula')}</div>
                         <code className="text-[11px] text-violet-300 font-mono">
                           {(simulationResult.dynamicAdjustment as { formula: string }).formula}
                         </code>
                         <div className="mt-1 flex items-center gap-3 text-[10px]">
-                          <span className="text-slate-500">Avatar调整: <span className="text-emerald-400">{(simulationResult.dynamicAdjustment as { avatarAdjBps: number }).avatarAdjBps} bps</span></span>
-                          <span className="text-slate-500">人类偏移: <span className="text-blue-400">{(simulationResult.dynamicAdjustment as { humanShiftBps: number }).humanShiftBps > 0 ? '+' : ''}{(simulationResult.dynamicAdjustment as { humanShiftBps: number }).humanShiftBps} bps</span></span>
+                          <span className="text-slate-500">{t('simulation.avatarAdjust')} <span className="text-emerald-400">{(simulationResult.dynamicAdjustment as { avatarAdjBps: number }).avatarAdjBps} bps</span></span>
+                          <span className="text-slate-500">{t('simulation.humanShift')} <span className="text-blue-400">{(simulationResult.dynamicAdjustment as { humanShiftBps: number }).humanShiftBps > 0 ? '+' : ''}{(simulationResult.dynamicAdjustment as { humanShiftBps: number }).humanShiftBps} bps</span></span>
                         </div>
                       </div>
                     )}
@@ -1018,7 +1020,7 @@ export default function ContractSimulation() {
                     {selectedContractId === 'CircuitGuard' && selectedFunctionName === 'evaluateState' && simulationResult.newState && (
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-xs">
-                          <span className="text-slate-400">状态转换:</span>
+                          <span className="text-slate-400">{t('simulation.stateTransition')}</span>
                           <Badge variant="outline" className="bg-slate-600/30 text-slate-300 border-slate-600 text-[10px]">
                             {String(simulationResult.previousState)}
                           </Badge>
@@ -1070,7 +1072,7 @@ export default function ContractSimulation() {
                               : 'text-red-400'
                           )}
                         >
-                          {simulationVerification.status === 'pass' ? '验证通过' : '验证失败'}
+                          {simulationVerification.status === 'pass' ? t('simulation.verifyPass') : t('simulation.verifyFail')}
                         </AlertTitle>
                         <AlertDescription className="text-[10px] text-slate-400">
                           {simulationVerification.details}
@@ -1087,16 +1089,16 @@ export default function ContractSimulation() {
               <div className="space-y-2">
                 <div className="flex items-center gap-1.5 text-xs text-slate-300 font-medium">
                   <Calculator className="w-3.5 h-3.5 text-violet-400" />
-                  分账守恒验证
+                  {t('simulation.splitConservation')}
                 </div>
                 <p className="text-[10px] text-slate-500">
-                  验证 humanBps + avatarBps + protocolBps = 10000 且金额守恒
+                  {t('simulation.splitVerifyDesc')}
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] text-slate-400">总金额 (totalAmount)</label>
+                  <label className="text-[10px] text-slate-400">{t('simulation.totalAmount')}</label>
                   <Input
                     value={splitTotalAmount}
                     onChange={(e) => setSplitTotalAmount(e.target.value)}
@@ -1105,7 +1107,7 @@ export default function ContractSimulation() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] text-slate-400">人类份额 (humanBps)</label>
+                  <label className="text-[10px] text-slate-400">{t('simulation.humanBps')}</label>
                   <Input
                     value={splitHumanBps}
                     onChange={(e) => setSplitHumanBps(e.target.value)}
@@ -1114,7 +1116,7 @@ export default function ContractSimulation() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] text-slate-400">分身份额 (avatarBps)</label>
+                  <label className="text-[10px] text-slate-400">{t('simulation.avatarBps')}</label>
                   <Input
                     value={splitAvatarBps}
                     onChange={(e) => setSplitAvatarBps(e.target.value)}
@@ -1123,7 +1125,7 @@ export default function ContractSimulation() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] text-slate-400">协议份额 (protocolBps)</label>
+                  <label className="text-[10px] text-slate-400">{t('simulation.protocolBps')}</label>
                   <Input
                     value={splitProtocolBps}
                     onChange={(e) => setSplitProtocolBps(e.target.value)}
@@ -1139,7 +1141,7 @@ export default function ContractSimulation() {
                   className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white text-xs h-9 px-4"
                 >
                   <Calculator className="w-3.5 h-3.5 mr-1.5" />
-                  验证守恒
+                  {t('simulation.verifyConservation')}
                 </Button>
                 <Button
                   variant="outline"
@@ -1154,18 +1156,18 @@ export default function ContractSimulation() {
                   }}
                 >
                   <RotateCcw className="w-3 h-3 mr-1" />
-                  重置默认
+                  {t('simulation.resetDefault')}
                 </Button>
               </div>
 
               {/* Formula display */}
               <div className="rounded-md border border-slate-700/50 bg-slate-900/40 p-2.5">
-                <div className="text-[10px] text-slate-400 font-medium mb-1">验证公式</div>
+                <div className="text-[10px] text-slate-400 font-medium mb-1">{t('simulation.verifyFormula')}</div>
                 <code className="text-[11px] text-violet-300 font-mono block">
                   totalAmount × (humanBps + avatarBps + protocolBps) / 10000 = totalAmount
                 </code>
                 <div className="mt-1.5 flex items-center gap-2 text-[10px]">
-                  <span className="text-slate-500">约束:</span>
+                  <span className="text-slate-500">{t('simulation.constraint')}</span>
                   <code className="text-amber-300 font-mono">humanBps + avatarBps + protocolBps === 10000</code>
                 </div>
               </div>
@@ -1202,7 +1204,7 @@ export default function ContractSimulation() {
                             : 'text-red-400'
                         )}
                       >
-                        {splitVerificationResult.status === 'pass' ? '验证通过 ✓' : '验证失败 ✗'}
+                        {splitVerificationResult.status === 'pass' ? t('simulation.verifyPass') + ' ✓' : t('simulation.verifyFail') + ' ✗'}
                       </AlertTitle>
                       <AlertDescription className="text-[10px] text-slate-400">
                         {splitVerificationResult.details}
@@ -1212,17 +1214,17 @@ export default function ContractSimulation() {
                     {/* Calculated amounts */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       <div className="rounded-md border border-blue-500/20 bg-blue-500/5 p-2.5">
-                        <div className="text-[10px] text-blue-400">人类份额</div>
+                        <div className="text-[10px] text-blue-400">{t('simulation.humanShare')}</div>
                         <p className="text-sm font-mono text-blue-300">${splitVerificationResult.calculated.humanAmount.toFixed(4)}</p>
                         <p className="text-[10px] text-slate-500">{splitHumanBps} bps</p>
                       </div>
                       <div className="rounded-md border border-emerald-500/20 bg-emerald-500/5 p-2.5">
-                        <div className="text-[10px] text-emerald-400">分身份额</div>
+                        <div className="text-[10px] text-emerald-400">{t('simulation.avatarShare')}</div>
                         <p className="text-sm font-mono text-emerald-300">${splitVerificationResult.calculated.avatarAmount.toFixed(4)}</p>
                         <p className="text-[10px] text-slate-500">{splitAvatarBps} bps</p>
                       </div>
                       <div className="rounded-md border border-amber-500/20 bg-amber-500/5 p-2.5">
-                        <div className="text-[10px] text-amber-400">协议份额</div>
+                        <div className="text-[10px] text-amber-400">{t('simulation.protocolShare')}</div>
                         <p className="text-sm font-mono text-amber-300">${splitVerificationResult.calculated.protocolAmount.toFixed(4)}</p>
                         <p className="text-[10px] text-slate-500">{splitProtocolBps} bps</p>
                       </div>
@@ -1230,7 +1232,7 @@ export default function ContractSimulation() {
 
                     {/* Total check */}
                     <div className="flex items-center justify-between rounded-md border border-slate-700/50 bg-slate-900/40 p-2.5">
-                      <span className="text-[10px] text-slate-400">BPS总和</span>
+                      <span className="text-[10px] text-slate-400">{t('simulation.bpsSum')}</span>
                       <span
                         className={cn(
                           'text-xs font-mono',
@@ -1251,7 +1253,7 @@ export default function ContractSimulation() {
             <TabsContent value="history" className="space-y-3 mt-3">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] text-slate-400 font-medium">
-                  模拟历史 ({history.length})
+                  {t('simulation.simHistory', { count: history.length })}
                 </span>
                 <Button
                   variant="ghost"
@@ -1259,14 +1261,14 @@ export default function ContractSimulation() {
                   className="h-6 text-[10px] text-slate-500 hover:text-slate-300 px-2"
                   onClick={() => setHistory([])}
                 >
-                  清空
+                  {t('simulation.clear')}
                 </Button>
               </div>
 
               <div className="max-h-80 overflow-y-auto space-y-2 custom-scrollbar">
                 {history.length === 0 ? (
                   <div className="text-center py-8 text-slate-500 text-xs">
-                    暂无模拟记录
+                    {t('simulation.noHistory')}
                   </div>
                 ) : (
                   history.map((item, index) => (

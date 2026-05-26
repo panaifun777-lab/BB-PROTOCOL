@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { useI18n, type TranslateFn } from '@/hooks/use-i18n';
 
 // ── Props ──────────────────────────────────────────────
 interface X402PaymentProps {
@@ -43,20 +44,22 @@ function getRiskLevel(amount: number): RiskLevel {
   return 'high';
 }
 
-const RISK_CONFIG: Record<RiskLevel, { label: string; badgeClass: string }> = {
-  low: {
-    label: '低风险',
-    badgeClass: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
-  },
-  medium: {
-    label: '中风险',
-    badgeClass: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
-  },
-  high: {
-    label: '高风险',
-    badgeClass: 'border-red-500/30 bg-red-500/10 text-red-400',
-  },
-};
+function getRiskConfig(t: TranslateFn): Record<RiskLevel, { label: string; badgeClass: string }> {
+  return {
+    low: {
+      label: t('payment.riskLow'),
+      badgeClass: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
+    },
+    medium: {
+      label: t('payment.riskMedium'),
+      badgeClass: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
+    },
+    high: {
+      label: t('payment.riskHigh'),
+      badgeClass: 'border-red-500/30 bg-red-500/10 text-red-400',
+    },
+  };
+}
 
 // ── Mock split percentages ─────────────────────────────
 const SPLIT = { human: 70, avatar: 20, protocol: 10 };
@@ -71,11 +74,11 @@ function mockTxHash(): string {
 }
 
 // ── Step indicator ─────────────────────────────────────
-function StepIndicator({ step }: { step: PaymentStep }) {
+function StepIndicator({ step, t }: { step: PaymentStep; t: TranslateFn }) {
   const steps: { key: PaymentStep; label: string }[] = [
-    { key: 'estimate', label: '预览' },
-    { key: 'confirm', label: '确认' },
-    { key: 'complete', label: '完成' },
+    { key: 'estimate', label: t('payment.stepPreview') },
+    { key: 'confirm', label: t('payment.stepConfirm') },
+    { key: 'complete', label: t('payment.stepComplete') },
   ];
 
   const currentIndex = steps.findIndex((s) => s.key === step);
@@ -131,6 +134,7 @@ export default function X402Payment({
   service,
   amount,
 }: X402PaymentProps) {
+  const { t } = useI18n();
   const [step, setStep] = useState<PaymentStep>('estimate');
   const [isProcessing, setIsProcessing] = useState(false);
   const [txHash, setTxHash] = useState('');
@@ -140,7 +144,7 @@ export default function X402Payment({
   const gasFee = amount * 0.05; // 5% gas
   const totalAmount = amount + gasFee;
   const riskLevel = getRiskLevel(amount);
-  const riskConfig = RISK_CONFIG[riskLevel];
+  const riskConfig = getRiskConfig(t)[riskLevel];
 
   // Human/avatar/protocol split amounts
   const humanAmount = totalAmount * (SPLIT.human / 100);
@@ -199,16 +203,16 @@ export default function X402Payment({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-slate-100">
             <Wallet className="size-5 text-violet-400" />
-            x402 支付流程
+            {t('payment.title')}
           </DialogTitle>
           <DialogDescription className="text-slate-400">
-            基于HTTP 402协议的微支付
+            {t('payment.description')}
           </DialogDescription>
         </DialogHeader>
 
         {/* ── Step indicator ────────────────────────────── */}
         <div className="py-2">
-          <StepIndicator step={step} />
+          <StepIndicator step={step} t={t} />
         </div>
 
         <AnimatePresence mode="wait">
@@ -225,19 +229,19 @@ export default function X402Payment({
               {/* Service & cost */}
               <div className="rounded-lg border border-slate-700 bg-slate-900/60 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-400">服务</span>
+                  <span className="text-sm text-slate-400">{t('payment.service')}</span>
                   <span className="text-sm font-medium text-slate-200">
                     {service}
                   </span>
                 </div>
                 <div className="mt-2 flex items-center justify-between">
-                  <span className="text-sm text-slate-400">费用</span>
+                  <span className="text-sm text-slate-400">{t('payment.fee')}</span>
                   <span className="text-sm font-medium text-slate-200">
                     ${amount.toFixed(4)} USDC + ${gasFee.toFixed(4)} Gas
                   </span>
                 </div>
                 <div className="mt-1 flex items-center justify-between">
-                  <span className="text-sm text-slate-400">总计</span>
+                  <span className="text-sm text-slate-400">{t('payment.total')}</span>
                   <span className="text-sm font-bold text-violet-400">
                     ${totalAmount.toFixed(4)} USDC
                   </span>
@@ -246,7 +250,7 @@ export default function X402Payment({
 
               {/* Risk badge */}
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-400">风险等级:</span>
+                <span className="text-xs text-slate-400">{t('payment.riskLevel')}</span>
                 <Badge variant="outline" className={riskConfig.badgeClass}>
                   {riskConfig.label}
                 </Badge>
@@ -254,7 +258,7 @@ export default function X402Payment({
 
               {/* Split preview */}
               <div className="space-y-3">
-                <p className="text-xs font-medium text-slate-400">收益分配</p>
+                <p className="text-xs font-medium text-slate-400">{t('payment.revenueSplit')}</p>
 
                 {/* Visual bar */}
                 <div className="flex h-3 overflow-hidden rounded-full">
@@ -277,7 +281,7 @@ export default function X402Payment({
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
                       <div className="size-2 rounded-full bg-violet-500" />
-                      <span className="text-slate-300">您的钱包</span>
+                      <span className="text-slate-300">{t('payment.yourWallet')}</span>
                     </div>
                     <span className="text-slate-200">
                       ${humanAmount.toFixed(4)} ({SPLIT.human}%)
@@ -286,7 +290,7 @@ export default function X402Payment({
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
                       <div className="size-2 rounded-full bg-cyan-500" />
-                      <span className="text-slate-300">分身金库</span>
+                      <span className="text-slate-300">{t('payment.avatarVault')}</span>
                     </div>
                     <span className="text-slate-200">
                       ${avatarAmount.toFixed(4)} ({SPLIT.avatar}%)
@@ -295,7 +299,7 @@ export default function X402Payment({
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
                       <div className="size-2 rounded-full bg-emerald-500" />
-                      <span className="text-slate-300">协议LP</span>
+                      <span className="text-slate-300">{t('payment.protocolLP')}</span>
                     </div>
                     <span className="text-slate-200">
                       ${protocolAmount.toFixed(4)} ({SPLIT.protocol}%)
@@ -333,7 +337,7 @@ export default function X402Payment({
                   />
                 </motion.div>
                 <p className="text-sm text-slate-300">
-                  {isProcessing ? '正在确认交易...' : '交易已提交'}
+                  {isProcessing ? t('payment.confirmingTransaction') : t('payment.transactionSubmitted')}
                 </p>
 
                 <div className="w-full">
@@ -372,28 +376,28 @@ export default function X402Payment({
                   <CheckCircle className="size-12 text-emerald-400" />
                 </motion.div>
                 <p className="text-base font-medium text-emerald-400">
-                  支付成功
+                  {t('payment.paymentSuccess')}
                 </p>
               </div>
 
               {/* Receipt */}
               <div className="rounded-lg border border-slate-700 bg-slate-900/60 p-4">
                 <p className="mb-3 text-xs font-medium text-slate-400">
-                  交易凭证
+                  {t('payment.transactionReceipt')}
                 </p>
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">服务</span>
+                    <span className="text-slate-400">{t('payment.service')}</span>
                     <span className="text-slate-200">{service}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">金额</span>
+                    <span className="text-slate-400">{t('payment.amount')}</span>
                     <span className="text-slate-200">
                       ${totalAmount.toFixed(4)} USDC
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">时间</span>
+                    <span className="text-slate-400">{t('payment.time')}</span>
                     <span className="text-slate-200" suppressHydrationWarning>
                       {completedAt || '---'}
                     </span>
@@ -409,7 +413,7 @@ export default function X402Payment({
 
               {/* Actual split */}
               <div className="space-y-1">
-                <p className="text-xs text-slate-400">实际分账</p>
+                <p className="text-xs text-slate-400">{t('payment.actualSplit')}</p>
                 <div className="flex h-2.5 overflow-hidden rounded-full">
                   <div
                     className="bg-violet-500"
@@ -425,9 +429,9 @@ export default function X402Payment({
                   />
                 </div>
                 <div className="flex justify-between text-[10px] text-slate-500">
-                  <span>钱包 ${humanAmount.toFixed(4)}</span>
-                  <span>金库 ${avatarAmount.toFixed(4)}</span>
-                  <span>LP ${protocolAmount.toFixed(4)}</span>
+                  <span>{t('payment.walletShort')} ${humanAmount.toFixed(4)}</span>
+                  <span>{t('payment.vaultShort')} ${avatarAmount.toFixed(4)}</span>
+                  <span>{t('payment.lpShort')} ${protocolAmount.toFixed(4)}</span>
                 </div>
               </div>
             </motion.div>
@@ -445,7 +449,7 @@ export default function X402Payment({
                   className="border-slate-600 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
                   onClick={handleClose}
                 >
-                  取消
+                  {t('payment.cancel')}
                 </Button>
               </DialogClose>
               <Button
@@ -454,7 +458,7 @@ export default function X402Payment({
                 onClick={handleConfirm}
               >
                 <DollarSign className="size-3.5" />
-                确认支付
+                {t('payment.confirmPay')}
               </Button>
             </>
           )}
@@ -467,7 +471,7 @@ export default function X402Payment({
               disabled
             >
               <Loader2 className="size-3.5 animate-spin" />
-              处理中...
+              {t('payment.processing')}
             </Button>
           )}
 
@@ -478,7 +482,7 @@ export default function X402Payment({
               onClick={handleClose}
             >
               <CheckCircle className="size-3.5" />
-              完成
+              {t('payment.complete')}
             </Button>
           )}
         </DialogFooter>

@@ -42,6 +42,7 @@ import {
   Cell,
 } from 'recharts';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/hooks/use-i18n';
 import { format, parseISO } from 'date-fns';
 
 // ── Types ──────────────────────────────────────────────
@@ -152,18 +153,18 @@ const MOCK_METRICS: PerformanceMetric[] = [
 ];
 
 const MOCK_CACHE_STRATEGIES: CacheStrategyEntry[] = [
-  { id: 'cs_1', name: 'SSR 页面缓存', ttl: 300, ttlLabel: '300s', hitRate: 87, swrInterval: 30, swrLabel: '30s', type: 'ssr' },
-  { id: 'cs_2', name: 'API 响应缓存', ttl: 60, ttlLabel: '60s', hitRate: 92, swrInterval: 10, swrLabel: '10s', type: 'api' },
-  { id: 'cs_3', name: '静态资源缓存', ttl: 31536000, ttlLabel: '1年', hitRate: 99, swrInterval: 0, swrLabel: 'immutable', type: 'static' },
-  { id: 'cs_4', name: 'ISR 增量缓存', ttl: 600, ttlLabel: '600s', hitRate: 78, swrInterval: 60, swrLabel: '60s', type: 'isr' },
-  { id: 'cs_5', name: 'CDN 边缘缓存', ttl: 1800, ttlLabel: '1800s', hitRate: 85, swrInterval: 0, swrLabel: 'purge', type: 'cdn' },
+  { id: 'cs_1', name: 'performance.ssrPageCache', ttl: 300, ttlLabel: '300s', hitRate: 87, swrInterval: 30, swrLabel: '30s', type: 'ssr' },
+  { id: 'cs_2', name: 'performance.apiResponseCache', ttl: 60, ttlLabel: '60s', hitRate: 92, swrInterval: 10, swrLabel: '10s', type: 'api' },
+  { id: 'cs_3', name: 'performance.staticAssetCache', ttl: 31536000, ttlLabel: 'performance.oneYear', hitRate: 99, swrInterval: 0, swrLabel: 'immutable', type: 'static' },
+  { id: 'cs_4', name: 'performance.isrIncrementalCache', ttl: 600, ttlLabel: '600s', hitRate: 78, swrInterval: 60, swrLabel: '60s', type: 'isr' },
+  { id: 'cs_5', name: 'performance.cdnEdgeCache', ttl: 1800, ttlLabel: '1800s', hitRate: 85, swrInterval: 0, swrLabel: 'purge', type: 'cdn' },
 ];
 
 const MOCK_CDN_CONFIG: CDNConfig = {
   provider: 'Cloudflare',
   edgeLocations: '280+',
   cacheHitRate: 91.2,
-  bandwidthSaved: '847GB/月',
+  bandwidthSaved: '847GB',
   ssl: 'TLS 1.3',
   http2: true,
   brotli: true,
@@ -223,16 +224,16 @@ const MOCK_CACHE_TREND: CacheTrendPoint[] = [
 ];
 
 const MOCK_RECOMMENDATIONS: OptimizationRecommendation[] = [
-  { id: 'rec_1', title: '延迟加载非关键字体', priority: 'high', estimatedSavings: '12KB / 200ms', description: '将非首屏字体改为font-display:swap，减少初始阻塞资源' },
-  { id: 'rec_2', title: '启用图片AVIF格式', priority: 'medium', estimatedSavings: '25KB / 图片', description: '将WebP图片升级为AVIF格式，可进一步减少30%体积' },
-  { id: 'rec_3', title: '预连接第三方域名', priority: 'medium', estimatedSavings: '100ms TTFB', description: '添加dns-prefetch和preconnect提示，加速第三方资源加载' },
-  { id: 'rec_4', title: '合并小请求为HTTP/2多路复用', priority: 'low', estimatedSavings: '2个请求', description: '将3个第三方请求合并为1个，减少连接开销' },
-  { id: 'rec_5', title: 'ISR缓存TTL优化', priority: 'high', estimatedSavings: '15% 缓存命中率', description: '将ISR revalidate从60s调整为120s，提高缓存效率' },
+  { id: 'rec_1', title: 'performance.rec1Title', priority: 'high', estimatedSavings: '12KB / 200ms', description: 'performance.rec1Desc' },
+  { id: 'rec_2', title: 'performance.rec2Title', priority: 'medium', estimatedSavings: '25KB / img', description: 'performance.rec2Desc' },
+  { id: 'rec_3', title: 'performance.rec3Title', priority: 'medium', estimatedSavings: '100ms TTFB', description: 'performance.rec3Desc' },
+  { id: 'rec_4', title: 'performance.rec4Title', priority: 'low', estimatedSavings: '2个请求', description: 'performance.rec4Desc' },
+  { id: 'rec_5', title: 'performance.rec5Title', priority: 'high', estimatedSavings: '15% 缓存命中率', description: 'performance.rec5Desc' },
 ];
 
 const MOCK_ALERTS: PerformanceAlert[] = [
-  { id: 'alert_1', title: 'JS Bundle 接近预算上限', severity: 'warning', description: 'JS Bundle已达142KB/150KB (94.7%)，建议关注新增依赖体积', timestamp: '2026-03-04T08:30:00Z' },
-  { id: 'alert_2', title: 'ISR缓存命中率下降', severity: 'warning', description: 'ISR缓存命中率从82%降至78%，可能需要调整revalidate间隔', timestamp: '2026-03-04T06:15:00Z' },
+  { id: 'alert_1', title: 'performance.alert1Title', severity: 'warning', description: 'performance.alert1Desc', timestamp: '2026-03-04T08:30:00Z' },
+  { id: 'alert_2', title: 'performance.alert2Title', severity: 'warning', description: 'performance.alert2Desc', timestamp: '2026-03-04T06:15:00Z' },
 ];
 
 const MOCK_DATA: PerformanceData = {
@@ -247,7 +248,7 @@ const MOCK_DATA: PerformanceData = {
   cssBundleSize: 28,
   imageOptimizationRate: 94,
   cacheHitRate: 91.2,
-  cdnBandwidthSaved: '847GB/月',
+  cdnBandwidthSaved: '847GB',
   sparklines: MOCK_SPARKLINES,
   cacheTrend: MOCK_CACHE_TREND,
   recommendations: MOCK_RECOMMENDATIONS,
@@ -265,17 +266,17 @@ interface TabConfig {
 
 const TABS: TabConfig[] = [
   { id: 'vitals', label: 'Web Vitals', icon: Gauge },
-  { id: 'cache', label: '缓存策略', icon: Database },
-  { id: 'lazy', label: '懒加载', icon: Layers },
-  { id: 'budget', label: '性能预算', icon: BarChart3 },
+  { id: 'cache', label: 'performance.cacheStrategy', icon: Database },
+  { id: 'lazy', label: 'performance.lazyLoading', icon: Layers },
+  { id: 'budget', label: 'performance.performanceBudget', icon: BarChart3 },
 ];
 
 // ── Color Config ───────────────────────────────────────
 const PRIORITY_CONFIG: Record<string, { color: string; bg: string; badge: string; text: string }> = {
-  critical: { color: 'text-red-400', bg: 'bg-red-500/10', badge: 'bg-red-500/20 text-red-300 border-red-500/30', text: '关键' },
-  high: { color: 'text-orange-400', bg: 'bg-orange-500/10', badge: 'bg-orange-500/20 text-orange-300 border-orange-500/30', text: '高' },
-  medium: { color: 'text-amber-400', bg: 'bg-amber-500/10', badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30', text: '中' },
-  low: { color: 'text-sky-400', bg: 'bg-sky-500/10', badge: 'bg-sky-500/20 text-sky-300 border-sky-500/30', text: '低' },
+  critical: { color: 'text-red-400', bg: 'bg-red-500/10', badge: 'bg-red-500/20 text-red-300 border-red-500/30', text: 'performance.priorityCritical' },
+  high: { color: 'text-orange-400', bg: 'bg-orange-500/10', badge: 'bg-orange-500/20 text-orange-300 border-orange-500/30', text: 'performance.priorityHigh' },
+  medium: { color: 'text-amber-400', bg: 'bg-amber-500/10', badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30', text: 'performance.priorityMedium' },
+  low: { color: 'text-sky-400', bg: 'bg-sky-500/10', badge: 'bg-sky-500/20 text-sky-300 border-sky-500/30', text: 'performance.priorityLow' },
 };
 
 const CACHE_TYPE_ICON: Record<string, React.ElementType> = {
@@ -288,6 +289,7 @@ const CACHE_TYPE_ICON: Record<string, React.ElementType> = {
 
 // ── Performance Score Ring Gauge ───────────────────────
 function PerformanceScoreGauge({ score }: { score: number }) {
+  const { t } = useI18n();
   const radius = 58;
   const circumference = 2 * Math.PI * radius;
   const progress = (score / 100) * circumference;
@@ -317,7 +319,7 @@ function PerformanceScoreGauge({ score }: { score: number }) {
       </div>
       <div className="text-center">
         <p className={cn('text-sm font-semibold', scoreColor)}>
-          {score >= 90 ? '性能等级: 优秀' : score >= 70 ? '性能等级: 良好' : '性能等级: 需优化'}
+          {score >= 90 ? t('performance.scoreExcellent') : score >= 70 ? t('performance.scoreGood') : t('performance.scoreNeedsOptimization')}
         </p>
       </div>
     </div>
@@ -326,6 +328,7 @@ function PerformanceScoreGauge({ score }: { score: number }) {
 
 // ── Radial Gauge for Individual Metrics ────────────────
 function RadialGauge({ metric, sparkline }: { metric: PerformanceMetric; sparkline: SparklinePoint[] }) {
+  const { t } = useI18n();
   const radius = 36;
   const circumference = 2 * Math.PI * radius;
   const ratio = Math.min(metric.value / metric.target, 1.5);
@@ -363,7 +366,7 @@ function RadialGauge({ metric, sparkline }: { metric: PerformanceMetric; sparkli
       </div>
       <div className="text-center w-full">
         <p className="text-xs font-semibold text-slate-200">{metric.name}</p>
-        <p className="text-[9px] text-slate-500">目标: {displayTarget}</p>
+        <p className="text-[9px] text-slate-500">{t('performance.target')}: {displayTarget}</p>
       </div>
       {/* Sparkline */}
       <div className="w-full h-6">
@@ -397,7 +400,7 @@ function CacheStrategyCard({ entry }: { entry: CacheStrategyEntry }) {
             <div className="flex size-7 items-center justify-center rounded-lg bg-violet-500/15">
               <Icon className="size-3.5 text-violet-400" />
             </div>
-            <span className="text-xs font-medium text-slate-200">{entry.name}</span>
+            <span className="text-xs font-medium text-slate-200">{t(entry.name)}</span>
           </div>
           <Badge variant="outline" className={cn('text-[9px]', hitColor === 'text-emerald-400' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : hitColor === 'text-amber-400' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-red-500/20 text-red-300 border-red-500/30')}>
             {entry.hitRate}%
@@ -415,6 +418,7 @@ function CacheStrategyCard({ entry }: { entry: CacheStrategyEntry }) {
 
 // ── Lazy Module Row ────────────────────────────────────
 function LazyModuleRow({ module: mod, onToggle }: { module: LazyLoadingModule; onToggle: (id: string) => void }) {
+  const { t } = useI18n();
   const prioConf = PRIORITY_CONFIG[mod.priority];
   const maxChunkSize = 35; // for bar width
 
@@ -439,7 +443,7 @@ function LazyModuleRow({ module: mod, onToggle }: { module: LazyLoadingModule; o
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs font-medium text-slate-200 font-mono truncate">{mod.name}</span>
-          <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0', prioConf.badge)}>{prioConf.text}</Badge>
+          <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0', prioConf.badge)}>{t(`performance.priority${mod.priority.charAt(0).toUpperCase() + mod.priority.slice(1)}`)}</Badge>
         </div>
         <div className="mt-1.5 flex items-center gap-3">
           {/* Chunk size bar */}
@@ -460,7 +464,7 @@ function LazyModuleRow({ module: mod, onToggle }: { module: LazyLoadingModule; o
 
       {/* Status */}
       <Badge variant="outline" className={cn('shrink-0 text-[9px]', mod.loaded ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-slate-600/30 text-slate-400 border-slate-600/30')}>
-        {mod.loaded ? '已加载' : '懒加载'}
+        {mod.loaded ? t('performance.loaded') : t('performance.lazyLoad')}
       </Badge>
     </motion.div>
   );
@@ -468,6 +472,7 @@ function LazyModuleRow({ module: mod, onToggle }: { module: LazyLoadingModule; o
 
 // ── Budget Bar ─────────────────────────────────────────
 function BudgetBar({ item }: { item: BudgetItem }) {
+  const { t } = useI18n();
   const pct = (item.actual / item.budget) * 100;
   const isOver = item.actual > item.budget;
   const isAmber = pct >= 80 && !isOver;
@@ -492,9 +497,9 @@ function BudgetBar({ item }: { item: BudgetItem }) {
         />
       </div>
       <div className="flex items-center justify-between text-[10px]">
-        <span className={cn(textColor)}>{pct.toFixed(1)}% 已用</span>
-        {isOver && <span className="text-red-400 font-medium">⚠ 超出预算</span>}
-        {isAmber && <span className="text-amber-400 font-medium">⚠ 接近上限</span>}
+        <span className={cn(textColor)}>{pct.toFixed(1)}% {t('performance.percentUsed')}</span>
+        {isOver && <span className="text-red-400 font-medium">⚠ {t('performance.overBudget')}</span>}
+        {isAmber && <span className="text-amber-400 font-medium">⚠ {t('performance.nearLimit')}</span>}
       </div>
     </motion.div>
   );
@@ -519,17 +524,19 @@ function WaterfallDepthViz({ depth }: { depth: number }) {
 
 // ── Custom Tooltip for Cache Trend ─────────────────────
 function CacheTrendTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
+  const { t } = useI18n();
   if (!active || !payload || !payload.length) return null;
   return (
     <div className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-xs shadow-xl">
       <p className="text-slate-300 font-medium">{label}</p>
-      <p className="text-emerald-400 tabular-nums">命中率: {payload[0].value}%</p>
+      <p className="text-emerald-400 tabular-nums">{t('performance.hitRateLabel')}: {payload[0].value}%</p>
     </div>
   );
 }
 
 // ── Main Component ─────────────────────────────────────
 export default function PerformanceDashboard() {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<TabId>('vitals');
   const [lazyModuleStates, setLazyModuleStates] = useState<Record<string, boolean>>(
     Object.fromEntries(MOCK_DATA.lazyModules.map((m) => [m.id, m.loaded])),
@@ -549,8 +556,8 @@ export default function PerformanceDashboard() {
 
   // Pie chart data for bundle composition
   const pieData = useMemo(() => [
-    { name: '已加载模块', value: data.lazyModules.filter((m) => lazyModuleStates[m.id]).reduce((s, m) => s + m.chunkSize, 0), color: '#34d399' },
-    { name: '懒加载模块', value: data.lazyModules.filter((m) => !lazyModuleStates[m.id]).reduce((s, m) => s + m.chunkSize, 0), color: '#8b5cf6' },
+    { name: 'performance.loadedModules', value: data.lazyModules.filter((m) => lazyModuleStates[m.id]).reduce((s, m) => s + m.chunkSize, 0), color: '#34d399' },
+    { name: 'performance.lazyModules', value: data.lazyModules.filter((m) => !lazyModuleStates[m.id]).reduce((s, m) => s + m.chunkSize, 0), color: '#8b5cf6' },
   ], [data.lazyModules, lazyModuleStates]);
 
   const initialBundle = data.lazyModules.filter((m) => lazyModuleStates[m.id]).reduce((s, m) => s + m.chunkSize, 0);
@@ -569,7 +576,7 @@ export default function PerformanceDashboard() {
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Package className="size-4 text-violet-400" />
-                <span className="text-xs font-semibold text-slate-200">JS Bundle 大小</span>
+                <span className="text-xs font-semibold text-slate-200">{t('performance.jsBundleSize')}</span>
               </div>
               <span className="text-xs text-slate-400 tabular-nums">
                 {data.jsBundleSize}/{data.jsBundleBudget}KB
@@ -577,7 +584,7 @@ export default function PerformanceDashboard() {
             </div>
             <Progress value={(data.jsBundleSize / data.jsBundleBudget) * 100} className="h-2 bg-slate-700 [&>div]:bg-violet-500" />
             <p className="mt-1.5 text-[10px] text-amber-400">
-              ⚠ 已使用 {(data.jsBundleSize / data.jsBundleBudget * 100).toFixed(1)}%，接近预算上限
+              ⚠ {t('performance.usedNearBudget')} {(data.jsBundleSize / data.jsBundleBudget * 100).toFixed(1)}%
             </p>
           </div>
 
@@ -585,15 +592,15 @@ export default function PerformanceDashboard() {
           <div className="grid grid-cols-3 gap-2">
             <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-3 text-center">
               <p className="text-lg font-bold text-emerald-400 tabular-nums">{data.cacheHitRate}%</p>
-              <p className="text-[9px] text-slate-500 mt-0.5">缓存命中率</p>
+              <p className="text-[9px] text-slate-500 mt-0.5">{t('performance.cacheHitRateLabel')}</p>
             </div>
             <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-3 text-center">
               <p className="text-lg font-bold text-violet-400">{data.cdnBandwidthSaved}</p>
-              <p className="text-[9px] text-slate-500 mt-0.5">CDN节省</p>
+              <p className="text-[9px] text-slate-500 mt-0.5">{t('performance.cdnSaved')}</p>
             </div>
             <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-3 text-center">
               <p className="text-lg font-bold text-emerald-400 tabular-nums">{data.imageOptimizationRate}%</p>
-              <p className="text-[9px] text-slate-500 mt-0.5">图片优化率</p>
+              <p className="text-[9px] text-slate-500 mt-0.5">{t('performance.imageOptimizationRate')}</p>
             </div>
           </div>
 
@@ -619,7 +626,7 @@ export default function PerformanceDashboard() {
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-3">
           <TrendingDown className="size-4 text-emerald-400" />
-          <h4 className="text-xs font-semibold text-slate-200">性能趋势 (最近7天)</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('performance.perfTrend7d')}</h4>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
           {data.metrics.map((metric) => {
@@ -654,7 +661,7 @@ export default function PerformanceDashboard() {
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-3">
           <Activity className="size-4 text-emerald-400" />
-          <h4 className="text-xs font-semibold text-slate-200">缓存命中率趋势 (24h)</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('performance.cacheHitTrend24h')}</h4>
         </div>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
@@ -680,16 +687,16 @@ export default function PerformanceDashboard() {
         <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
           <div className="flex items-center gap-2 mb-3">
             <Cloud className="size-4 text-violet-400" />
-            <h4 className="text-xs font-semibold text-slate-200">CDN 配置</h4>
+            <h4 className="text-xs font-semibold text-slate-200">{t('performance.cdnConfigTitle')}</h4>
           </div>
           <div className="space-y-2 text-[11px]">
-            <div className="flex justify-between"><span className="text-slate-400">提供商</span><span className="text-slate-200 font-medium">{data.cdnConfig.provider}</span></div>
-            <div className="flex justify-between"><span className="text-slate-400">边缘节点</span><span className="text-slate-200 font-medium">{data.cdnConfig.edgeLocations}</span></div>
-            <div className="flex justify-between"><span className="text-slate-400">缓存命中率</span><span className="text-emerald-400 font-medium">{data.cdnConfig.cacheHitRate}%</span></div>
-            <div className="flex justify-between"><span className="text-slate-400">带宽节省</span><span className="text-violet-400 font-medium">{data.cdnConfig.bandwidthSaved}</span></div>
+            <div className="flex justify-between"><span className="text-slate-400">{t('performance.provider')}</span><span className="text-slate-200 font-medium">{data.cdnConfig.provider}</span></div>
+            <div className="flex justify-between"><span className="text-slate-400">{t('performance.edgeNodes')}</span><span className="text-slate-200 font-medium">{data.cdnConfig.edgeLocations}</span></div>
+            <div className="flex justify-between"><span className="text-slate-400">{t('performance.hitRateLabel')}</span><span className="text-emerald-400 font-medium">{data.cdnConfig.cacheHitRate}%</span></div>
+            <div className="flex justify-between"><span className="text-slate-400">{t('performance.bandwidthSaved')}</span><span className="text-violet-400 font-medium">{data.cdnConfig.bandwidthSaved}</span></div>
             <div className="flex justify-between"><span className="text-slate-400">SSL</span><span className="text-slate-200 font-medium">{data.cdnConfig.ssl}</span></div>
-            <div className="flex justify-between"><span className="text-slate-400">HTTP/2</span><span className="text-emerald-400 font-medium">{data.cdnConfig.http2 ? '✓ 已启用' : '✗ 未启用'}</span></div>
-            <div className="flex justify-between"><span className="text-slate-400">Brotli</span><span className="text-emerald-400 font-medium">{data.cdnConfig.brotli ? '✓ 已启用' : '✗ 未启用'}</span></div>
+            <div className="flex justify-between"><span className="text-slate-400">HTTP/2</span><span className="text-emerald-400 font-medium">{data.cdnConfig.http2 ? t('performance.enabledMark') : t('performance.notEnabledMark')}</span></div>
+            <div className="flex justify-between"><span className="text-slate-400">Brotli</span><span className="text-emerald-400 font-medium">{data.cdnConfig.brotli ? t('performance.enabledMark') : t('performance.notEnabledMark')}</span></div>
           </div>
         </div>
 
@@ -697,12 +704,12 @@ export default function PerformanceDashboard() {
         <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
           <div className="flex items-center gap-2 mb-3">
             <Shield className="size-4 text-emerald-400" />
-            <h4 className="text-xs font-semibold text-slate-200">缓存效率总结</h4>
+            <h4 className="text-xs font-semibold text-slate-200">{t('performance.cacheEfficiency')}</h4>
           </div>
           <div className="space-y-3">
             <div>
               <div className="flex items-center justify-between text-[11px] mb-1">
-                <span className="text-slate-400">平均命中率</span>
+                <span className="text-slate-400">{t('performance.avgHitRate')}</span>
                 <span className="text-emerald-400 font-medium tabular-nums">
                   {(data.cacheStrategies.reduce((s, c) => s + c.hitRate, 0) / data.cacheStrategies.length).toFixed(1)}%
                 </span>
@@ -711,18 +718,18 @@ export default function PerformanceDashboard() {
             </div>
             <div>
               <div className="flex items-center justify-between text-[11px] mb-1">
-                <span className="text-slate-400">CDN边缘命中率</span>
+                <span className="text-slate-400">{t('performance.cdnEdgeHitRate')}</span>
                 <span className="text-emerald-400 font-medium tabular-nums">{data.cdnConfig.cacheHitRate}%</span>
               </div>
               <Progress value={data.cdnConfig.cacheHitRate} className="h-2 bg-slate-700 [&>div]:bg-emerald-500" />
             </div>
             <div className="pt-2 border-t border-slate-700/50">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-slate-400">总缓存条目</span>
+                <span className="text-slate-400">{t('performance.totalCacheEntries')}</span>
                 <span className="text-slate-200 font-medium">1,247</span>
               </div>
               <div className="flex items-center justify-between text-[11px] mt-1">
-                <span className="text-slate-400">缓存总大小</span>
+                <span className="text-slate-400">{t('performance.totalCacheSize')}</span>
                 <span className="text-slate-200 font-medium">284MB</span>
               </div>
             </div>
@@ -738,14 +745,14 @@ export default function PerformanceDashboard() {
           onClick={handlePurgeCache}
         >
           <RefreshCw className="mr-1.5 size-3.5" />
-          清除缓存
+          {t('performance.purgeCache')}
         </Button>
         <AnimatePresence>
           {purgeToast && (
             <motion.span initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}
               className="text-xs text-emerald-400 flex items-center gap-1"
             >
-              <CheckCircle className="size-3" /> 缓存已清除 (模拟)
+              <CheckCircle className="size-3" /> {t('performance.cachePurged')}
             </motion.span>
           )}
         </AnimatePresence>
@@ -760,7 +767,7 @@ export default function PerformanceDashboard() {
         <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
           <div className="flex items-center gap-2 mb-3">
             <Layers className="size-4 text-violet-400" />
-            <h4 className="text-xs font-semibold text-slate-200">Bundle 组成</h4>
+            <h4 className="text-xs font-semibold text-slate-200">{t('performance.bundleComposition')}</h4>
           </div>
           <div className="h-44">
             <ResponsiveContainer width="100%" height="100%">
@@ -779,8 +786,8 @@ export default function PerformanceDashboard() {
             </ResponsiveContainer>
           </div>
           <div className="flex items-center justify-center gap-4 text-[10px] mt-2">
-            <div className="flex items-center gap-1.5"><div className="size-2.5 rounded-full bg-emerald-500" /><span className="text-slate-400">已加载</span></div>
-            <div className="flex items-center gap-1.5"><div className="size-2.5 rounded-full bg-violet-500" /><span className="text-slate-400">懒加载</span></div>
+            <div className="flex items-center gap-1.5"><div className="size-2.5 rounded-full bg-emerald-500" /><span className="text-slate-400">{t('performance.loaded')}</span></div>
+            <div className="flex items-center gap-1.5"><div className="size-2.5 rounded-full bg-violet-500" /><span className="text-slate-400">{t('performance.lazyLoad')}</span></div>
           </div>
         </div>
 
@@ -788,12 +795,12 @@ export default function PerformanceDashboard() {
         <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
           <div className="flex items-center gap-2 mb-3">
             <Package className="size-4 text-emerald-400" />
-            <h4 className="text-xs font-semibold text-slate-200">Bundle 对比</h4>
+            <h4 className="text-xs font-semibold text-slate-200">{t('performance.bundleComparison')}</h4>
           </div>
           <div className="space-y-4 mt-2">
             <div>
               <div className="flex items-center justify-between text-[11px] mb-1.5">
-                <span className="text-slate-400">初始加载</span>
+                <span className="text-slate-400">{t('performance.initialLoad')}</span>
                 <span className="text-emerald-400 font-medium tabular-nums">{initialBundle}KB</span>
               </div>
               <div className="h-4 rounded-full bg-slate-700/50 overflow-hidden">
@@ -807,7 +814,7 @@ export default function PerformanceDashboard() {
             </div>
             <div>
               <div className="flex items-center justify-between text-[11px] mb-1.5">
-                <span className="text-slate-400">全量加载</span>
+                <span className="text-slate-400">{t('performance.fullLoad')}</span>
                 <span className="text-violet-400 font-medium tabular-nums">{totalBundle}KB</span>
               </div>
               <div className="h-4 rounded-full bg-slate-700/50 overflow-hidden">
@@ -821,7 +828,7 @@ export default function PerformanceDashboard() {
             </div>
             <div className="pt-2 border-t border-slate-700/50 text-center">
               <p className="text-xs text-slate-300">
-                懒加载节省 <span className="text-emerald-400 font-bold tabular-nums">{totalBundle - initialBundle}KB</span>
+                {t('performance.lazySaved')} <span className="text-emerald-400 font-bold tabular-nums">{totalBundle - initialBundle}KB</span>
                 <span className="text-slate-500 ml-1">({((1 - initialBundle / totalBundle) * 100).toFixed(0)}%)</span>
               </p>
             </div>
@@ -829,7 +836,7 @@ export default function PerformanceDashboard() {
 
           {/* Critical Path */}
           <div className="mt-4 pt-3 border-t border-slate-700/50">
-            <h5 className="text-[10px] font-medium text-slate-400 mb-2">关键加载路径</h5>
+            <h5 className="text-[10px] font-medium text-slate-400 mb-2">{t('performance.criticalLoadPath')}</h5>
             <div className="flex flex-wrap gap-1.5">
               {data.lazyModules.filter((m) => lazyModuleStates[m.id]).map((m) => (
                 <Badge key={m.id} variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-300 border-emerald-500/20">
@@ -837,7 +844,7 @@ export default function PerformanceDashboard() {
                 </Badge>
               ))}
             </div>
-            <h5 className="text-[10px] font-medium text-slate-400 mt-2 mb-2">懒加载路径</h5>
+            <h5 className="text-[10px] font-medium text-slate-400 mt-2 mb-2">{t('performance.lazyLoadPath')}</h5>
             <div className="flex flex-wrap gap-1.5">
               {data.lazyModules.filter((m) => !lazyModuleStates[m.id]).map((m) => (
                 <Badge key={m.id} variant="outline" className="text-[9px] bg-violet-500/10 text-violet-300 border-violet-500/20">
@@ -854,9 +861,9 @@ export default function PerformanceDashboard() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Layers className="size-4 text-violet-400" />
-            <h4 className="text-xs font-semibold text-slate-200">模块加载状态</h4>
+            <h4 className="text-xs font-semibold text-slate-200">{t('performance.moduleLoadStatus')}</h4>
           </div>
-          <span className="text-[10px] text-slate-500">点击切换加载状态</span>
+          <span className="text-[10px] text-slate-500">{t('performance.clickToToggle')}</span>
         </div>
         <div className="space-y-2">
           {data.lazyModules.map((mod) => (
@@ -873,7 +880,7 @@ export default function PerformanceDashboard() {
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-4">
           <BarChart3 className="size-4 text-violet-400" />
-          <h4 className="text-xs font-semibold text-slate-200">预算 vs 实际</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('performance.budgetVsActual')}</h4>
         </div>
         <div className="space-y-4">
           {data.budget.items.map((item) => (
@@ -888,26 +895,26 @@ export default function PerformanceDashboard() {
         <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
           <div className="flex items-center gap-2 mb-3">
             <Activity className="size-4 text-emerald-400" />
-            <h4 className="text-xs font-semibold text-slate-200">请求分析</h4>
+            <h4 className="text-xs font-semibold text-slate-200">{t('performance.requestAnalysis')}</h4>
           </div>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="size-3 rounded-full bg-emerald-500" />
-                <span className="text-xs text-slate-300">首方请求</span>
+                <span className="text-xs text-slate-300">{t('performance.firstPartyRequests')}</span>
               </div>
               <span className="text-sm font-bold text-emerald-400 tabular-nums">{data.budget.firstPartyRequests}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="size-3 rounded-full bg-violet-500" />
-                <span className="text-xs text-slate-300">第三方请求</span>
+                <span className="text-xs text-slate-300">{t('performance.thirdPartyRequests')}</span>
               </div>
               <span className="text-sm font-bold text-violet-400 tabular-nums">{data.budget.thirdPartyRequests}</span>
             </div>
             <Separator className="bg-slate-700/50" />
             <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-400">总请求数</span>
+              <span className="text-xs text-slate-400">{t('performance.totalRequests')}</span>
               <span className="text-sm font-bold text-slate-200 tabular-nums">{data.budget.firstPartyRequests + data.budget.thirdPartyRequests}</span>
             </div>
           </div>
@@ -917,25 +924,25 @@ export default function PerformanceDashboard() {
         <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
           <div className="flex items-center gap-2 mb-3">
             <ArrowDown className="size-4 text-violet-400" />
-            <h4 className="text-xs font-semibold text-slate-200">瀑布深度</h4>
+            <h4 className="text-xs font-semibold text-slate-200">{t('performance.waterfallDepthTitle')}</h4>
           </div>
           <div className="flex items-end gap-4">
             <WaterfallDepthViz depth={data.budget.waterfallDepth} />
             <div className="space-y-1 text-[10px]">
               <div className="flex items-center gap-1.5">
                 <div className="size-2 rounded-full bg-emerald-500/60" />
-                <span className="text-slate-400">关键路径</span>
+                <span className="text-slate-400">{t('performance.criticalPath')}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="size-2 rounded-full bg-slate-600/60" />
-                <span className="text-slate-400">子资源</span>
+                <span className="text-slate-400">{t('performance.subResources')}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="size-2 rounded-full bg-violet-500/60" />
-                <span className="text-slate-400">异步加载</span>
+                <span className="text-slate-400">{t('performance.asyncLoad')}</span>
               </div>
-              <p className="text-emerald-400 font-medium mt-2">深度: {data.budget.waterfallDepth} 级</p>
-              <p className="text-slate-500">目标: ≤ 4 级 ✓</p>
+              <p className="text-emerald-400 font-medium mt-2">{t('performance.depthLevel', { depth: data.budget.waterfallDepth })}</p>
+              <p className="text-slate-500">{t('performance.targetDepth')}</p>
             </div>
           </div>
         </div>
@@ -945,7 +952,7 @@ export default function PerformanceDashboard() {
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-3">
           <Zap className="size-4 text-amber-400" />
-          <h4 className="text-xs font-semibold text-slate-200">优化建议</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('performance.optimizationSuggestions')}</h4>
         </div>
         <div className="space-y-2">
           {data.recommendations.map((rec, i) => {
@@ -961,13 +968,13 @@ export default function PerformanceDashboard() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-xs font-medium text-slate-200">{rec.title}</p>
+                    <p className="text-xs font-medium text-slate-200">{t(rec.title)}</p>
                     <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0', prioConf.badge)}>{prioConf.text}</Badge>
                     <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-emerald-500/10 text-emerald-300 border-emerald-500/20">
-                      节省 {rec.estimatedSavings}
+                      {t('performance.savings')} {rec.estimatedSavings}
                     </Badge>
                   </div>
-                  <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">{rec.description}</p>
+                  <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">{t(rec.description)}</p>
                 </div>
               </motion.div>
             );
@@ -985,10 +992,10 @@ export default function PerformanceDashboard() {
             )}>
               <AlertTriangle className={cn('size-4', alert.severity === 'critical' ? 'text-red-400' : 'text-amber-400')} />
               <AlertTitle className={cn('text-xs', alert.severity === 'critical' ? 'text-red-300' : 'text-amber-300')}>
-                {alert.title}
+                {t(alert.title)}
               </AlertTitle>
               <AlertDescription className={cn('text-[11px]', alert.severity === 'critical' ? 'text-red-300/70' : 'text-amber-300/70')}>
-                {alert.description}
+                {t(alert.description)}
                 <span className="ml-2 text-slate-500">
                   <Clock className="inline size-2.5 mr-0.5" />
                   {format(parseISO(alert.timestamp), 'MMM d HH:mm')}
@@ -1018,7 +1025,7 @@ export default function PerformanceDashboard() {
         <CardHeader className="pb-0 pt-5">
           <CardTitle className="flex items-center gap-2 text-base text-slate-100">
             <Gauge className="size-5 text-emerald-400" />
-            性能优化面板
+            {t('performance.title')}
           </CardTitle>
         </CardHeader>
 
@@ -1040,7 +1047,7 @@ export default function PerformanceDashboard() {
                   )}
                 >
                   <TabIcon className="size-3.5" />
-                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="hidden sm:inline">{tab.id === 'vitals' ? tab.label : t(tab.label)}</span>
                 </button>
               );
             })}

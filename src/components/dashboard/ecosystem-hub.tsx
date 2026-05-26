@@ -39,6 +39,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/hooks/use-i18n';
+import type { TranslateFn } from '@/hooks/use-i18n';
 
 // ── Types ──────────────────────────────────────────────
 type ProtocolStatus = 'integrated' | 'pending' | 'planned';
@@ -135,20 +137,20 @@ interface EcosystemData {
   activityFeed: ActivityFeedItem[];
 }
 
-// ── Config Maps ────────────────────────────────────────
+// ── Config Maps (label stores i18n key, resolved at render) ──
 const STATUS_CONFIG: Record<ProtocolStatus, { label: string; badge: string; dot: string }> = {
   integrated: {
-    label: '已集成',
+    label: 'ecosystem.integrated',
     badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     dot: 'bg-emerald-400',
   },
   pending: {
-    label: '接入中',
+    label: 'ecosystem.pending',
     badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     dot: 'bg-amber-400',
   },
   planned: {
-    label: '规划',
+    label: 'ecosystem.planned',
     badge: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
     dot: 'bg-slate-400',
   },
@@ -156,17 +158,17 @@ const STATUS_CONFIG: Record<ProtocolStatus, { label: string; badge: string; dot:
 
 const SUPPORT_CONFIG: Record<WalletSupport, { label: string; badge: string; dot: string }> = {
   full: {
-    label: '完整支持',
+    label: 'ecosystem.fullSupport',
     badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     dot: 'bg-emerald-400',
   },
   partial: {
-    label: '部分支持',
+    label: 'ecosystem.partialSupport',
     badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     dot: 'bg-amber-400',
   },
   planned: {
-    label: '计划中',
+    label: 'ecosystem.plannedSupport',
     badge: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
     dot: 'bg-slate-400',
   },
@@ -174,25 +176,25 @@ const SUPPORT_CONFIG: Record<WalletSupport, { label: string; badge: string; dot:
 
 const PRIORITY_CONFIG: Record<NotificationPriority, { label: string; border: string; badge: string; icon: string }> = {
   critical: {
-    label: '紧急',
+    label: 'ecosystem.criticalLabel',
     border: 'border-l-red-500',
     badge: 'bg-red-500/20 text-red-300 border-red-500/30',
     icon: 'text-red-400',
   },
   high: {
-    label: '高',
+    label: 'ecosystem.highLabel',
     border: 'border-l-amber-500',
     badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     icon: 'text-amber-400',
   },
   medium: {
-    label: '中',
+    label: 'ecosystem.mediumLabel',
     border: 'border-l-sky-500',
     badge: 'bg-sky-500/20 text-sky-300 border-sky-500/30',
     icon: 'text-sky-400',
   },
   low: {
-    label: '低',
+    label: 'ecosystem.lowLabel',
     border: 'border-l-slate-500',
     badge: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
     icon: 'text-slate-400',
@@ -210,30 +212,30 @@ const NOTIFICATION_TYPE_ICON: Record<NotificationType, React.ElementType> = {
   compliance: Scale,
 };
 
-const NOTIFICATION_TYPE_LABEL: Record<NotificationType, string> = {
-  governance: '治理',
-  revenue: '收益',
-  security: '安全',
-  bridge: '桥接',
-  skill: '技能',
-  system: '系统',
-  delegation: '委托',
-  compliance: '合规',
+const NOTIFICATION_TYPE_LABEL_KEY: Record<NotificationType, string> = {
+  governance: 'ecosystem.governanceType',
+  revenue: 'ecosystem.revenueType',
+  security: 'ecosystem.securityType',
+  bridge: 'ecosystem.bridgeType',
+  skill: 'ecosystem.skillType',
+  system: 'ecosystem.systemType',
+  delegation: 'ecosystem.delegationType',
+  compliance: 'ecosystem.complianceType',
 };
 
 const ACTIVITY_TYPE_CONFIG: Record<ActivityType, { label: string; badge: string }> = {
-  liquidity: { label: '流动性', badge: 'bg-sky-500/20 text-sky-300 border-sky-500/30' },
-  rate: { label: '利率', badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
-  price: { label: '价格', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
-  sync: { label: '同步', badge: 'bg-violet-500/20 text-violet-300 border-violet-500/30' },
-  alert: { label: '告警', badge: 'bg-red-500/20 text-red-300 border-red-500/30' },
+  liquidity: { label: 'ecosystem.liquidity', badge: 'bg-sky-500/20 text-sky-300 border-sky-500/30' },
+  rate: { label: 'ecosystem.rateLabel', badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
+  price: { label: 'ecosystem.priceLabel', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
+  sync: { label: 'ecosystem.syncLabel', badge: 'bg-violet-500/20 text-violet-300 border-violet-500/30' },
+  alert: { label: 'ecosystem.alertLabel', badge: 'bg-red-500/20 text-red-300 border-red-500/30' },
 };
 
-const FEATURE_LABELS: Record<string, string> = {
-  connect: '连接',
-  sign: '签名',
-  send: '发送',
-  contract: '合约',
+const FEATURE_LABEL_KEYS: Record<string, string> = {
+  connect: 'ecosystem.connectFeature',
+  sign: 'ecosystem.signFeature',
+  send: 'ecosystem.sendFeature',
+  contract: 'ecosystem.contractFeature',
 };
 
 const CATEGORIES = ['All', 'DEX', 'Lending', 'Oracle', 'Indexing', 'Staking', 'Identity', 'DEX Aggregator'] as const;
@@ -257,7 +259,7 @@ function formatRecords(n: number): string {
   return n.toLocaleString();
 }
 
-function getRelativeTime(ts: string): string {
+function getRelativeTime(ts: string, t: TranslateFn): string {
   const now = new Date('2026-03-10T15:00:00Z');
   const d = new Date(ts);
   const diffMs = now.getTime() - d.getTime();
@@ -265,10 +267,10 @@ function getRelativeTime(ts: string): string {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return '刚刚';
-  if (diffMins < 60) return `${diffMins}分钟前`;
-  if (diffHours < 24) return `${diffHours}小时前`;
-  return `${diffDays}天前`;
+  if (diffMins < 1) return t('ecosystem.justNow');
+  if (diffMins < 60) return t('ecosystem.minutesAgo', { count: diffMins });
+  if (diffHours < 24) return t('ecosystem.hoursAgo', { count: diffHours });
+  return t('ecosystem.daysAgo', { count: diffDays });
 }
 
 function getFreshnessColor(freshness: string): string {
@@ -282,14 +284,14 @@ function getFreshnessColor(freshness: string): string {
 // ── Deterministic Fallback Data ────────────────────────
 const FALLBACK_DATA: EcosystemData = {
   protocols: [
-    { id: 'uniswap', name: 'Uniswap V4', category: 'DEX', icon: '🦄', status: 'integrated', description: 'AFC/USDC流动性池托管，自动做市策略', integrationDate: '2026-02-20', tvl: 890000, volume24h: 45000, users: 1250 },
-    { id: 'aave', name: 'Aave V3', category: 'Lending', icon: '👻', status: 'integrated', description: '分身金库AFC质押借贷，自动利率优化', integrationDate: '2026-02-25', tvl: 520000, volume24h: 18000, users: 890 },
-    { id: 'chainlink', name: 'Chainlink', category: 'Oracle', icon: '🔗', status: 'integrated', description: 'AFC价格预言机，共振分外部数据源', integrationDate: '2026-01-15', tvl: 0, volume24h: 0, users: 0 },
-    { id: 'the-graph', name: 'The Graph', category: 'Indexing', icon: '📊', status: 'integrated', description: '链上事件索引，分身活动Subgraph', integrationDate: '2026-01-10', tvl: 0, volume24h: 0, users: 0 },
-    { id: 'lido', name: 'Lido', category: 'Staking', icon: '🏔️', status: 'pending', description: 'ETH质押收益接入分身金库', integrationDate: '', tvl: 0, volume24h: 0, users: 0 },
-    { id: 'compound', name: 'Compound V3', category: 'Lending', icon: '🏦', status: 'pending', description: '备用借贷协议，利率比较策略', integrationDate: '', tvl: 0, volume24h: 0, users: 0 },
-    { id: '1inch', name: '1inch', category: 'DEX Aggregator', icon: '🟣', status: 'planned', description: '最优路径兑换，Gas节省优化', integrationDate: '', tvl: 0, volume24h: 0, users: 0 },
-    { id: 'ens', name: 'ENS', category: 'Identity', icon: '📛', status: 'planned', description: '分身.soul域名映射至ENS', integrationDate: '', tvl: 0, volume24h: 0, users: 0 },
+    { id: 'uniswap', name: 'Uniswap V4', category: 'DEX', icon: '🦄', status: 'integrated', description: 'ecosystem.descUniswap', integrationDate: '2026-02-20', tvl: 890000, volume24h: 45000, users: 1250 },
+    { id: 'aave', name: 'Aave V3', category: 'Lending', icon: '👻', status: 'integrated', description: 'ecosystem.descAave', integrationDate: '2026-02-25', tvl: 520000, volume24h: 18000, users: 890 },
+    { id: 'chainlink', name: 'Chainlink', category: 'Oracle', icon: '🔗', status: 'integrated', description: 'ecosystem.descChainlink', integrationDate: '2026-01-15', tvl: 0, volume24h: 0, users: 0 },
+    { id: 'the-graph', name: 'The Graph', category: 'Indexing', icon: '📊', status: 'integrated', description: 'ecosystem.descTheGraph', integrationDate: '2026-01-10', tvl: 0, volume24h: 0, users: 0 },
+    { id: 'lido', name: 'Lido', category: 'Staking', icon: '🏔️', status: 'pending', description: 'ecosystem.descLido', integrationDate: '', tvl: 0, volume24h: 0, users: 0 },
+    { id: 'compound', name: 'Compound V3', category: 'Lending', icon: '🏦', status: 'pending', description: 'ecosystem.descCompound', integrationDate: '', tvl: 0, volume24h: 0, users: 0 },
+    { id: '1inch', name: '1inch', category: 'DEX Aggregator', icon: '🟣', status: 'planned', description: 'ecosystem.desc1inch', integrationDate: '', tvl: 0, volume24h: 0, users: 0 },
+    { id: 'ens', name: 'ENS', category: 'Identity', icon: '📛', status: 'planned', description: 'ecosystem.descEns', integrationDate: '', tvl: 0, volume24h: 0, users: 0 },
   ],
   wallets: [
     { name: 'MetaMask', icon: '🦊', support: 'full', users: 8500, features: ['connect', 'sign', 'send', 'contract'] },
@@ -317,14 +319,14 @@ const FALLBACK_DATA: EcosystemData = {
     ],
   },
   notifications: [
-    { id: 'n1', type: 'governance', title: '新提案: 调整分账比例', message: '提案 #1 已进入投票期，请参与治理', priority: 'high', read: false, createdAt: '2026-03-10T14:30:00Z' },
-    { id: 'n2', type: 'revenue', title: '收益到账', message: '您收到 $12.50 技能调用收益', priority: 'medium', read: false, createdAt: '2026-03-10T13:20:00Z' },
-    { id: 'n3', type: 'security', title: '共振分预警', message: '分身 Alpha-7 共振分降至 55，已触发 SOFT_LIMIT', priority: 'critical', read: false, createdAt: '2026-03-10T12:15:00Z' },
-    { id: 'n4', type: 'bridge', title: '跨链转账完成', message: 'Base → Ethereum: 5000 AFC 桥接成功', priority: 'low', read: true, createdAt: '2026-03-10T10:45:00Z' },
-    { id: 'n5', type: 'skill', title: '技能解锁', message: 'RAG高级检索已解锁，累计收益达到阈值', priority: 'medium', read: true, createdAt: '2026-03-10T09:30:00Z' },
-    { id: 'n6', type: 'system', title: '系统升级', message: 'V2.2.0 已部署至Canary环境，灰度5%', priority: 'low', read: true, createdAt: '2026-03-09T18:00:00Z' },
-    { id: 'n7', type: 'delegation', title: '委托权重变更', message: '用户0x5b2a...已委托您3000 BPS技术领域权重', priority: 'medium', read: false, createdAt: '2026-03-10T11:00:00Z' },
-    { id: 'n8', type: 'compliance', title: 'KYC模块已激活', message: '提案 #2 已执行，KYC合规模块现可启用', priority: 'low', read: true, createdAt: '2026-03-07T12:30:00Z' },
+    { id: 'n1', type: 'governance', title: 'ecosystem.notifTitleGovernance', message: 'ecosystem.notifMsgGovernance', priority: 'high', read: false, createdAt: '2026-03-10T14:30:00Z' },
+    { id: 'n2', type: 'revenue', title: 'ecosystem.notifTitleRevenue', message: 'ecosystem.notifMsgRevenue', priority: 'medium', read: false, createdAt: '2026-03-10T13:20:00Z' },
+    { id: 'n3', type: 'security', title: 'ecosystem.notifTitleSecurity', message: 'ecosystem.notifMsgSecurity', priority: 'critical', read: false, createdAt: '2026-03-10T12:15:00Z' },
+    { id: 'n4', type: 'bridge', title: 'ecosystem.notifTitleBridge', message: 'ecosystem.notifMsgBridge', priority: 'low', read: true, createdAt: '2026-03-10T10:45:00Z' },
+    { id: 'n5', type: 'skill', title: 'ecosystem.notifTitleSkill', message: 'ecosystem.notifMsgSkill', priority: 'medium', read: true, createdAt: '2026-03-10T09:30:00Z' },
+    { id: 'n6', type: 'system', title: 'ecosystem.notifTitleSystem', message: 'ecosystem.notifMsgSystem', priority: 'low', read: true, createdAt: '2026-03-09T18:00:00Z' },
+    { id: 'n7', type: 'delegation', title: 'ecosystem.notifTitleDelegation', message: 'ecosystem.notifMsgDelegation', priority: 'medium', read: false, createdAt: '2026-03-10T11:00:00Z' },
+    { id: 'n8', type: 'compliance', title: 'ecosystem.notifTitleCompliance', message: 'ecosystem.notifMsgCompliance', priority: 'low', read: true, createdAt: '2026-03-07T12:30:00Z' },
   ],
   ecosystemMetrics: {
     totalIntegrations: 8,
@@ -336,22 +338,23 @@ const FALLBACK_DATA: EcosystemData = {
   },
   partnerProgram: {
     tiers: [
-      { name: 'Explorer', requirements: '集成1个API端点', benefits: '基础技术支持, 社区徽章', partners: 45 },
-      { name: 'Builder', requirements: '集成3+端点, 100+用户', benefits: '优先技术支持, 联合营销, API额度提升', partners: 12 },
-      { name: 'Strategic', requirements: '深度定制集成, 1000+用户', benefits: '专属客户经理, 共同路线图, 优惠费率', partners: 3 },
+      { name: 'Explorer', requirements: 'ecosystem.tierExplorerReq', benefits: 'ecosystem.tierExplorerBenefits', partners: 45 },
+      { name: 'Builder', requirements: 'ecosystem.tierBuilderReq', benefits: 'ecosystem.tierBuilderBenefits', partners: 12 },
+      { name: 'Strategic', requirements: 'ecosystem.tierStrategicReq', benefits: 'ecosystem.tierStrategicBenefits', partners: 3 },
     ],
   },
   activityFeed: [
-    { protocol: 'Uniswap V4', event: 'AFC/USDC池流动性增加 $50K', timestamp: '2026-03-10T14:00:00Z', type: 'liquidity' },
-    { protocol: 'Aave V3', event: 'AFC质押利率更新至 4.2% APY', timestamp: '2026-03-10T12:30:00Z', type: 'rate' },
-    { protocol: 'Chainlink', event: 'AFC/USD价格更新 $2.45', timestamp: '2026-03-10T12:00:00Z', type: 'price' },
-    { protocol: 'The Graph', event: 'Subgraph同步至区块 #21456789', timestamp: '2026-03-10T11:45:00Z', type: 'sync' },
-    { protocol: 'AFC Bridge', event: '跨链状态同步延迟: Polygon', timestamp: '2026-03-10T10:15:00Z', type: 'alert' },
+    { protocol: 'Uniswap V4', event: 'ecosystem.eventLiquidity', timestamp: '2026-03-10T14:00:00Z', type: 'liquidity' },
+    { protocol: 'Aave V3', event: 'ecosystem.eventRate', timestamp: '2026-03-10T12:30:00Z', type: 'rate' },
+    { protocol: 'Chainlink', event: 'ecosystem.eventPrice', timestamp: '2026-03-10T12:00:00Z', type: 'price' },
+    { protocol: 'The Graph', event: 'ecosystem.eventSync', timestamp: '2026-03-10T11:45:00Z', type: 'sync' },
+    { protocol: 'AFC Bridge', event: 'ecosystem.eventAlert', timestamp: '2026-03-10T10:15:00Z', type: 'alert' },
   ],
 };
 
 // ── Tab 1: Protocol Integration ────────────────────────
 function ProtocolIntegrationTab({ protocols, metrics }: { protocols: Protocol[]; metrics: EcosystemMetrics }) {
+  const { t } = useI18n();
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
 
   const integrated = protocols.filter((p) => p.status === 'integrated').length;
@@ -365,12 +368,12 @@ function ProtocolIntegrationTab({ protocols, metrics }: { protocols: Protocol[];
       {/* Ecosystem Metrics Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
         {[
-          { label: '总集成数', value: metrics.totalIntegrations, icon: Puzzle, color: 'text-violet-400' },
-          { label: '活跃集成', value: metrics.activeIntegrations, icon: CheckCircle2, color: 'text-emerald-400' },
-          { label: '总用户', value: formatNumber(metrics.totalUsers), icon: Users, color: 'text-sky-400' },
-          { label: '月活用户', value: formatNumber(metrics.monthlyActiveUsers), icon: Activity, color: 'text-amber-400' },
-          { label: '交易量', value: formatCurrency(metrics.transactionVolume), icon: TrendingUp, color: 'text-emerald-400' },
-          { label: '开发者', value: metrics.developerCount, icon: Zap, color: 'text-violet-400' },
+          { label: t('ecosystem.totalIntegrations'), value: metrics.totalIntegrations, icon: Puzzle, color: 'text-violet-400' },
+          { label: t('ecosystem.activeIntegrations'), value: metrics.activeIntegrations, icon: CheckCircle2, color: 'text-emerald-400' },
+          { label: t('ecosystem.totalUsers'), value: formatNumber(metrics.totalUsers), icon: Users, color: 'text-sky-400' },
+          { label: t('ecosystem.monthlyActiveUsers'), value: formatNumber(metrics.monthlyActiveUsers), icon: Activity, color: 'text-amber-400' },
+          { label: t('ecosystem.transactionVolume'), value: formatCurrency(metrics.transactionVolume), icon: TrendingUp, color: 'text-emerald-400' },
+          { label: t('ecosystem.developerCount'), value: metrics.developerCount, icon: Zap, color: 'text-violet-400' },
         ].map((item) => (
           <motion.div
             key={item.label}
@@ -394,15 +397,15 @@ function ProtocolIntegrationTab({ protocols, metrics }: { protocols: Protocol[];
       {/* Integration Stats Bar */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400">协议状态:</span>
+          <span className="text-xs text-slate-400">{t('ecosystem.protocolStatus')}</span>
           <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-300 border-emerald-500/20">
-            {integrated} 已集成
+            {t('ecosystem.integratedCount', { count: integrated })}
           </Badge>
           <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-300 border-amber-500/20">
-            {pending} 接入中
+            {t('ecosystem.pendingCount', { count: pending })}
           </Badge>
           <Badge variant="outline" className="text-[10px] bg-slate-500/10 text-slate-300 border-slate-500/20">
-            {planned} 规划
+            {t('ecosystem.plannedCount', { count: planned })}
           </Badge>
         </div>
       </div>
@@ -457,13 +460,13 @@ function ProtocolIntegrationTab({ protocols, metrics }: { protocols: Protocol[];
                     </div>
                     <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0 shrink-0', statusConfig.badge)}>
                       <span className={cn('inline-block size-1.5 rounded-full mr-1', statusConfig.dot)} />
-                      {statusConfig.label}
+                      {t(statusConfig.label)}
                     </Badge>
                   </div>
 
                   {/* Description */}
                   <p className="text-[11px] text-slate-400 leading-relaxed mb-3 line-clamp-2 flex-1">
-                    {protocol.description}
+                    {t(protocol.description)}
                   </p>
 
                   {/* Stats (only for integrated) */}
@@ -474,11 +477,11 @@ function ProtocolIntegrationTab({ protocols, metrics }: { protocols: Protocol[];
                         <p className="text-xs font-semibold text-emerald-400 tabular-nums">{formatCurrency(protocol.tvl)}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-[10px] text-slate-500">24h量</p>
+                        <p className="text-[10px] text-slate-500">{t('ecosystem.volume24h')}</p>
                         <p className="text-xs font-semibold text-amber-400 tabular-nums">{formatCurrency(protocol.volume24h)}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-[10px] text-slate-500">用户</p>
+                        <p className="text-[10px] text-slate-500">{t('ecosystem.users')}</p>
                         <p className="text-xs font-semibold text-sky-400 tabular-nums">{formatNumber(protocol.users)}</p>
                       </div>
                     </div>
@@ -504,7 +507,7 @@ function ProtocolIntegrationTab({ protocols, metrics }: { protocols: Protocol[];
                         'border-slate-600 text-slate-400 hover:bg-slate-700/50'
                       )}
                     >
-                      {isIntegrated ? '管理' : protocol.status === 'pending' ? '接入中' : '规划'}
+                      {isIntegrated ? t('ecosystem.manage') : protocol.status === 'pending' ? t('ecosystem.connectingStatus') : t('ecosystem.planLabel')}
                       {isIntegrated && <ExternalLink className="size-3 ml-1" />}
                     </Button>
                   </div>
@@ -520,6 +523,7 @@ function ProtocolIntegrationTab({ protocols, metrics }: { protocols: Protocol[];
 
 // ── Tab 2: Wallet Ecosystem ────────────────────────────
 function WalletEcosystemTab({ wallets }: { wallets: WalletItem[] }) {
+  const { t } = useI18n();
   const [connecting, setConnecting] = useState(false);
   const [connected, setConnected] = useState(false);
 
@@ -542,15 +546,15 @@ function WalletEcosystemTab({ wallets }: { wallets: WalletItem[] }) {
     <div className="space-y-4">
       {/* Wallet Support Overview */}
       <div className="flex items-center gap-4">
-        <span className="text-xs text-slate-400">钱包支持:</span>
+        <span className="text-xs text-slate-400">{t('ecosystem.walletSupportLabel')}</span>
         <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-300 border-emerald-500/20">
-          <Check className="size-2.5 mr-0.5" /> {fullCount} 完整
+          <Check className="size-2.5 mr-0.5" /> {t('ecosystem.fullCount', { count: fullCount })}
         </Badge>
         <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-300 border-amber-500/20">
-          {partialCount} 部分
+          {t('ecosystem.partialCount', { count: partialCount })}
         </Badge>
         <Badge variant="outline" className="text-[10px] bg-slate-500/10 text-slate-300 border-slate-500/20">
-          {plannedCount} 计划
+          {t('ecosystem.plannedCountWallet', { count: plannedCount })}
         </Badge>
       </div>
 
@@ -579,13 +583,13 @@ function WalletEcosystemTab({ wallets }: { wallets: WalletItem[] }) {
                       <div>
                         <h4 className="text-sm font-medium text-slate-100">{wallet.name}</h4>
                         {wallet.users > 0 && (
-                          <p className="text-[10px] text-slate-500">{formatNumber(wallet.users)} 用户</p>
+                          <p className="text-[10px] text-slate-500">{t('ecosystem.walletUsers', { users: formatNumber(wallet.users) })}</p>
                         )}
                       </div>
                     </div>
                     <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0 shrink-0', supportConfig.badge)}>
                       <span className={cn('inline-block size-1.5 rounded-full mr-1', supportConfig.dot)} />
-                      {supportConfig.label}
+                      {t(supportConfig.label)}
                     </Badge>
                   </div>
 
@@ -604,7 +608,7 @@ function WalletEcosystemTab({ wallets }: { wallets: WalletItem[] }) {
                           )}
                         >
                           {supported ? <Check className="size-2.5" /> : <X className="size-2.5" />}
-                          {FEATURE_LABELS[feature]}
+                          {t(FEATURE_LABEL_KEYS[feature])}
                         </div>
                       );
                     })}
@@ -629,10 +633,10 @@ function WalletEcosystemTab({ wallets }: { wallets: WalletItem[] }) {
               </div>
               <div>
                 <h4 className="text-sm font-medium text-slate-100">
-                  {connected ? '钱包已连接' : '连接钱包'}
+                  {connected ? t('ecosystem.walletConnected') : t('ecosystem.connectWalletLabel')}
                 </h4>
                 <p className="text-[11px] text-slate-400">
-                  {connected ? '模拟连接成功 — MetaMask (0x7f3a...c4d2)' : '点击按钮模拟钱包连接'}
+                  {connected ? t('ecosystem.connectSuccess') : t('ecosystem.clickToConnect')}
                 </p>
               </div>
             </div>
@@ -644,7 +648,7 @@ function WalletEcosystemTab({ wallets }: { wallets: WalletItem[] }) {
                   className="flex items-center gap-1.5"
                 >
                   <span className="inline-block size-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[10px] text-emerald-400">已连接</span>
+                  <span className="text-[10px] text-emerald-400">{t('ecosystem.connectedLabel')}</span>
                 </motion.div>
               )}
               <Button
@@ -665,9 +669,9 @@ function WalletEcosystemTab({ wallets }: { wallets: WalletItem[] }) {
                       transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                       className="size-3.5 border-2 border-white/30 border-t-white rounded-full"
                     />
-                    连接中...
+                    {t('ecosystem.connectingLabel')}
                   </>
-                ) : connected ? '断开' : '模拟连接'}
+                ) : connected ? t('ecosystem.disconnect') : t('ecosystem.simulateConnect')}
               </Button>
             </div>
           </div>
@@ -679,24 +683,25 @@ function WalletEcosystemTab({ wallets }: { wallets: WalletItem[] }) {
 
 // ── Tab 3: Data Aggregation ────────────────────────────
 function DataAggregationTab({ dataAggregation, activityFeed }: { dataAggregation: DataAggregation; activityFeed: ActivityFeedItem[] }) {
+  const { t } = useI18n();
   return (
     <div className="space-y-4">
       {/* Data Sources Table */}
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <Database className="size-3.5 text-violet-400" />
-          数据源
+          {t('ecosystem.dataSourceTitle')}
         </h4>
         <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-[11px]">
               <thead>
                 <tr className="border-b border-slate-700/50">
-                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">数据源</th>
-                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">提供商</th>
-                  <th className="text-right px-4 py-2.5 text-slate-400 font-medium">记录数</th>
-                  <th className="text-right px-4 py-2.5 text-slate-400 font-medium">新鲜度</th>
-                  <th className="text-center px-4 py-2.5 text-slate-400 font-medium">状态</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">{t('ecosystem.dataSourceCol')}</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">{t('ecosystem.providerCol')}</th>
+                  <th className="text-right px-4 py-2.5 text-slate-400 font-medium">{t('ecosystem.recordsCol')}</th>
+                  <th className="text-right px-4 py-2.5 text-slate-400 font-medium">{t('ecosystem.freshnessCol')}</th>
+                  <th className="text-center px-4 py-2.5 text-slate-400 font-medium">{t('ecosystem.statusCol')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -723,7 +728,7 @@ function DataAggregationTab({ dataAggregation, activityFeed }: { dataAggregation
                           ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                           : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
                       )}>
-                        {source.status === 'active' ? '活跃' : '延迟'}
+                        {source.status === 'active' ? t('ecosystem.activeLabel') : t('ecosystem.delayedLabel')}
                       </Badge>
                     </td>
                   </motion.tr>
@@ -738,7 +743,7 @@ function DataAggregationTab({ dataAggregation, activityFeed }: { dataAggregation
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <Radio className="size-3.5 text-emerald-400" />
-          数据管道
+          {t('ecosystem.dataPipelineTitle')}
         </h4>
         <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm p-4">
           <div className="flex items-center gap-0 overflow-x-auto pb-2">
@@ -784,7 +789,7 @@ function DataAggregationTab({ dataAggregation, activityFeed }: { dataAggregation
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <Activity className="size-3.5 text-amber-400" />
-          协议活动
+          {t('ecosystem.protocolActivity')}
         </h4>
         <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm overflow-hidden">
           <ScrollArea className="max-h-64">
@@ -801,13 +806,13 @@ function DataAggregationTab({ dataAggregation, activityFeed }: { dataAggregation
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0 shrink-0', typeConfig.badge)}>
-                        {typeConfig.label}
+                        {t(typeConfig.label)}
                       </Badge>
                       <span className="text-[11px] text-slate-300 truncate">
-                        <span className="text-slate-400 font-medium">{item.protocol}</span> — {item.event}
+                        <span className="text-slate-400 font-medium">{item.protocol}</span> — {t(item.event)}
                       </span>
                     </div>
-                    <span className="text-[10px] text-slate-500 shrink-0 tabular-nums">{getRelativeTime(item.timestamp)}</span>
+                    <span className="text-[10px] text-slate-500 shrink-0 tabular-nums">{getRelativeTime(item.timestamp, t)}</span>
                   </motion.div>
                 );
               })}
@@ -827,6 +832,7 @@ function NotificationCenterTab({
   notifications: NotificationItem[];
   partnerProgram: PartnerProgram;
 }) {
+  const { t } = useI18n();
   const [notifications, setNotifications] = useState(initialNotifications);
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [notifPrefs, setNotifPrefs] = useState<Record<NotificationType, boolean>>({
@@ -863,11 +869,11 @@ function NotificationCenterTab({
   }, []);
 
   const priorityFilters: { value: string; label: string; badge: string }[] = [
-    { value: 'all', label: '全部', badge: 'bg-slate-500/10 text-slate-300 border-slate-500/20' },
-    { value: 'critical', label: '紧急', badge: 'bg-red-500/10 text-red-300 border-red-500/20' },
-    { value: 'high', label: '高', badge: 'bg-amber-500/10 text-amber-300 border-amber-500/20' },
-    { value: 'medium', label: '中', badge: 'bg-sky-500/10 text-sky-300 border-sky-500/20' },
-    { value: 'low', label: '低', badge: 'bg-slate-500/10 text-slate-300 border-slate-500/20' },
+    { value: 'all', label: t('ecosystem.allLabel'), badge: 'bg-slate-500/10 text-slate-300 border-slate-500/20' },
+    { value: 'critical', label: t('ecosystem.criticalLabel'), badge: 'bg-red-500/10 text-red-300 border-red-500/20' },
+    { value: 'high', label: t('ecosystem.highLabel'), badge: 'bg-amber-500/10 text-amber-300 border-amber-500/20' },
+    { value: 'medium', label: t('ecosystem.mediumLabel'), badge: 'bg-sky-500/10 text-sky-300 border-sky-500/20' },
+    { value: 'low', label: t('ecosystem.lowLabel'), badge: 'bg-slate-500/10 text-slate-300 border-slate-500/20' },
   ];
 
   const allNotifTypes: NotificationType[] = ['governance', 'revenue', 'security', 'bridge', 'skill', 'system', 'delegation', 'compliance'];
@@ -879,7 +885,7 @@ function NotificationCenterTab({
         <CardHeader className="pb-2 pt-3 px-4">
           <CardTitle className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
             <Settings className="size-3.5 text-slate-400" />
-            通知偏好
+            {t('ecosystem.notificationPrefs')}
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-3">
@@ -892,7 +898,7 @@ function NotificationCenterTab({
                   <div className="flex items-center gap-1.5">
                     <TypeIcon className={cn('size-3', enabled ? 'text-slate-300' : 'text-slate-500')} />
                     <span className={cn('text-[10px]', enabled ? 'text-slate-300' : 'text-slate-500')}>
-                      {NOTIFICATION_TYPE_LABEL[type]}
+                      {t(NOTIFICATION_TYPE_LABEL_KEY[type])}
                     </span>
                   </div>
                   <Switch
@@ -928,7 +934,7 @@ function NotificationCenterTab({
         <div className="flex items-center gap-2">
           {unreadCount > 0 && (
             <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-300 border-red-500/20">
-              {unreadCount} 未读
+              {t('ecosystem.unreadLabel', { count: unreadCount })}
             </Badge>
           )}
           <Button
@@ -939,7 +945,7 @@ function NotificationCenterTab({
             className="h-6 text-[10px] px-2.5 border-slate-600 text-slate-400 hover:text-slate-300 hover:border-slate-500"
           >
             <Check className="size-3 mr-1" />
-            全部标为已读
+            {t('ecosystem.markAllRead')}
           </Button>
         </div>
       </div>
@@ -980,39 +986,39 @@ function NotificationCenterTab({
                           'text-xs',
                           notif.read ? 'text-slate-400 font-normal' : 'text-slate-100 font-medium'
                         )}>
-                          {notif.title}
+                          {t(notif.title)}
                         </h5>
                         <Badge variant="outline" className={cn('text-[8px] px-1 py-0', priorityConfig.badge)}>
-                          {priorityConfig.label}
+                          {t(priorityConfig.label)}
                         </Badge>
                         <Badge variant="outline" className="text-[8px] px-1 py-0 bg-slate-700/50 text-slate-400 border-slate-600">
-                          {NOTIFICATION_TYPE_LABEL[notif.type]}
+                          {t(NOTIFICATION_TYPE_LABEL_KEY[notif.type])}
                         </Badge>
                       </div>
                       <p className={cn(
                         'text-[11px] mt-0.5',
                         notif.read ? 'text-slate-500' : 'text-slate-400'
                       )}>
-                        {notif.message}
+                        {t(notif.message)}
                       </p>
                       <div className="flex items-center gap-3 mt-1.5">
                         <span className="text-[10px] text-slate-500 flex items-center gap-1">
                           <Clock className="size-2.5" />
-                          {getRelativeTime(notif.createdAt)}
+                          {getRelativeTime(notif.createdAt, t)}
                         </span>
                         {!notif.read && (
                           <button
                             onClick={() => handleMarkRead(notif.id)}
                             className="text-[10px] text-sky-400 hover:text-sky-300 transition-colors"
                           >
-                            标记已读
+                            {t('ecosystem.markRead')}
                           </button>
                         )}
                         <button
                           onClick={() => handleDismiss(notif.id)}
                           className="text-[10px] text-slate-500 hover:text-slate-400 transition-colors"
                         >
-                          忽略
+                          {t('ecosystem.ignore')}
                         </button>
                       </div>
                     </div>
@@ -1033,7 +1039,7 @@ function NotificationCenterTab({
       <div>
         <h4 className="text-xs font-medium text-slate-300 mb-2 flex items-center gap-1.5">
           <Sparkles className="size-3.5 text-violet-400" />
-          合作伙伴计划
+          {t('ecosystem.partnerProgram')}
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {partnerProgram.tiers.map((tier, idx) => {
@@ -1055,17 +1061,17 @@ function NotificationCenterTab({
                     <div className="flex items-center justify-between">
                       <h5 className={cn('text-sm font-semibold', color.icon)}>{tier.name}</h5>
                       <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-slate-700/50 text-slate-300 border-slate-600">
-                        {tier.partners} 合作方
+                        {t('ecosystem.partnerCount', { count: tier.partners })}
                       </Badge>
                     </div>
                     <div className="space-y-2">
                       <div>
-                        <p className="text-[10px] text-slate-500 mb-0.5">要求</p>
-                        <p className="text-[11px] text-slate-300">{tier.requirements}</p>
+                        <p className="text-[10px] text-slate-500 mb-0.5">{t('ecosystem.requirements')}</p>
+                        <p className="text-[11px] text-slate-300">{t(tier.requirements)}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] text-slate-500 mb-0.5">权益</p>
-                        <p className="text-[11px] text-slate-300">{tier.benefits}</p>
+                        <p className="text-[10px] text-slate-500 mb-0.5">{t('ecosystem.benefits')}</p>
+                        <p className="text-[11px] text-slate-300">{t(tier.benefits)}</p>
                       </div>
                     </div>
                     <Button
@@ -1078,7 +1084,7 @@ function NotificationCenterTab({
                         'hover:bg-slate-700/50'
                       )}
                     >
-                      申请加入
+                      {t('ecosystem.applyJoin')}
                       <ChevronRight className="size-3 ml-1" />
                     </Button>
                   </CardContent>
@@ -1094,6 +1100,7 @@ function NotificationCenterTab({
 
 // ── Main Component ─────────────────────────────────────
 export default function EcosystemHub() {
+  const { t } = useI18n();
   const [data, setData] = useState<EcosystemData>(FALLBACK_DATA);
   const [activeTab, setActiveTab] = useState('protocols');
 
@@ -1121,12 +1128,12 @@ export default function EcosystemHub() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-semibold text-slate-100 flex items-center gap-2">
               <Puzzle className="size-4 text-violet-400" />
-              生态集成中心
+              {t('ecosystem.title')}
             </CardTitle>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-300 border-emerald-500/20">
                 <span className="inline-block size-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse" />
-                {data.ecosystemMetrics.activeIntegrations} 活跃
+                {t('ecosystem.activeCount', { count: data.ecosystemMetrics.activeIntegrations })}
               </Badge>
             </div>
           </div>
@@ -1136,19 +1143,19 @@ export default function EcosystemHub() {
             <TabsList className="bg-slate-900/50 border border-slate-700/50 mb-4">
               <TabsTrigger value="protocols" className="data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300 text-[11px] gap-1.5">
                 <Puzzle className="size-3.5" />
-                协议集成
+                {t('ecosystem.protocolIntegration')}
               </TabsTrigger>
               <TabsTrigger value="wallets" className="data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300 text-[11px] gap-1.5">
                 <Wallet className="size-3.5" />
-                钱包生态
+                {t('ecosystem.walletSupport')}
               </TabsTrigger>
               <TabsTrigger value="data" className="data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300 text-[11px] gap-1.5">
                 <Database className="size-3.5" />
-                数据聚合
+                {t('ecosystem.dataAggregation')}
               </TabsTrigger>
               <TabsTrigger value="notifications" className="data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300 text-[11px] gap-1.5 relative">
                 <Bell className="size-3.5" />
-                通知中心
+                {t('ecosystem.notificationCenter')}
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white">
                     {unreadCount}

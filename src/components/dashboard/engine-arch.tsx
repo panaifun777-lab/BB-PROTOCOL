@@ -36,6 +36,7 @@ import {
   Cell,
 } from 'recharts';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/hooks/use-i18n';
 
 // ── Types ──────────────────────────────────────────────
 interface FunctionDef {
@@ -170,6 +171,7 @@ function BenchmarkTooltip({ active, payload, label }: { active?: boolean; payloa
 // ── Copy Button ────────────────────────────────────────
 function CopyButton({ text, className }: { text: string; className?: string }) {
   const [copied, setCopied] = useState(false);
+  const { t } = useI18n();
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(text).then(() => {
@@ -186,7 +188,7 @@ function CopyButton({ text, className }: { text: string; className?: string }) {
         copied ? 'bg-emerald-500/20' : 'bg-slate-700/50 hover:bg-slate-600/50',
         className,
       )}
-      aria-label="复制"
+      aria-label={t('engine.copy')}
     >
       {copied ? (
         <CheckCircle className="size-3.5 text-emerald-400" />
@@ -201,6 +203,7 @@ function CopyButton({ text, className }: { text: string; className?: string }) {
 function ModuleCard({ mod }: { mod: Module }) {
   const [functionsExpanded, setFunctionsExpanded] = useState(false);
   const [mathExpanded, setMathExpanded] = useState(false);
+  const { t } = useI18n();
   const catConf = CATEGORY_COLORS[mod.category] || CATEGORY_COLORS.core;
   const statusConf = STATUS_COLORS[mod.status] || STATUS_COLORS.production;
 
@@ -241,22 +244,22 @@ function ModuleCard({ mod }: { mod: Module }) {
           <p className={cn('text-sm font-bold tabular-nums', getLatencyColor(mod.performanceMs))}>
             {mod.performanceMs < 1 ? mod.performanceMs.toFixed(1) : mod.performanceMs}{mod.performanceMs >= 1 ? 'ms' : 'ms'}
           </p>
-          <p className="text-[9px] text-slate-500">延迟</p>
+          <p className="text-[9px] text-slate-500">{t('engine.latency')}</p>
         </div>
         <div className="rounded-lg p-2 text-center border border-slate-700/50 bg-emerald-500/5">
           <p className="text-sm font-bold tabular-nums text-emerald-400">{mod.throughput}</p>
-          <p className="text-[9px] text-slate-500">吞吐</p>
+          <p className="text-[9px] text-slate-500">{t('engine.throughput')}</p>
         </div>
         <div className="rounded-lg p-2 text-center border border-slate-700/50 bg-violet-500/5">
           <p className="text-sm font-bold tabular-nums text-violet-400">{mod.memoryUsage}</p>
-          <p className="text-[9px] text-slate-500">内存</p>
+          <p className="text-[9px] text-slate-500">{t('engine.memory')}</p>
         </div>
       </div>
 
       {/* Tests Summary */}
       <div className="flex items-center gap-3 mb-3 text-[10px]">
-        <span className="text-slate-500">测试:</span>
-        <span className="text-emerald-400 font-medium tabular-nums">{mod.tests.passing}/{mod.tests.unit + mod.tests.property + mod.tests.benchmark} 通过</span>
+        <span className="text-slate-500">{t('engine.testLabel')}</span>
+        <span className="text-emerald-400 font-medium tabular-nums">{mod.tests.passing}/{mod.tests.unit + mod.tests.property + mod.tests.benchmark} {t('engine.passing')}</span>
         <span className="text-slate-600">|</span>
         <span className="text-slate-400">Unit {mod.tests.unit}</span>
         <span className="text-slate-400">Prop {mod.tests.property}</span>
@@ -271,7 +274,7 @@ function ModuleCard({ mod }: { mod: Module }) {
         >
           {functionsExpanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
           <FunctionSquare className="size-3" />
-          <span className="font-medium">函数列表</span>
+          <span className="font-medium">{t('engine.functionList')}</span>
           <span className="text-slate-600">({mod.functions.length})</span>
         </button>
         <AnimatePresence>
@@ -312,7 +315,7 @@ function ModuleCard({ mod }: { mod: Module }) {
         )}
       >
         <Sigma className="mr-1.5 size-3" />
-        {mathExpanded ? '收起数学模型' : '查看数学模型'}
+        {mathExpanded ? t('engine.collapseMathModel') : t('engine.viewMathModel')}
       </Button>
 
       {/* Math Model (Expandable) */}
@@ -328,7 +331,7 @@ function ModuleCard({ mod }: { mod: Module }) {
             <div className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
               <div className="flex items-center gap-2 mb-2">
                 <Sigma className="size-3.5 text-amber-400" />
-                <span className="text-[11px] font-semibold text-amber-300">数学模型</span>
+                <span className="text-[11px] font-semibold text-amber-300">{t('engine.mathModel')}</span>
               </div>
               <div className="relative rounded-md bg-slate-900/80 p-3 mb-3">
                 <pre className="text-sm font-mono text-amber-200/90 whitespace-pre-wrap break-all">{mod.mathModel.formula}</pre>
@@ -336,10 +339,10 @@ function ModuleCard({ mod }: { mod: Module }) {
               </div>
               <div className="space-y-1.5">
                 <div className="grid grid-cols-[auto_1fr_auto_auto] gap-x-3 gap-y-1 text-[10px]">
-                  <span className="text-slate-500 font-medium">符号</span>
-                  <span className="text-slate-500 font-medium">名称</span>
-                  <span className="text-slate-500 font-medium">值</span>
-                  <span className="text-slate-500 font-medium">描述</span>
+                  <span className="text-slate-500 font-medium">{t('engine.symbol')}</span>
+                  <span className="text-slate-500 font-medium">{t('engine.name')}</span>
+                  <span className="text-slate-500 font-medium">{t('engine.value')}</span>
+                  <span className="text-slate-500 font-medium">{t('engine.description')}</span>
                 </div>
                 {mod.mathModel.parameters.map((param) => (
                   <div key={param.symbol} className="grid grid-cols-[auto_1fr_auto_auto] gap-x-3 gap-y-1 text-[10px] py-1 border-t border-slate-700/30">
@@ -406,6 +409,7 @@ function FlowArrow({ flow, index }: { flow: DataFlow; index: number }) {
 
 // ── Data Flow Visual Diagram ───────────────────────────
 function DataFlowDiagram({ flows }: { flows: DataFlow[] }) {
+  const { t } = useI18n();
   // Group flows by source
   const sources = useMemo(() => {
     const map = new Map<string, DataFlow[]>();
@@ -430,7 +434,7 @@ function DataFlowDiagram({ flows }: { flows: DataFlow[] }) {
     <div className="rounded-xl border border-slate-700 bg-slate-800/40 p-4">
       <div className="flex items-center gap-2 mb-4">
         <Activity className="size-4 text-emerald-400" />
-        <h4 className="text-xs font-semibold text-slate-200">数据流拓扑</h4>
+        <h4 className="text-xs font-semibold text-slate-200">{t('engine.dataFlowTopology')}</h4>
       </div>
       <div className="space-y-4">
         {Array.from(sources.entries()).map(([source, targets], si) => (
@@ -482,6 +486,7 @@ export default function EngineArch() {
   const [data, setData] = useState<EngineArchData | null>(null);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
+  const { t } = useI18n();
 
   useEffect(() => {
     fetch('/api/engine-arch')
@@ -535,7 +540,7 @@ export default function EngineArch() {
             className="flex flex-col items-center gap-3"
           >
             <Cog className="size-8 text-orange-400 animate-spin" />
-            <p className="text-slate-400 text-sm">加载 Rust 引擎架构数据...</p>
+            <p className="text-slate-400 text-sm">{t('engine.loadingData')}</p>
           </motion.div>
         </CardContent>
       </Card>
@@ -548,11 +553,11 @@ export default function EngineArch() {
       {/* Overview Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {[
-          { label: '模块', value: data.modules.length, color: 'text-slate-200', bg: 'bg-slate-800/60', icon: Cog },
+          { label: t('engine.modules'), value: data.modules.length, color: 'text-slate-200', bg: 'bg-slate-800/60', icon: Cog },
           { label: 'LoC', value: formatNumber(data.systemMetrics.totalLoc), color: 'text-emerald-400', bg: 'bg-emerald-500/5', icon: HardDrive },
-          { label: '函数', value: data.systemMetrics.totalFunctions, color: 'text-violet-400', bg: 'bg-violet-500/5', icon: FunctionSquare },
-          { label: '测试', value: data.systemMetrics.passingTests, color: 'text-sky-400', bg: 'bg-sky-500/5', icon: CheckCircle },
-          { label: '平均延迟', value: `${data.systemMetrics.avgLatencyMs}ms`, color: 'text-amber-400', bg: 'bg-amber-500/5', icon: Zap },
+          { label: t('engine.functions'), value: data.systemMetrics.totalFunctions, color: 'text-violet-400', bg: 'bg-violet-500/5', icon: FunctionSquare },
+          { label: t('engine.tests'), value: data.systemMetrics.passingTests, color: 'text-sky-400', bg: 'bg-sky-500/5', icon: CheckCircle },
+          { label: t('engine.avgLatency'), value: `${data.systemMetrics.avgLatencyMs}ms`, color: 'text-amber-400', bg: 'bg-amber-500/5', icon: Zap },
         ].map((stat) => (
           <div key={stat.label} className={cn('rounded-lg border border-slate-700 p-3 text-center', stat.bg)}>
             <stat.icon className={cn('size-3.5 mx-auto mb-1', stat.color)} />
@@ -592,7 +597,7 @@ export default function EngineArch() {
       {filteredModules.length === 0 && (
         <div className="text-center py-8">
           <Cog className="size-6 text-slate-600 mx-auto mb-2" />
-          <p className="text-xs text-slate-500">该分类暂无模块</p>
+          <p className="text-xs text-slate-500">{t('engine.noModulesInCategory')}</p>
         </div>
       )}
     </div>
@@ -604,10 +609,10 @@ export default function EngineArch() {
       {/* System Metrics Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: '总代码量', value: formatNumber(data.systemMetrics.totalLoc), sub: 'LoC', icon: HardDrive, color: 'text-emerald-400' },
-          { label: 'CPU 使用', value: data.systemMetrics.cpuUsage, sub: '当前', icon: Cpu, color: 'text-amber-400' },
-          { label: '内存占用', value: data.systemMetrics.memoryTotal, sub: '总计', icon: Activity, color: 'text-violet-400' },
-          { label: '运行时间', value: data.systemMetrics.uptime, sub: '可用性', icon: Clock, color: 'text-sky-400' },
+          { label: t('engine.totalLoc'), value: formatNumber(data.systemMetrics.totalLoc), sub: 'LoC', icon: HardDrive, color: 'text-emerald-400' },
+          { label: t('engine.cpuUsage'), value: data.systemMetrics.cpuUsage, sub: t('engine.cpuCurrent'), icon: Cpu, color: 'text-amber-400' },
+          { label: t('engine.memoryUsageLabel'), value: data.systemMetrics.memoryTotal, sub: t('engine.memoryTotal'), icon: Activity, color: 'text-violet-400' },
+          { label: t('engine.uptime'), value: data.systemMetrics.uptime, sub: t('engine.availability'), icon: Clock, color: 'text-sky-400' },
         ].map((stat) => (
           <div key={stat.label} className="rounded-lg border border-slate-700 bg-slate-800/60 p-3">
             <div className="flex items-center gap-2 mb-1">
@@ -627,9 +632,9 @@ export default function EngineArch() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <ArrowRight className="size-4 text-violet-400" />
-          <h4 className="text-xs font-semibold text-slate-200">数据流详情</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('engine.dataFlowDetails')}</h4>
           <Badge variant="outline" className="text-[9px] bg-slate-600/20 text-slate-300 border-slate-600/30">
-            {data.dataFlow.length} 条
+            {t('engine.flowCount', { count: data.dataFlow.length })}
           </Badge>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -649,21 +654,21 @@ export default function EngineArch() {
         <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
           <div className="flex items-center gap-2 mb-1">
             <Zap className="size-3.5 text-emerald-400" />
-            <span className="text-[10px] text-slate-500">最快操作</span>
+            <span className="text-[10px] text-slate-500">{t('engine.fastestOp')}</span>
           </div>
           <p className="text-xs font-medium text-emerald-300">{benchmarkSummary.fastest}</p>
         </div>
         <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
           <div className="flex items-center gap-2 mb-1">
             <Clock className="size-3.5 text-red-400" />
-            <span className="text-[10px] text-slate-500">最慢操作</span>
+            <span className="text-[10px] text-slate-500">{t('engine.slowestOp')}</span>
           </div>
           <p className="text-xs font-medium text-red-300">{benchmarkSummary.slowest}</p>
         </div>
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
           <div className="flex items-center gap-2 mb-1">
             <BarChart3 className="size-3.5 text-amber-400" />
-            <span className="text-[10px] text-slate-500">平均 P99</span>
+            <span className="text-[10px] text-slate-500">{t('engine.avgP99')}</span>
           </div>
           <p className="text-lg font-bold tabular-nums text-amber-400">{benchmarkSummary.avgP99.toFixed(1)}ms</p>
         </div>
@@ -673,7 +678,7 @@ export default function EngineArch() {
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-3">
           <BarChart3 className="size-4 text-emerald-400" />
-          <h4 className="text-xs font-semibold text-slate-200">性能基准 — P50 / P95 / P99 延迟分布</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('engine.benchmarkTitle')}</h4>
         </div>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
@@ -735,11 +740,11 @@ export default function EngineArch() {
       {/* Benchmark Table */}
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 overflow-hidden">
         <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-x-4 p-3 border-b border-slate-700/50 text-[10px] font-semibold text-slate-500">
-          <span>操作</span>
+          <span>{t('engine.operation')}</span>
           <span className="w-16 text-right">P50</span>
           <span className="w-16 text-right">P95</span>
           <span className="w-16 text-right">P99</span>
-          <span className="w-10 text-right">单位</span>
+          <span className="w-10 text-right">{t('engine.unit')}</span>
         </div>
         <ScrollArea className="max-h-72">
           {data.performanceBenchmarks.map((b, i) => (
@@ -799,10 +804,10 @@ export default function EngineArch() {
             {/* Parameter Table */}
             <div className="rounded-lg border border-slate-700/50 overflow-hidden">
               <div className="grid grid-cols-[auto_1fr_auto_1fr] gap-x-3 p-2.5 bg-slate-900/40 text-[9px] font-semibold text-slate-500 border-b border-slate-700/30">
-                <span>符号</span>
-                <span>名称</span>
-                <span>值</span>
-                <span>描述</span>
+                <span>{t('engine.symbol')}</span>
+                <span>{t('engine.name')}</span>
+                <span>{t('engine.value')}</span>
+                <span>{t('engine.description')}</span>
               </div>
               {mod.mathModel.parameters.map((param, pi) => (
                 <div
@@ -827,7 +832,7 @@ export default function EngineArch() {
               <div className="mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <TrendingDown className="size-3.5 text-emerald-400" />
-                  <span className="text-[11px] font-semibold text-emerald-300">IFD 权重函数 λ 向量</span>
+                  <span className="text-[11px] font-semibold text-emerald-300">{t('engine.ifdWeightVector')}</span>
                 </div>
                 <div className="flex items-end gap-1 h-24">
                   {mod.mathModel.parameters.map((param) => {
@@ -854,7 +859,7 @@ export default function EngineArch() {
                     );
                   })}
                 </div>
-                <p className="text-[9px] text-slate-500 mt-2 text-center">Σλ = {mod.mathModel.parameters.reduce((s, p) => s + p.value, 0).toFixed(2)} (权重归一化)</p>
+                <p className="text-[9px] text-slate-500 mt-2 text-center">{t('engine.weightNormalization', { sum: mod.mathModel.parameters.reduce((s, p) => s + p.value, 0).toFixed(2) })}</p>
               </div>
             )}
           </motion.div>
@@ -865,7 +870,7 @@ export default function EngineArch() {
       <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
         <div className="flex items-center gap-2 mb-3">
           <Flame className="size-4 text-amber-400" />
-          <span className="text-xs font-semibold text-amber-300">AFC 代币经济 — 通缩模型</span>
+          <span className="text-xs font-semibold text-amber-300">{t('engine.afcTokenomics')}</span>
         </div>
 
         {/* Deflation Formula */}
@@ -881,7 +886,7 @@ export default function EngineArch() {
           <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-3">
             <div className="flex items-center gap-2 mb-2">
               <Flame className="size-3.5 text-red-400" />
-              <span className="text-[10px] font-medium text-slate-300">燃烧率</span>
+              <span className="text-[10px] font-medium text-slate-300">{t('engine.burnRate')}</span>
             </div>
             <div className="flex items-end gap-1 h-16">
               {[12, 18.5, 24, 31, 38, 45, 52].map((val, i) => (
@@ -900,13 +905,13 @@ export default function EngineArch() {
               <span>→</span>
               <span>Mar</span>
             </div>
-            <p className="text-[9px] text-red-400 mt-1">月燃烧量递增 ×3.6x</p>
+            <p className="text-[9px] text-red-400 mt-1">{t('engine.monthlyBurnIncrease')}</p>
           </div>
 
           <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-3">
             <div className="flex items-center gap-2 mb-2">
               <ArrowUpRight className="size-3.5 text-emerald-400" />
-              <span className="text-[10px] font-medium text-slate-300">回购率</span>
+              <span className="text-[10px] font-medium text-slate-300">{t('engine.buybackRate')}</span>
             </div>
             <div className="flex items-end gap-1 h-16">
               {[20, 22, 25, 28, 32, 36, 40].map((val, i) => (
@@ -925,7 +930,7 @@ export default function EngineArch() {
               <span>→</span>
               <span>Mar</span>
             </div>
-            <p className="text-[9px] text-emerald-400 mt-1">金库回购比例 ×2.0x</p>
+            <p className="text-[9px] text-emerald-400 mt-1">{t('engine.vaultBuybackRatio')}</p>
           </div>
         </div>
 
@@ -933,15 +938,15 @@ export default function EngineArch() {
         <div className="grid grid-cols-3 gap-2 mt-3">
           <div className="rounded-lg border border-slate-700/50 bg-slate-800/40 p-2 text-center">
             <p className="text-sm font-bold text-red-400 tabular-nums">5%</p>
-            <p className="text-[8px] text-slate-500">燃烧率</p>
+            <p className="text-[8px] text-slate-500">{t('engine.burnRate')}</p>
           </div>
           <div className="rounded-lg border border-slate-700/50 bg-slate-800/40 p-2 text-center">
             <p className="text-sm font-bold text-emerald-400 tabular-nums">20%</p>
-            <p className="text-[8px] text-slate-500">回购率</p>
+            <p className="text-[8px] text-slate-500">{t('engine.buybackRate')}</p>
           </div>
           <div className="rounded-lg border border-slate-700/50 bg-slate-800/40 p-2 text-center">
             <p className="text-sm font-bold text-amber-400 tabular-nums">15.7%</p>
-            <p className="text-[8px] text-slate-500">价值捕获率</p>
+            <p className="text-[8px] text-slate-500">{t('engine.valueCaptureRate')}</p>
           </div>
         </div>
       </div>
@@ -956,8 +961,8 @@ export default function EngineArch() {
             <Cog className="size-5 text-orange-400" />
           </div>
           <div>
-            <CardTitle className="text-lg text-slate-100">Rust 引擎架构</CardTitle>
-            <p className="text-[11px] text-slate-500 mt-0.5">6 核心模块 · 28 函数 · 165 测试</p>
+            <CardTitle className="text-lg text-slate-100">{t('engine.rustEngine')}</CardTitle>
+            <p className="text-[11px] text-slate-500 mt-0.5">{t('engine.engineSubtitle')}</p>
           </div>
           <Badge className="ml-auto bg-orange-500/15 text-orange-300 border-orange-500/30 text-[10px]">
             <Cog className="mr-1 size-3" />
@@ -973,28 +978,28 @@ export default function EngineArch() {
               className="data-[state=active]:bg-orange-500/20 data-[state=active]:text-orange-300 text-[10px] h-8 px-3"
             >
               <Cog className="mr-1.5 size-3" />
-              引擎模块
+              {t('engine.engineModules')}
             </TabsTrigger>
             <TabsTrigger
               value="dataflow"
               className="data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300 text-[10px] h-8 px-3"
             >
               <ArrowRight className="mr-1.5 size-3" />
-              数据流
+              {t('engine.dataFlow')}
             </TabsTrigger>
             <TabsTrigger
               value="benchmarks"
               className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-300 text-[10px] h-8 px-3"
             >
               <BarChart3 className="mr-1.5 size-3" />
-              性能基准
+              {t('engine.performanceBenchmark')}
             </TabsTrigger>
             <TabsTrigger
               value="mathmodels"
               className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-300 text-[10px] h-8 px-3"
             >
               <Sigma className="mr-1.5 size-3" />
-              数学模型
+              {t('engine.mathModels')}
             </TabsTrigger>
           </TabsList>
 

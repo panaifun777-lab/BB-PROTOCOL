@@ -45,6 +45,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/hooks/use-i18n';
 import { format, parseISO } from 'date-fns';
 import {
   useMonitoringStream,
@@ -199,18 +200,18 @@ function TrendArrow({ current, previous }: { current: number; previous: number }
 
 // ── Relative Time ────────────────────────────────────────────
 
-function relativeTime(dateStr: string): string {
-  if (dateStr === '从未触发') return dateStr;
+function relativeTime(dateStr: string, t?: (key: string, params?: Record<string, string | number>) => string): string {
+  if (dateStr === (t ? t('monitoring.neverTriggered') : '从未触发')) return t ? t('monitoring.neverTriggered') : dateStr;
   try {
     const date = new Date(dateStr);
     const now = new Date('2026-05-25T18:55:00Z');
     const diffMs = now.getTime() - date.getTime();
     const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin < 60) return `${diffMin}分钟前`;
+    if (diffMin < 60) return t ? t('deployment.minutesAgo', { n: diffMin }) : `${diffMin}分钟前`;
     const diffH = Math.floor(diffMin / 60);
-    if (diffH < 24) return `${diffH}小时前`;
+    if (diffH < 24) return t ? t('deployment.hoursAgo', { n: diffH }) : `${diffH}小时前`;
     const diffD = Math.floor(diffH / 24);
-    return `${diffD}天前`;
+    return t ? t('deployment.daysAgo', { n: diffD }) : `${diffD}天前`;
   } catch {
     return dateStr;
   }
@@ -219,6 +220,7 @@ function relativeTime(dateStr: string): string {
 // ── Main Component ───────────────────────────────────────────
 
 export default function MonitoringCenter() {
+  const { t } = useI18n();
   const { isConnected, systemMetrics, metricsHistory, chainEvents, lastAnomaly, anomalyHistory } = useMonitoringStream();
   const [activeTab, setActiveTab] = useState('system');
   const [apiData, setApiData] = useState<MonitoringAPIData | null>(null);
@@ -304,8 +306,8 @@ export default function MonitoringCenter() {
               <Activity className="w-4.5 h-4.5 text-white" />
             </div>
             <div>
-              <CardTitle className="text-base text-slate-100">监控与告警中心</CardTitle>
-              <p className="text-xs text-slate-400 mt-0.5">Monitoring & Alerting Center</p>
+              <CardTitle className="text-base text-slate-100">{t('monitoring.title')}</CardTitle>
+              <p className="text-xs text-slate-400 mt-0.5">{t('monitoring.title')}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -316,13 +318,13 @@ export default function MonitoringCenter() {
                 isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'
               )} />
               <span className="text-[10px] text-emerald-300 font-medium">
-                {isConnected ? '实时监控中' : '连接中...'}
+                {isConnected ? t('monitoring.realtimeMonitor') : t('monitoring.connecting')}
               </span>
             </div>
             {/* System health */}
             <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20">
               <CheckCircle2 className="w-3 h-3 mr-1" />
-              健康
+              {t('monitoring.healthy')}
             </Badge>
           </div>
         </div>
@@ -333,19 +335,19 @@ export default function MonitoringCenter() {
           <TabsList className="bg-slate-900/60 border border-slate-700/50 w-full grid grid-cols-4 h-9">
             <TabsTrigger value="system" className="text-xs data-[state=active]:bg-slate-700 data-[state=active]:text-emerald-300">
               <Cpu className="w-3 h-3 mr-1" />
-              系统监控
+              {t('monitoring.systemMonitor')}
             </TabsTrigger>
             <TabsTrigger value="chain" className="text-xs data-[state=active]:bg-slate-700 data-[state=active]:text-emerald-300">
               <Link2 className="w-3 h-3 mr-1" />
-              链上事件
+              {t('monitoring.chainEventsTab')}
             </TabsTrigger>
             <TabsTrigger value="alerts" className="text-xs data-[state=active]:bg-slate-700 data-[state=active]:text-emerald-300">
               <Bell className="w-3 h-3 mr-1" />
-              告警规则
+              {t('monitoring.alertRulesTab')}
             </TabsTrigger>
             <TabsTrigger value="anomaly" className="text-xs data-[state=active]:bg-slate-700 data-[state=active]:text-emerald-300">
               <Search className="w-3 h-3 mr-1" />
-              异常检测
+              {t('monitoring.anomalyDetectionTab')}
             </TabsTrigger>
           </TabsList>
 
@@ -396,7 +398,7 @@ export default function MonitoringCenter() {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-1.5">
                         <HardDrive className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-[11px] text-slate-400">内存</span>
+                        <span className="text-[11px] text-slate-400">{t('monitoring.memory')}</span>
                       </div>
                       <TrendArrow current={metrics.memory} previous={prevMetrics.memory} />
                     </div>
@@ -420,7 +422,7 @@ export default function MonitoringCenter() {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-1.5">
                         <Zap className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-[11px] text-slate-400">请求率</span>
+                        <span className="text-[11px] text-slate-400">{t('monitoring.requestRateLabel')}</span>
                       </div>
                       <TrendArrow current={metrics.requestRate} previous={prevMetrics.requestRate} />
                     </div>
@@ -445,7 +447,7 @@ export default function MonitoringCenter() {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-1.5">
                         <AlertTriangle className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-[11px] text-slate-400">错误率</span>
+                        <span className="text-[11px] text-slate-400">{t('monitoring.errorRateLabel')}</span>
                       </div>
                       <TrendArrow current={metrics.errorRate} previous={prevMetrics.errorRate} />
                     </div>
@@ -471,14 +473,14 @@ export default function MonitoringCenter() {
                   >
                     <h4 className="text-xs font-medium text-slate-300 mb-3 flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      延迟分布
+                      {t('monitoring.latencyDistribution')}
                     </h4>
                     <ResponsiveContainer width="100%" height={80}>
                       <BarChart data={latencyData} margin={{ top: 4, right: 8, bottom: 4, left: 8 }}>
                         <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                         <Tooltip
                           contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8, fontSize: 11 }}
-                          formatter={(value: number) => [`${value}ms`, '延迟']}
+                          formatter={(value: number) => [`${value}ms`, t('monitoring.latencyLabel')]}
                         />
                         <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                           {latencyData.map((entry, index) => (
@@ -503,12 +505,12 @@ export default function MonitoringCenter() {
                   >
                     <h4 className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
                       <Network className="w-3.5 h-3.5 text-slate-400" />
-                      网络 I/O
+                      {t('monitoring.networkIO')}
                     </h4>
                     {/* Network In */}
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-slate-400">入站</span>
+                        <span className="text-slate-400">{t('monitoring.inbound')}</span>
                         <span className="text-emerald-400 font-medium">{metrics.networkIn} Mbps</span>
                       </div>
                       <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden">
@@ -521,7 +523,7 @@ export default function MonitoringCenter() {
                     {/* Network Out */}
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-slate-400">出站</span>
+                        <span className="text-slate-400">{t('monitoring.outbound')}</span>
                         <span className="text-violet-400 font-medium">{metrics.networkOut} Mbps</span>
                       </div>
                       <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden">
@@ -535,7 +537,7 @@ export default function MonitoringCenter() {
                     <div className="pt-2 border-t border-slate-700/50 flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <Server className="w-3 h-3 text-slate-500" />
-                        <span className="text-[11px] text-slate-400">活跃连接</span>
+                        <span className="text-[11px] text-slate-400">{t('monitoring.activeConnectionsLabel')}</span>
                       </div>
                       <span className="text-sm font-bold text-slate-200">{metrics.activeConnections.toLocaleString()}</span>
                     </div>
@@ -551,7 +553,7 @@ export default function MonitoringCenter() {
                 >
                   <h4 className="text-xs font-medium text-slate-300 mb-3 flex items-center gap-1.5">
                     <BarChart3 className="w-3.5 h-3.5 text-slate-400" />
-                    Prometheus 指标
+                    {t('monitoring.prometheusMetrics')}
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                     {prometheusMetrics.map((m) => (
@@ -597,13 +599,13 @@ export default function MonitoringCenter() {
                             : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'
                         )}
                       >
-                        {cat === 'all' ? '全部' : cat}
+                        {cat === 'all' ? t('monitoring.allLabel') : cat}
                       </Button>
                     ))}
                   </div>
                   <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-[10px] text-emerald-300 font-medium">监听中</span>
+                    <span className="text-[10px] text-emerald-300 font-medium">{t('monitoring.listening')}</span>
                   </div>
                 </div>
 
@@ -638,7 +640,7 @@ export default function MonitoringCenter() {
                             <button
                               onClick={() => copyHash(event.txHash)}
                               className="p-0.5 rounded hover:bg-slate-700/50 transition-colors"
-                              title="复制"
+                              title={t('monitoring.copyTitle')}
                             >
                               <Copy className={cn('w-3 h-3', copiedHash === event.txHash ? 'text-emerald-400' : 'text-slate-500')} />
                             </button>
@@ -664,7 +666,7 @@ export default function MonitoringCenter() {
 
                     {filteredEvents.length === 0 && (
                       <div className="text-center py-8 text-slate-500 text-xs">
-                        暂无链上事件
+                        {t('monitoring.noChainEvents')}
                       </div>
                     )}
                   </div>
@@ -695,7 +697,7 @@ export default function MonitoringCenter() {
                     className="h-7 text-[10px] border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
                   >
                     <Plus className="w-3 h-3 mr-1" />
-                    添加规则
+                    {t('monitoring.addRule')}
                   </Button>
                 </div>
 
@@ -764,10 +766,10 @@ export default function MonitoringCenter() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="text-[9px] h-5 border-slate-600 text-slate-400">
-                            {rule.triggerCount}次/7d
+                            {rule.triggerCount}{t('monitoring.timesPer7d')}
                           </Badge>
                           <span className="text-[9px] text-slate-500">
-                            {relativeTime(rule.lastTriggered)}
+                            {relativeTime(rule.lastTriggered, t)}
                           </span>
                         </div>
                       </div>
@@ -808,10 +810,10 @@ export default function MonitoringCenter() {
                   </div>
                   <div>
                     <div className="text-xs font-medium text-slate-200">
-                      {anomalyDetection?.status === 'monitoring' ? '正常监控中' : '检测到异常'}
+                      {anomalyDetection?.status === 'monitoring' ? t('monitoring.normalMonitoring') : t('monitoring.anomalyDetected')}
                     </div>
                     <div className="text-[10px] text-slate-400 mt-0.5">
-                      基线: {anomalyDetection?.baselineWindow || '--'} · 方法: {anomalyDetection?.detectionMethod || '--'}
+                      {t('monitoring.baselineLabel')}: {anomalyDetection?.baselineWindow || '--'} · {t('monitoring.methodLabel')}: {anomalyDetection?.detectionMethod || '--'}
                     </div>
                   </div>
                   <Badge className={cn(
@@ -863,11 +865,11 @@ export default function MonitoringCenter() {
                       <div className="flex items-center gap-2 pt-1">
                         <Button variant="ghost" size="sm" className="h-6 text-[9px] px-2 text-slate-400 hover:text-slate-200">
                           <Eye className="w-3 h-3 mr-1" />
-                          详情
+                          {t('monitoring.detailsBtn')}
                         </Button>
                         <Button variant="ghost" size="sm" className="h-6 text-[9px] px-2 text-slate-400 hover:text-slate-200">
                           <Shield className="w-3 h-3 mr-1" />
-                          处理
+                          {t('monitoring.handleBtn')}
                         </Button>
                       </div>
                     </motion.div>
@@ -883,7 +885,7 @@ export default function MonitoringCenter() {
                 >
                   <h4 className="text-xs font-medium text-slate-300 mb-3 flex items-center gap-1.5">
                     <Activity className="w-3.5 h-3.5 text-slate-400" />
-                    异常分数趋势 (24h)
+                    {t('monitoring.anomalyScoreTrend')}
                   </h4>
                   <ResponsiveContainer width="100%" height={120}>
                     <LineChart data={ANOMALY_TREND} margin={{ top: 4, right: 8, bottom: 4, left: 8 }}>
@@ -902,7 +904,7 @@ export default function MonitoringCenter() {
                       />
                       <Tooltip
                         contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8, fontSize: 11 }}
-                        formatter={(value: number) => [value.toFixed(1), '异常分数']}
+                        formatter={(value: number) => [value.toFixed(1), t('monitoring.anomalyScore')]}
                       />
                       <Line
                         type="monotone"
@@ -920,7 +922,7 @@ export default function MonitoringCenter() {
                 <div>
                   <h4 className="text-xs font-medium text-slate-300 mb-3 flex items-center gap-1.5">
                     <Globe className="w-3.5 h-3.5 text-slate-400" />
-                    Grafana 仪表盘
+                    {t('monitoring.grafanaDashboards')}
                   </h4>
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                     {grafanaDashboards.map((dash, idx) => (
@@ -932,14 +934,14 @@ export default function MonitoringCenter() {
                         className="rounded-lg border border-slate-700/50 bg-slate-900/40 p-3 space-y-2"
                       >
                         <div className="text-[11px] font-medium text-slate-200">{dash.name}</div>
-                        <div className="text-[9px] text-slate-500">{dash.panels} 面板</div>
+                        <div className="text-[9px] text-slate-500">{dash.panels} {t('monitoring.panels')}</div>
                         <Button
                           variant="ghost"
                           size="sm"
                           className="w-full h-6 text-[9px] text-violet-400 hover:text-violet-300 hover:bg-violet-500/10"
                         >
                           <ExternalLink className="w-3 h-3 mr-1" />
-                          打开
+                          {t('monitoring.openBtn')}
                         </Button>
                       </motion.div>
                     ))}

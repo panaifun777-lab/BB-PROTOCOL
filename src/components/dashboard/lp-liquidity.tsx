@@ -39,6 +39,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { useI18n } from '@/hooks/use-i18n';
 
 // ── Types ─────────────────────────────────────────────────────
 
@@ -131,7 +132,7 @@ const DEFAULT_STAKING: StakingInfo = {
   apy: 12.5,
   stakers: 342,
   minStake: 1000,
-  lockPeriod: '30天',
+  lockPeriod: 'liquidity.lockPeriod30d',
   rewardsDistributed: 650000,
 };
 
@@ -174,37 +175,6 @@ function formatUSD(n: number): string {
 
 function formatPct(n: number): string {
   return `${(n * 100).toFixed(1)}%`;
-}
-
-function getTimeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const hours = Math.floor(diff / 3600000);
-  if (hours < 1) return '刚刚';
-  if (hours < 24) return `${hours}小时前`;
-  const days = Math.floor(hours / 24);
-  return `${days}天前`;
-}
-
-function getTxTypeLabel(type: LPTransaction['type']): string {
-  switch (type) {
-    case 'add_liquidity': return '添加流动性';
-    case 'remove_liquidity': return '移除流动性';
-    case 'swap': return '兑换';
-  }
-}
-
-function getTxTypeStyle(type: LPTransaction['type'], direction?: 'buy' | 'sell'): string {
-  if (type === 'add_liquidity') return 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30';
-  if (type === 'remove_liquidity') return 'bg-red-500/10 text-red-300 border-red-500/30';
-  if (direction === 'buy') return 'bg-blue-500/10 text-blue-300 border-blue-500/30';
-  return 'bg-amber-500/10 text-amber-300 border-amber-500/30';
-}
-
-function getTxIcon(type: LPTransaction['type'], direction?: 'buy' | 'sell') {
-  if (type === 'add_liquidity') return <ArrowUpRight className="h-3.5 w-3.5 text-emerald-400" />;
-  if (type === 'remove_liquidity') return <ArrowDownRight className="h-3.5 w-3.5 text-red-400" />;
-  if (direction === 'buy') return <ArrowUpRight className="h-3.5 w-3.5 text-blue-400" />;
-  return <ArrowDownRight className="h-3.5 w-3.5 text-amber-400" />;
 }
 
 // ── Sub-Components ────────────────────────────────────────────
@@ -254,32 +224,32 @@ function MetricCard({
   );
 }
 
-function RevenueFlowDiagram() {
+function RevenueFlowDiagram({ t }: { t: (key: string, params?: Record<string, string | number>) => string }) {
   const flowItems = [
     {
       id: 'user',
-      label: '用户支付',
+      label: t('liquidity.flowUserPay'),
       icon: <Wallet className="h-4 w-4" />,
       color: 'bg-blue-500/15 border-blue-500/30 text-blue-300',
       iconColor: 'text-blue-400',
     },
     {
       id: 'human',
-      label: '人类 70%',
+      label: t('liquidity.flowHuman70'),
       icon: <Users className="h-4 w-4" />,
       color: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300',
       iconColor: 'text-emerald-400',
     },
     {
       id: 'treasury',
-      label: '分身金库 20%',
+      label: t('liquidity.flowTreasury20'),
       icon: <Coins className="h-4 w-4" />,
       color: 'bg-violet-500/15 border-violet-500/30 text-violet-300',
       iconColor: 'text-violet-400',
     },
     {
       id: 'protocol',
-      label: '协议LP 10%',
+      label: t('liquidity.flowProtocolLP10'),
       icon: <Droplets className="h-4 w-4" />,
       color: 'bg-amber-500/15 border-amber-500/30 text-amber-300',
       iconColor: 'text-amber-400',
@@ -307,7 +277,7 @@ function RevenueFlowDiagram() {
         {/* Arrow down */}
         <div className="flex flex-col items-center">
           <ArrowDownRight className="h-4 w-4 text-slate-500 rotate-[135deg]" />
-          <span className="text-[9px] text-slate-500 mt-0.5">自动分账</span>
+          <span className="text-[9px] text-slate-500 mt-0.5">{t('liquidity.autoSplit')}</span>
         </div>
 
         {/* Three destinations */}
@@ -340,12 +310,12 @@ function RevenueFlowDiagram() {
         >
           <div className="flex items-center gap-2 mb-1.5">
             <Coins className="h-3.5 w-3.5 text-violet-400" />
-            <span className="text-xs font-medium text-violet-300">金库自动回购</span>
+            <span className="text-xs font-medium text-violet-300">{t('liquidity.treasuryBuyback')}</span>
           </div>
           <div className="flex items-center gap-2 text-[11px]">
-            <span className="text-slate-400">AFC回购</span>
+            <span className="text-slate-400">{t('liquidity.afcBuyback')}</span>
             <ArrowRight className="h-3 w-3 text-violet-400" />
-            <span className="text-violet-300 font-medium">通缩压力</span>
+            <span className="text-violet-300 font-medium">{t('liquidity.deflationPressure')}</span>
           </div>
         </motion.div>
 
@@ -357,12 +327,12 @@ function RevenueFlowDiagram() {
         >
           <div className="flex items-center gap-2 mb-1.5">
             <Droplets className="h-3.5 w-3.5 text-amber-400" />
-            <span className="text-xs font-medium text-amber-300">协议LP注入</span>
+            <span className="text-xs font-medium text-amber-300">{t('liquidity.protocolLPInjection')}</span>
           </div>
           <div className="flex items-center gap-2 text-[11px]">
-            <span className="text-slate-400">增加深度</span>
+            <span className="text-slate-400">{t('liquidity.increaseDepth')}</span>
             <ArrowRight className="h-3 w-3 text-amber-400" />
-            <span className="text-amber-300 font-medium">稳定价格</span>
+            <span className="text-amber-300 font-medium">{t('liquidity.stabilizePrice')}</span>
           </div>
         </motion.div>
       </div>
@@ -372,19 +342,20 @@ function RevenueFlowDiagram() {
 
 // ── Custom Tooltip for Depth Chart ────────────────────────────
 
-function DepthChartTooltip({ active, payload, label }: {
+function DepthChartTooltip({ active, payload, label, t }: {
   active?: boolean;
   payload?: Array<{ value: number; dataKey: string; color: string }>;
   label?: number;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }) {
   if (!active || !payload || !payload.length) return null;
   return (
     <div className="rounded-lg border border-slate-700 bg-slate-800/95 backdrop-blur-sm px-3 py-2 text-xs shadow-xl">
-      <p className="text-slate-300 font-medium mb-1">价格: ${label?.toFixed(3)}</p>
+      <p className="text-slate-300 font-medium mb-1">{t('liquidity.price')}: ${label?.toFixed(3)}</p>
       {payload.map((entry, i) => (
         <p key={i} className="text-slate-400">
           <span className="inline-block w-2 h-2 rounded-full mr-1.5" style={{ backgroundColor: entry.color }} />
-          {entry.dataKey === 'bidLiquidity' ? '买方深度' : '卖方深度'}: {formatNumber(entry.value)}
+          {entry.dataKey === 'bidLiquidity' ? t('liquidity.bidDepth') : t('liquidity.askDepth')}: {formatNumber(entry.value)}
         </p>
       ))}
     </div>
@@ -400,6 +371,8 @@ export default function LPLiquidity({
   depthData = DEFAULT_DEPTH_DATA,
   transactions = DEFAULT_TRANSACTIONS,
 }: LPLiquidityProps) {
+  const { t } = useI18n();
+
   const circulatingPct = useMemo(
     () => ((tokenEconomics.circulatingSupply / tokenEconomics.totalSupply) * 100),
     [tokenEconomics]
@@ -415,6 +388,37 @@ export default function LPLiquidity({
     [depthData]
   );
 
+  const getTimeAgo = (iso: string): string => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const hours = Math.floor(diff / 3600000);
+    if (hours < 1) return t('liquidity.justNow');
+    if (hours < 24) return t('liquidity.hoursAgo', { count: hours });
+    const days = Math.floor(hours / 24);
+    return t('liquidity.daysAgo', { count: days });
+  };
+
+  const getTxTypeLabel = (type: LPTransaction['type']): string => {
+    switch (type) {
+      case 'add_liquidity': return t('liquidity.addLiquidity');
+      case 'remove_liquidity': return t('liquidity.removeLiquidity');
+      case 'swap': return t('liquidity.swap');
+    }
+  };
+
+  const getTxTypeStyle = (type: LPTransaction['type'], direction?: 'buy' | 'sell'): string => {
+    if (type === 'add_liquidity') return 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30';
+    if (type === 'remove_liquidity') return 'bg-red-500/10 text-red-300 border-red-500/30';
+    if (direction === 'buy') return 'bg-blue-500/10 text-blue-300 border-blue-500/30';
+    return 'bg-amber-500/10 text-amber-300 border-amber-500/30';
+  };
+
+  const getTxIcon = (type: LPTransaction['type'], direction?: 'buy' | 'sell') => {
+    if (type === 'add_liquidity') return <ArrowUpRight className="h-3.5 w-3.5 text-emerald-400" />;
+    if (type === 'remove_liquidity') return <ArrowDownRight className="h-3.5 w-3.5 text-red-400" />;
+    if (direction === 'buy') return <ArrowUpRight className="h-3.5 w-3.5 text-blue-400" />;
+    return <ArrowDownRight className="h-3.5 w-3.5 text-amber-400" />;
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -427,10 +431,10 @@ export default function LPLiquidity({
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Droplets className="h-4 w-4 text-violet-400" />
-                LP流动性仪表盘
+                {t('liquidity.title')}
               </CardTitle>
               <CardDescription className="text-xs text-slate-400 mt-0.5">
-                AFC/USDC 流动性池 · 价值捕获引擎
+                {t('liquidity.subtitle')}
               </CardDescription>
             </div>
             <Badge
@@ -438,7 +442,7 @@ export default function LPLiquidity({
               className="bg-emerald-500/10 text-emerald-300 border-emerald-500/30 text-[10px]"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
-              活跃
+              {t('liquidity.active')}
             </Badge>
           </div>
         </CardHeader>
@@ -451,28 +455,28 @@ export default function LPLiquidity({
                 className="text-[11px] px-3 py-1 data-[state=active]:bg-slate-700 data-[state=active]:text-violet-300"
               >
                 <BarChart3 className="h-3 w-3 mr-1" />
-                总览
+                {t('liquidity.tabOverview')}
               </TabsTrigger>
               <TabsTrigger
                 value="depth"
                 className="text-[11px] px-3 py-1 data-[state=active]:bg-slate-700 data-[state=active]:text-violet-300"
               >
                 <Droplets className="h-3 w-3 mr-1" />
-                深度图
+                {t('liquidity.tabDepth')}
               </TabsTrigger>
               <TabsTrigger
                 value="tokenomics"
                 className="text-[11px] px-3 py-1 data-[state=active]:bg-slate-700 data-[state=active]:text-violet-300"
               >
                 <Coins className="h-3 w-3 mr-1" />
-                代币经济
+                {t('liquidity.tabTokenomics')}
               </TabsTrigger>
               <TabsTrigger
                 value="staking"
                 className="text-[11px] px-3 py-1 data-[state=active]:bg-slate-700 data-[state=active]:text-violet-300"
               >
                 <Lock className="h-3 w-3 mr-1" />
-                质押
+                {t('liquidity.tabStaking')}
               </TabsTrigger>
             </TabsList>
 
@@ -482,14 +486,14 @@ export default function LPLiquidity({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <MetricCard
                   icon={<Droplets className="h-3.5 w-3.5" />}
-                  label="总流动性"
+                  label={t('liquidity.totalLiquidity')}
                   value={formatUSD(pool.totalLiquidity)}
                   subValue={`${formatNumber(pool.afcReserve, 0)} AFC`}
                   color="violet"
                 />
                 <MetricCard
                   icon={<TrendingUp className="h-3.5 w-3.5" />}
-                  label="AFC 价格"
+                  label={t('liquidity.afcPrice')}
                   value={`$${pool.afcPrice.toFixed(2)}`}
                   subValue={
                     pool.priceChange24h > 0
@@ -500,16 +504,16 @@ export default function LPLiquidity({
                 />
                 <MetricCard
                   icon={<BarChart3 className="h-3.5 w-3.5" />}
-                  label="24h 成交量"
+                  label={t('liquidity.volume24h')}
                   value={formatUSD(pool.volume24h)}
-                  subValue={`费率 ${(pool.feeRate * 100).toFixed(1)}%`}
+                  subValue={`${t('liquidity.feeRate')} ${(pool.feeRate * 100).toFixed(1)}%`}
                   color="blue"
                 />
                 <MetricCard
                   icon={<Coins className="h-3.5 w-3.5" />}
-                  label="24h 手续费"
+                  label={t('liquidity.fees24h')}
                   value={formatUSD(pool.fees24h)}
-                  subValue="LP收益来源"
+                  subValue={t('liquidity.lpRevenueSource')}
                   color="amber"
                 />
               </div>
@@ -518,16 +522,16 @@ export default function LPLiquidity({
               <div className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <ArrowRight className="h-4 w-4 text-violet-400" />
-                  <span className="text-sm font-medium text-slate-200">收益流转机制</span>
+                  <span className="text-sm font-medium text-slate-200">{t('liquidity.revenueFlow')}</span>
                 </div>
-                <RevenueFlowDiagram />
+                <RevenueFlowDiagram t={t} />
               </div>
 
               {/* Recent Transactions */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-400 font-medium">最近流动性事件</span>
-                  <span className="text-[10px] text-slate-500">{transactions.length} 笔</span>
+                  <span className="text-xs text-slate-400 font-medium">{t('liquidity.recentLiquidityEvents')}</span>
+                  <span className="text-[10px] text-slate-500">{t('liquidity.txCount', { count: transactions.length })}</span>
                 </div>
                 <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
                   {transactions.map((tx) => (
@@ -550,7 +554,7 @@ export default function LPLiquidity({
                                 'text-[10px] font-medium',
                                 tx.direction === 'buy' ? 'text-blue-300' : 'text-amber-300'
                               )}>
-                                {tx.direction === 'buy' ? '买入' : '卖出'}
+                                {tx.direction === 'buy' ? t('liquidity.buy') : t('liquidity.sell')}
                               </span>
                             )}
                           </div>
@@ -576,15 +580,15 @@ export default function LPLiquidity({
             <TabsContent value="depth" className="mt-4 space-y-4">
               <div className="grid grid-cols-3 gap-3">
                 <div className="rounded-lg border border-slate-700/50 bg-slate-800/40 p-2.5 text-center">
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wider">当前价格</p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider">{t('liquidity.currentPrice')}</p>
                   <p className="text-sm font-bold text-white">${pool.afcPrice.toFixed(3)}</p>
                 </div>
                 <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-2.5 text-center">
-                  <p className="text-[10px] text-emerald-400 uppercase tracking-wider">买方深度</p>
+                  <p className="text-[10px] text-emerald-400 uppercase tracking-wider">{t('liquidity.bidDepth')}</p>
                   <p className="text-sm font-bold text-emerald-300">{formatUSD(maxDepth * pool.afcPrice)}</p>
                 </div>
                 <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-2.5 text-center">
-                  <p className="text-[10px] text-red-400 uppercase tracking-wider">卖方深度</p>
+                  <p className="text-[10px] text-red-400 uppercase tracking-wider">{t('liquidity.askDepth')}</p>
                   <p className="text-sm font-bold text-red-300">{formatUSD(maxDepth * pool.afcPrice)}</p>
                 </div>
               </div>
@@ -616,7 +620,7 @@ export default function LPLiquidity({
                       tickLine={false}
                       tickFormatter={(v: number) => formatNumber(v)}
                     />
-                    <Tooltip content={<DepthChartTooltip />} />
+                    <Tooltip content={<DepthChartTooltip t={t} />} />
                     <ReferenceLine
                       x={pool.afcPrice}
                       stroke="#8b5cf6"
@@ -655,15 +659,15 @@ export default function LPLiquidity({
               <div className="flex items-center justify-center gap-6 text-[11px]">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-1.5 rounded-full bg-emerald-500" />
-                  <span className="text-slate-400">买方深度 (Bid)</span>
+                  <span className="text-slate-400">{t('liquidity.bidDepthLabel')}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-1.5 rounded-full bg-red-500" />
-                  <span className="text-slate-400">卖方深度 (Ask)</span>
+                  <span className="text-slate-400">{t('liquidity.askDepthLabel')}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-0.5 bg-violet-500" style={{ borderTop: '2px dashed #8b5cf6' }} />
-                  <span className="text-slate-400">当前价格</span>
+                  <span className="text-slate-400">{t('liquidity.currentPrice')}</span>
                 </div>
               </div>
             </TabsContent>
@@ -674,41 +678,41 @@ export default function LPLiquidity({
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <MetricCard
                   icon={<Coins className="h-3.5 w-3.5" />}
-                  label="总供应量"
+                  label={t('liquidity.totalSupply')}
                   value={`${formatNumber(tokenEconomics.totalSupply)} AFC`}
                   color="violet"
                 />
                 <MetricCard
                   icon={<TrendingUp className="h-3.5 w-3.5" />}
-                  label="流通量"
+                  label={t('liquidity.circulatingSupply')}
                   value={`${formatNumber(tokenEconomics.circulatingSupply)} AFC`}
-                  subValue={`占比 ${circulatingPct.toFixed(1)}%`}
+                  subValue={`${t('liquidity.proportion')} ${circulatingPct.toFixed(1)}%`}
                   color="blue"
                 />
                 <MetricCard
                   icon={<Flame className="h-3.5 w-3.5" />}
-                  label="燃烧率 (θ)"
+                  label={t('liquidity.burnRate')}
                   value={formatPct(tokenEconomics.burnRate)}
                   color="red"
                 />
                 <MetricCard
                   icon={<Coins className="h-3.5 w-3.5" />}
-                  label="回购率 (β)"
+                  label={t('liquidity.buybackRate')}
                   value={formatPct(tokenEconomics.buybackRate)}
                   color="emerald"
                 />
                 <MetricCard
                   icon={<TrendingUp className="h-3.5 w-3.5" />}
-                  label="价值捕获率 (η)"
+                  label={t('liquidity.valueCaptureRate')}
                   value={formatPct(tokenEconomics.valueCaptureRate)}
-                  subValue="持续上升 ↑"
+                  subValue={t('liquidity.risingTrend')}
                   color="violet"
                 />
                 <MetricCard
                   icon={<BarChart3 className="h-3.5 w-3.5" />}
-                  label="月燃烧量"
+                  label={t('liquidity.monthlyBurn')}
                   value={`${formatNumber(tokenEconomics.monthlyBurn[tokenEconomics.monthlyBurn.length - 1].burned)} AFC`}
-                  subValue="递增趋势"
+                  subValue={t('liquidity.increasingTrend')}
                   color="amber"
                 />
               </div>
@@ -716,13 +720,13 @@ export default function LPLiquidity({
               {/* Circulating Supply Progress */}
               <div className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-slate-400">流通占比</span>
+                  <span className="text-xs text-slate-400">{t('liquidity.circulatingRatio')}</span>
                   <span className="text-xs text-violet-300 font-medium">{circulatingPct.toFixed(2)}%</span>
                 </div>
                 <Progress value={circulatingPct} className="h-2 bg-slate-700/50 [&>div]:bg-gradient-to-r [&>div]:from-violet-500 [&>div]:to-blue-500" />
                 <div className="flex items-center justify-between mt-1.5 text-[10px] text-slate-500">
                   <span>0</span>
-                  <span>总供应量 1B AFC</span>
+                  <span>{t('liquidity.totalSupply1B')}</span>
                 </div>
               </div>
 
@@ -730,7 +734,7 @@ export default function LPLiquidity({
               <div className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Flame className="h-3.5 w-3.5 text-red-400" />
-                  <span className="text-xs text-slate-300 font-medium">月度通缩燃烧</span>
+                  <span className="text-xs text-slate-300 font-medium">{t('liquidity.monthlyDeflationBurn')}</span>
                 </div>
                 <div className="h-40">
                   <ResponsiveContainer width="100%" height="100%">
@@ -747,7 +751,6 @@ export default function LPLiquidity({
                         tick={{ fontSize: 10, fill: '#94a3b8' }}
                         axisLine={{ stroke: '#334155' }}
                         tickLine={false}
-                        tickFormatter={(v: string) => v.split('-')[1] + '月'}
                       />
                       <YAxis
                         tick={{ fontSize: 10, fill: '#94a3b8' }}
@@ -763,7 +766,7 @@ export default function LPLiquidity({
                           fontSize: '11px',
                           color: '#e2e8f0',
                         }}
-                        formatter={(value: number) => [`${formatNumber(value)} AFC`, '燃烧量']}
+                        formatter={(value: number) => [`${formatNumber(value)} AFC`, t('liquidity.burnAmount')]}
                         labelFormatter={(label: string) => label}
                       />
                       <Area
@@ -787,21 +790,21 @@ export default function LPLiquidity({
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <MetricCard
                   icon={<Lock className="h-3.5 w-3.5" />}
-                  label="总质押量"
+                  label={t('liquidity.totalStaked')}
                   value={`${formatNumber(staking.totalStaked)} AFC`}
-                  subValue={`占比 ${stakingPct.toFixed(1)}%`}
+                  subValue={`${t('liquidity.proportion')} ${stakingPct.toFixed(1)}%`}
                   color="violet"
                 />
                 <MetricCard
                   icon={<TrendingUp className="h-3.5 w-3.5" />}
-                  label="年化收益 (APY)"
+                  label={t('liquidity.apy')}
                   value={`${staking.apy}%`}
-                  subValue="复利计算"
+                  subValue={t('liquidity.compoundCalc')}
                   color="emerald"
                 />
                 <MetricCard
                   icon={<Users className="h-3.5 w-3.5" />}
-                  label="质押人数"
+                  label={t('liquidity.stakerCount')}
                   value={staking.stakers.toLocaleString()}
                   color="blue"
                 />
@@ -810,13 +813,13 @@ export default function LPLiquidity({
               {/* Staking Progress */}
               <div className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-slate-400">质押进度 (流通量占比)</span>
+                  <span className="text-xs text-slate-400">{t('liquidity.stakingProgress')}</span>
                   <span className="text-xs text-violet-300 font-medium">{stakingPct.toFixed(1)}%</span>
                 </div>
                 <Progress value={stakingPct} className="h-2 bg-slate-700/50 [&>div]:bg-gradient-to-r [&>div]:from-violet-500 [&>div]:to-emerald-500" />
                 <div className="flex items-center justify-between mt-1.5 text-[10px] text-slate-500">
                   <span>0</span>
-                  <span>流通量 {formatNumber(tokenEconomics.circulatingSupply)} AFC</span>
+                  <span>{t('liquidity.circulatingLabel')} {formatNumber(tokenEconomics.circulatingSupply)} AFC</span>
                 </div>
               </div>
 
@@ -825,19 +828,19 @@ export default function LPLiquidity({
                 <div className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-4 space-y-3">
                   <div className="flex items-center gap-2">
                     <Coins className="h-4 w-4 text-amber-400" />
-                    <span className="text-sm font-medium text-slate-200">质押参数</span>
+                    <span className="text-sm font-medium text-slate-200">{t('liquidity.stakingParams')}</span>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400">最低质押量</span>
+                      <span className="text-slate-400">{t('liquidity.minStake')}</span>
                       <span className="text-white font-medium">{formatNumber(staking.minStake)} AFC</span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400">锁定期</span>
-                      <span className="text-white font-medium">{staking.lockPeriod}</span>
+                      <span className="text-slate-400">{t('liquidity.lockPeriod')}</span>
+                      <span className="text-white font-medium">{t(staking.lockPeriod)}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400">已分配奖励</span>
+                      <span className="text-slate-400">{t('liquidity.rewardsDistributed')}</span>
                       <span className="text-emerald-300 font-medium">{formatNumber(staking.rewardsDistributed)} AFC</span>
                     </div>
                   </div>
@@ -845,14 +848,14 @@ export default function LPLiquidity({
 
                 <div className="rounded-xl border border-violet-500/20 bg-gradient-to-br from-violet-500/10 to-blue-500/5 p-4 flex flex-col justify-between">
                   <div>
-                    <p className="text-xs text-violet-300/60 uppercase tracking-widest mb-1">质押 AFC</p>
+                    <p className="text-xs text-violet-300/60 uppercase tracking-widest mb-1">{t('liquidity.stakeAfc')}</p>
                     <p className="text-2xl font-bold text-white">{staking.apy}% <span className="text-sm font-normal text-violet-300">APY</span></p>
                   </div>
                   <Button
                     className="w-full mt-3 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white text-xs font-medium h-9"
                   >
                     <Lock className="h-3.5 w-3.5 mr-1.5" />
-                    立即质押
+                    {t('liquidity.stakeNow')}
                   </Button>
                 </div>
               </div>
@@ -866,7 +869,7 @@ export default function LPLiquidity({
             size="sm"
             className="w-full bg-slate-700/30 border-slate-600/50 text-slate-300 hover:bg-slate-600/50 hover:text-white text-xs"
           >
-            查看 Base L2 链上数据
+            {t('liquidity.viewBaseL2')}
           </Button>
         </CardFooter>
       </Card>

@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Shield, Brain, Wallet, Activity, Sparkles, Check, Lock, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/hooks/use-i18n';
 import type { AvatarProfile, AvatarSkill } from '@/lib/types';
 import {
   Card,
@@ -40,11 +41,11 @@ function truncateHash(hash: string, prefix = 6, suffix = 4): string {
 }
 
 // Helper: tier label
-function getTierLabel(tier: AvatarProfile['tier']): string {
+function getTierLabel(tier: AvatarProfile['tier'], t: (key: string, params?: Record<string, string | number>) => string): string {
   switch (tier) {
-    case 'starter': return '入门';
-    case 'pro': return '专业';
-    case 'enterprise': return '企业';
+    case 'starter': return t('avatar.tierStarter');
+    case 'pro': return t('avatar.tierPro');
+    case 'enterprise': return t('avatar.tierEnterprise');
     default: return tier;
   }
 }
@@ -60,6 +61,7 @@ function getTierColor(tier: AvatarProfile['tier']): string {
 
 // Revenue split bar
 function RevenueSplitBar({ humanBps, avatarBps, protocolBps }: { humanBps: number; avatarBps: number; protocolBps: number }) {
+  const { t } = useI18n();
   const total = humanBps + avatarBps + protocolBps;
   const humanPct = Math.round((humanBps / total) * 100);
   const avatarPct = Math.round((avatarBps / total) * 100);
@@ -90,15 +92,15 @@ function RevenueSplitBar({ humanBps, avatarBps, protocolBps }: { humanBps: numbe
       <div className="flex items-center gap-3 text-[11px] text-slate-400">
         <span className="flex items-center gap-1">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500" />
-          人类 {humanPct}%
+          {t('avatar.human')} {humanPct}%
         </span>
         <span className="flex items-center gap-1">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          金库 {avatarPct}%
+          {t('avatar.vault')} {avatarPct}%
         </span>
         <span className="flex items-center gap-1">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
-          LP {protocolPct}%
+          {t('avatar.lp')} {protocolPct}%
         </span>
       </div>
     </div>
@@ -106,6 +108,7 @@ function RevenueSplitBar({ humanBps, avatarBps, protocolBps }: { humanBps: numbe
 }
 
 export default function CognitiveCard({ avatar, skills }: CognitiveCardProps) {
+  const { t } = useI18n();
   const resonance = getResonanceColor(avatar.resonanceScore);
   const unlockedSkills = skills.filter((s) => s.unlocked);
   const lockedSkills = skills.filter((s) => !s.unlocked);
@@ -135,7 +138,7 @@ export default function CognitiveCard({ avatar, skills }: CognitiveCardProps) {
                   <Wallet className="h-3 w-3" />
                   <span className="font-mono">{truncateHash(avatar.soulId)}</span>
                   <span className="text-slate-600">|</span>
-                  <span className="text-slate-500">认知根:</span>
+                  <span className="text-slate-500">{t('avatar.cognitionRoot')}:</span>
                   <span className="font-mono">{truncateHash(avatar.cognitionRoot, 4, 4)}</span>
                 </CardDescription>
               </div>
@@ -151,13 +154,13 @@ export default function CognitiveCard({ avatar, skills }: CognitiveCardProps) {
                     )}
                   >
                     <span className={cn('h-2 w-2 rounded-full animate-pulse', resonance.dot)} />
-                    共振分 {avatar.resonanceScore}
+                    {t('avatar.resonanceScore')} {avatar.resonanceScore}
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="bg-slate-800 text-slate-200 border-slate-700">
-                  <p>情绪共振强度评分</p>
+                  <p>{t('avatar.resonanceDescription')}</p>
                   <p className="text-[10px] text-slate-400">
-                    {avatar.resonanceScore >= 70 ? '正常运作区间' : avatar.resonanceScore >= 50 ? '接近软限制阈值' : '已触发硬暂停'}
+                    {avatar.resonanceScore >= 70 ? t('avatar.normalZone') : avatar.resonanceScore >= 50 ? t('avatar.softLimitZone') : t('avatar.hardPauseZone')}
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -165,7 +168,7 @@ export default function CognitiveCard({ avatar, skills }: CognitiveCardProps) {
                 variant="outline"
                 className={cn('text-[10px] px-1.5 py-0', getTierColor(avatar.tier))}
               >
-                {getTierLabel(avatar.tier)}
+                {getTierLabel(avatar.tier, t)}
               </Badge>
             </div>
           </div>
@@ -176,7 +179,7 @@ export default function CognitiveCard({ avatar, skills }: CognitiveCardProps) {
           <div className="space-y-2">
             <div className="flex items-center gap-1.5 text-xs text-slate-400">
               <Activity className="h-3 w-3" />
-              <span>技能包</span>
+              <span>{t('avatar.skillPack')}</span>
               <span className="text-slate-600">({unlockedSkills.length}/{skills.length})</span>
             </div>
             <div className="flex flex-wrap gap-1.5">
@@ -204,11 +207,11 @@ export default function CognitiveCard({ avatar, skills }: CognitiveCardProps) {
                   <TooltipContent side="bottom" className="bg-slate-800 text-slate-200 border-slate-700">
                     {as.unlocked ? (
                       <>
-                        <p>使用 {as.usageCount} 次 · 满意度 {as.satisfaction}%</p>
-                        <p className="text-[10px] text-slate-400">平均成本 ${as.avgCost.toFixed(3)}</p>
+                        <p>{t('avatar.skillUsageSatisfaction', { count: as.usageCount, satisfaction: as.satisfaction })}</p>
+                        <p className="text-[10px] text-slate-400">{t('skills.avgCost')} ${as.avgCost.toFixed(3)}</p>
                       </>
                     ) : (
-                      <p>收益阈值: ${as.skill.revenueThreshold} 解锁</p>
+                      <p>{t('avatar.skillUnlockThreshold', { threshold: as.skill.revenueThreshold })}</p>
                     )}
                   </TooltipContent>
                 </Tooltip>
@@ -221,7 +224,7 @@ export default function CognitiveCard({ avatar, skills }: CognitiveCardProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs text-slate-400">
                 <Wallet className="h-3 w-3" />
-                <span>年度收益</span>
+                <span>{t('avatar.annualRevenue')}</span>
               </div>
               <span className="text-sm font-semibold text-white">
                 ${annualRevenue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
@@ -243,7 +246,7 @@ export default function CognitiveCard({ avatar, skills }: CognitiveCardProps) {
               avatar.circuitState === 'HARD_PAUSE' ? 'text-red-400' :
               'text-blue-400'
             )} />
-            <span className="text-[11px] text-slate-400">熔断状态:</span>
+            <span className="text-[11px] text-slate-400">{t('avatar.circuitState')}:</span>
             <Badge
               variant="outline"
               className={cn(
@@ -266,14 +269,14 @@ export default function CognitiveCard({ avatar, skills }: CognitiveCardProps) {
             className="flex-1 bg-slate-700/30 border-slate-600/50 text-slate-300 hover:bg-slate-600/50 hover:text-white text-xs"
           >
             <Clock className="h-3 w-3" />
-            查看时间线
+            {t('avatar.viewTimeline')}
           </Button>
           <Button
             variant="outline"
             size="sm"
             className="flex-1 bg-slate-700/30 border-slate-600/50 text-slate-300 hover:bg-slate-600/50 hover:text-white text-xs"
           >
-            调整委托
+            {t('avatar.adjustDelegation')}
           </Button>
           <Button
             variant="outline"
@@ -281,7 +284,7 @@ export default function CognitiveCard({ avatar, skills }: CognitiveCardProps) {
             className="flex-1 bg-slate-700/30 border-slate-600/50 text-slate-300 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/30 text-xs"
           >
             <Shield className="h-3 w-3" />
-            熔断设置
+            {t('avatar.circuitSettings')}
           </Button>
         </CardFooter>
       </Card>

@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { Wallet, TrendingUp, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/hooks/use-i18n';
 import type { RevenueSummary, RevenueSplit } from '@/lib/types';
 import {
   Card,
@@ -62,11 +63,11 @@ function SplitBar({ data }: { data: SplitBarData }) {
   );
 }
 
-function getSourceLabel(source: RevenueSplit['source']): string {
+function getSourceLabel(source: RevenueSplit['source'], t: (key: string, params?: Record<string, string | number>) => string): string {
   switch (source) {
-    case 'skill_call': return '技能调用';
-    case 'rental': return '分身租赁';
-    case 'collaboration': return '跨分身协作';
+    case 'skill_call': return t('revenue.skillCall');
+    case 'rental': return t('revenue.sourceRental');
+    case 'collaboration': return t('revenue.sourceCollaboration');
     default: return source;
   }
 }
@@ -81,6 +82,7 @@ function getSourceColor(source: RevenueSplit['source']): string {
 }
 
 export default function SplitDashboard({ summary, recentRevenues }: SplitDashboardProps) {
+  const { t, locale } = useI18n();
   const monthlyRevenue = summary.monthlyRevenue;
   const latestMonth = monthlyRevenue[monthlyRevenue.length - 1];
   const prevMonth = monthlyRevenue.length > 1 ? monthlyRevenue[monthlyRevenue.length - 2] : null;
@@ -90,27 +92,27 @@ export default function SplitDashboard({ summary, recentRevenues }: SplitDashboa
 
   const splitBars: SplitBarData[] = useMemo(() => [
     {
-      label: '人类份额',
+      label: t('revenue.humanShareLabel'),
       bps: summary.currentHumanBps,
       amount: summary.totalHuman,
       color: 'bg-blue-500',
       bgColor: 'bg-blue-500/10',
     },
     {
-      label: '分身金库',
+      label: t('revenue.avatarVaultLabel'),
       bps: summary.currentAvatarBps,
       amount: summary.totalAvatar,
       color: 'bg-emerald-500',
       bgColor: 'bg-emerald-500/10',
     },
     {
-      label: '协议LP',
+      label: t('revenue.protocolLPLabel'),
       bps: summary.currentProtocolBps,
       amount: summary.totalProtocol,
       color: 'bg-amber-500',
       bgColor: 'bg-amber-500/10',
     },
-  ], [summary]);
+  ], [summary, locale]);
 
   const maxRevenue = useMemo(
     () => Math.max(...monthlyRevenue.map((m) => m.amount)),
@@ -129,10 +131,10 @@ export default function SplitDashboard({ summary, recentRevenues }: SplitDashboa
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Wallet className="h-4 w-4 text-blue-400" />
-                动态分账仪表盘
+                {t('revenue.title')}
               </CardTitle>
               <CardDescription className="text-xs text-slate-400 mt-0.5">
-                本月收益及分账详情
+                {t('revenue.subtitle')}
               </CardDescription>
             </div>
             <div className="text-right">
@@ -156,7 +158,7 @@ export default function SplitDashboard({ summary, recentRevenues }: SplitDashboa
                     <span className="text-slate-400">0%</span>
                   </>
                 )}
-                <span className="text-slate-500">vs上月</span>
+                <span className="text-slate-500">{t('revenue.vsLastMonth')}</span>
               </div>
             </div>
           </div>
@@ -174,19 +176,19 @@ export default function SplitDashboard({ summary, recentRevenues }: SplitDashboa
           <div className="rounded-lg border border-slate-700/50 bg-slate-800/50 p-3">
             <div className="flex items-center gap-2 text-xs">
               <TrendingUp className="h-3.5 w-3.5 text-amber-400" />
-              <span className="text-slate-300 font-medium">动态调整</span>
+              <span className="text-slate-300 font-medium">{t('revenue.dynamicAdjustment')}</span>
             </div>
             <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
               {summary.resonanceImpact}
             </p>
             <p className="mt-0.5 text-[10px] text-slate-500">
-              共振分越高 → 人类份额越大；低于50触发硬暂停
+              {t('revenue.resonanceRule')}
             </p>
           </div>
 
           {/* Monthly Revenue Chart */}
           <div className="space-y-2">
-            <p className="text-xs text-slate-400 font-medium">月度收益趋势</p>
+            <p className="text-xs text-slate-400 font-medium">{t('revenue.monthlyTrend')}</p>
             <div className="h-36">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyRevenue} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
@@ -196,7 +198,7 @@ export default function SplitDashboard({ summary, recentRevenues }: SplitDashboa
                     tick={{ fontSize: 10, fill: '#94a3b8' }}
                     axisLine={{ stroke: '#334155' }}
                     tickLine={false}
-                    tickFormatter={(v: string) => v.split('-')[1] + '月'}
+                    tickFormatter={(v: string) => v.split('-')[1] + t('revenue.monthSuffix')}
                   />
                   <YAxis
                     tick={{ fontSize: 10, fill: '#94a3b8' }}
@@ -220,7 +222,7 @@ export default function SplitDashboard({ summary, recentRevenues }: SplitDashboa
 
           {/* Recent Revenue List */}
           <div className="space-y-2">
-            <p className="text-xs text-slate-400 font-medium">最近分账</p>
+            <p className="text-xs text-slate-400 font-medium">{t('revenue.recentSplits')}</p>
             <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
               {recentRevenues.map((rev) => (
                 <div
@@ -232,7 +234,7 @@ export default function SplitDashboard({ summary, recentRevenues }: SplitDashboa
                       variant="outline"
                       className={cn('text-[10px] px-1.5 py-0', getSourceColor(rev.source))}
                     >
-                      {getSourceLabel(rev.source)}
+                      {getSourceLabel(rev.source, t)}
                     </Badge>
                     <span className="text-[11px] text-slate-400 font-mono">
                       {rev.txHash || '—'}
@@ -253,7 +255,7 @@ export default function SplitDashboard({ summary, recentRevenues }: SplitDashboa
             size="sm"
             className="w-full bg-slate-700/30 border-slate-600/50 text-slate-300 hover:bg-slate-600/50 hover:text-white text-xs"
           >
-            查看详细分账日志
+            {t('revenue.viewDetailedLog')}
           </Button>
         </CardFooter>
       </Card>

@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/hooks/use-i18n';
 import type { TimelineEvent } from '@/lib/types';
 
 // ===== Event type configuration =====
@@ -28,7 +29,7 @@ interface EventTypeConfig {
   color: string;         // Tailwind text color class
   bgColor: string;       // Tailwind bg class for dot
   borderColor: string;   // Tailwind border class for dot ring
-  label: string;
+  labelKey: string;      // i18n key for label
   emoji: string;
 }
 
@@ -38,7 +39,7 @@ const EVENT_TYPE_CONFIG: Record<TimelineEvent['eventType'], EventTypeConfig> = {
     color: 'text-emerald-400',
     bgColor: 'bg-emerald-500',
     borderColor: 'border-emerald-500/40',
-    label: '收益',
+    labelKey: 'timeline.labelRevenue',
     emoji: '💰',
   },
   skill_invocation: {
@@ -46,7 +47,7 @@ const EVENT_TYPE_CONFIG: Record<TimelineEvent['eventType'], EventTypeConfig> = {
     color: 'text-purple-400',
     bgColor: 'bg-purple-500',
     borderColor: 'border-purple-500/40',
-    label: '技能',
+    labelKey: 'timeline.labelSkill',
     emoji: '🧠',
   },
   resonance_update: {
@@ -54,7 +55,7 @@ const EVENT_TYPE_CONFIG: Record<TimelineEvent['eventType'], EventTypeConfig> = {
     color: 'text-blue-400',
     bgColor: 'bg-blue-500',
     borderColor: 'border-blue-500/40',
-    label: '共振',
+    labelKey: 'timeline.labelResonance',
     emoji: '📊',
   },
   delegation_change: {
@@ -62,7 +63,7 @@ const EVENT_TYPE_CONFIG: Record<TimelineEvent['eventType'], EventTypeConfig> = {
     color: 'text-amber-400',
     bgColor: 'bg-amber-500',
     borderColor: 'border-amber-500/40',
-    label: '委托',
+    labelKey: 'timeline.labelDelegation',
     emoji: '🔄',
   },
   circuit_change: {
@@ -70,7 +71,7 @@ const EVENT_TYPE_CONFIG: Record<TimelineEvent['eventType'], EventTypeConfig> = {
     color: 'text-red-400',
     bgColor: 'bg-red-500',
     borderColor: 'border-red-500/40',
-    label: '熔断',
+    labelKey: 'timeline.labelCircuit',
     emoji: '⚠️',
   },
 };
@@ -86,16 +87,16 @@ const FILTER_MAP: Record<FilterKey, TimelineEvent['eventType'] | null> = {
   circuit: 'circuit_change',
 };
 
-const FILTER_LABELS: Record<FilterKey, string> = {
-  all: '全部',
-  revenue: '收益',
-  skill: '技能',
-  delegation: '委托',
-  circuit: '熔断',
+const FILTER_LABEL_KEYS: Record<FilterKey, string> = {
+  all: 'common.all',
+  revenue: 'timeline.labelRevenue',
+  skill: 'timeline.labelSkill',
+  delegation: 'timeline.labelDelegation',
+  circuit: 'timeline.labelCircuit',
 };
 
 // ===== Individual timeline event =====
-function TimelineEventCard({ event, index }: { event: TimelineEvent; index: number }) {
+function TimelineEventCard({ event, index, t }: { event: TimelineEvent; index: number; t: (key: string, params?: Record<string, string | number>) => string }) {
   const config = EVENT_TYPE_CONFIG[event.eventType];
   const IconComponent = config.icon;
 
@@ -167,7 +168,7 @@ function TimelineEventCard({ event, index }: { event: TimelineEvent; index: numb
               config.color
             )}
           >
-            {config.emoji} {config.label}
+            {config.emoji} {t(config.labelKey)}
           </Badge>
         </div>
 
@@ -179,7 +180,7 @@ function TimelineEventCard({ event, index }: { event: TimelineEvent; index: numb
         {/* Amount (for revenue events) */}
         {event.amount != null && (
           <p className="mt-0.5 text-xs text-slate-400">
-            金额: <span className="font-medium text-emerald-400">${event.amount.toFixed(2)}</span>
+            {t('timeline.amountLabel')} <span className="font-medium text-emerald-400">${event.amount.toFixed(2)}</span>
           </p>
         )}
 
@@ -223,6 +224,7 @@ interface CognitiveTimelineProps {
 }
 
 export default function CognitiveTimeline({ events }: CognitiveTimelineProps) {
+  const { t } = useI18n();
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
 
   const filteredEvents = useMemo(() => {
@@ -246,13 +248,13 @@ export default function CognitiveTimeline({ events }: CognitiveTimelineProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Filter className="size-5 text-blue-400" />
-            认知时间线
+            {t('timeline.title')}
           </CardTitle>
           <Badge
             variant="outline"
             className="border-slate-600 bg-slate-700/50 text-xs text-slate-300"
           >
-            {events.length} 条记录
+            {t('timeline.recordCount', { count: events.length })}
           </Badge>
         </div>
       </CardHeader>
@@ -265,7 +267,7 @@ export default function CognitiveTimeline({ events }: CognitiveTimelineProps) {
           className="mb-4 w-full"
         >
           <TabsList className="h-8 w-full bg-slate-900/80 p-0.5 sm:w-auto">
-            {(Object.keys(FILTER_LABELS) as FilterKey[]).map((key) => {
+            {(Object.keys(FILTER_LABEL_KEYS) as FilterKey[]).map((key) => {
               const config =
                 key !== 'all'
                   ? EVENT_TYPE_CONFIG[FILTER_MAP[key]!]
@@ -279,7 +281,7 @@ export default function CognitiveTimeline({ events }: CognitiveTimelineProps) {
                     config && `data-[state=active]:${config.color}`
                   )}
                 >
-                  {config ? config.emoji : null} {FILTER_LABELS[key]}
+                  {config ? config.emoji : null} {t(FILTER_LABEL_KEYS[key])}
                 </TabsTrigger>
               );
             })}
@@ -295,6 +297,7 @@ export default function CognitiveTimeline({ events }: CognitiveTimelineProps) {
                   key={event.id}
                   event={event}
                   index={index}
+                  t={t}
                 />
               ))}
             </AnimatePresence>
@@ -305,7 +308,7 @@ export default function CognitiveTimeline({ events }: CognitiveTimelineProps) {
                 animate={{ opacity: 1 }}
                 className="py-8 text-center text-sm text-slate-500"
               >
-                该筛选条件下暂无事件记录
+                {t('timeline.emptyFilter')}
               </motion.div>
             )}
           </div>
@@ -330,7 +333,7 @@ export default function CognitiveTimeline({ events }: CognitiveTimelineProps) {
           }}
         >
           <Download className="mr-1 size-3.5" />
-          导出全部记录
+          {t('timeline.exportAll')}
         </Button>
         <Button
           variant="ghost"
@@ -338,7 +341,7 @@ export default function CognitiveTimeline({ events }: CognitiveTimelineProps) {
           className="text-xs text-slate-400 hover:text-slate-200"
         >
           <Activity className="mr-1 size-3.5" />
-          订阅更新
+          {t('timeline.subscribeUpdates')}
         </Button>
       </CardFooter>
     </Card>

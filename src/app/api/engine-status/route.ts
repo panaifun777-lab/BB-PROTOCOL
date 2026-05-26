@@ -124,26 +124,34 @@ function getMcpStatus(): EngineModuleStatus {
 }
 
 export async function GET() {
-  const modules: EngineModuleStatus[] = [
-    getIfdStatus(),
-    getEceStatus(),
-    getPoueStatus(),
-    getMcpStatus(),
-  ]
+  try {
+    const modules: EngineModuleStatus[] = [
+      getIfdStatus(),
+      getEceStatus(),
+      getPoueStatus(),
+      getMcpStatus(),
+    ]
 
-  const onlineCount = modules.filter(m => m.status === 'online').length
-  const totalEvents = modules.reduce((sum, m) => sum + m.events.length, 0)
+    const onlineCount = modules.filter(m => m.status === 'online').length
+    const totalEvents = modules.reduce((sum, m) => sum + m.events.length, 0)
 
-  return NextResponse.json({
-    modules,
-    summary: {
-      totalModules: 4,
-      online: onlineCount,
-      degraded: modules.filter(m => m.status === 'degraded').length,
-      offline: modules.filter(m => m.status === 'offline').length,
-      totalEvents,
-      systemUptime: formatUptime(getUptimeSeconds() * 1000),
-      lastGlobalUpdate: new Date().toISOString(),
-    },
-  })
+    return NextResponse.json({
+      modules,
+      summary: {
+        totalModules: 4,
+        online: onlineCount,
+        degraded: modules.filter(m => m.status === 'degraded').length,
+        offline: modules.filter(m => m.status === 'offline').length,
+        totalEvents,
+        systemUptime: formatUptime(getUptimeSeconds() * 1000),
+        lastGlobalUpdate: new Date().toISOString(),
+      },
+    })
+  } catch (error) {
+    console.error('[API] Error in GET /api/engine-status:', error)
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    )
+  }
 }

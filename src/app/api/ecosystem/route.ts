@@ -194,13 +194,21 @@ const activityFeed: ActivityFeedItem[] = [
 
 // ── GET Handler ────────────────────────────────────────
 export async function GET() {
-  return NextResponse.json({
-    protocols,
-    wallets,
-    dataAggregation,
-    notifications,
-    ecosystemMetrics,
-    partnerProgram,
-    activityFeed,
-  });
+  try {
+    return NextResponse.json({
+      protocols,
+      wallets,
+      dataAggregation,
+      notifications,
+      ecosystemMetrics,
+      partnerProgram,
+      activityFeed,
+    });
+  } catch (error) {
+    console.error('[API] Error in GET /api/ecosystem:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }

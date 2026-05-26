@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useI18n } from '@/hooks/use-i18n';
 import { useClientTime } from '@/hooks/use-client-time';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -123,46 +124,46 @@ interface MultiChainData {
 // ── Status Configs ─────────────────────────────────────
 const CHAIN_STATUS_CONFIG: Record<ChainStatus, { label: string; badge: string; actionLabel: string }> = {
   active: {
-    label: '活跃',
+    label: 'multichain.chainActive',
     badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-    actionLabel: '切换',
+    actionLabel: 'multichain.switchAction',
   },
   pending: {
-    label: '准备中',
+    label: 'multichain.chainPending',
     badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-    actionLabel: '准备中',
+    actionLabel: 'multichain.chainPending',
   },
   planned: {
-    label: '规划中',
+    label: 'multichain.chainPlanned',
     badge: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-    actionLabel: '规划中',
+    actionLabel: 'multichain.chainPlanned',
   },
 };
 
 const BRIDGE_STATUS_CONFIG: Record<BridgeStatus, { label: string; badge: string }> = {
   active: {
-    label: '活跃',
+    label: 'multichain.bridgeActive',
     badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
   },
   pending: {
-    label: '待激活',
+    label: 'multichain.bridgePending',
     badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
   },
 };
 
 const SWITCH_STATUS_CONFIG: Record<SwitchStatus, { label: string; badge: string; icon: React.ElementType }> = {
   completed: {
-    label: '已完成',
+    label: 'multichain.switchCompleted',
     badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     icon: CheckCircle2,
   },
   pending: {
-    label: '进行中',
+    label: 'multichain.switchPending',
     badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     icon: Clock,
   },
   failed: {
-    label: '失败',
+    label: 'multichain.switchFailed',
     badge: 'bg-red-500/20 text-red-300 border-red-500/30',
     icon: AlertTriangle,
   },
@@ -170,17 +171,17 @@ const SWITCH_STATUS_CONFIG: Record<SwitchStatus, { label: string; badge: string;
 
 const SYNC_STATUS_CONFIG: Record<SyncStatus, { label: string; badge: string; icon: React.ElementType }> = {
   synced: {
-    label: '已同步',
+    label: 'multichain.syncSynced',
     badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     icon: CheckCircle2,
   },
   delayed: {
-    label: '延迟',
+    label: 'multichain.syncDelayed',
     badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     icon: AlertTriangle,
   },
   error: {
-    label: '错误',
+    label: 'multichain.syncError',
     badge: 'bg-red-500/20 text-red-300 border-red-500/30',
     icon: AlertTriangle,
   },
@@ -188,21 +189,21 @@ const SYNC_STATUS_CONFIG: Record<SyncStatus, { label: string; badge: string; ico
 
 const PIPELINE_STATUS_CONFIG: Record<PipelineStatus, { label: string; icon: React.ElementType; color: string; bg: string; badge: string }> = {
   passed: {
-    label: '通过',
+    label: 'multichain.pipelinePassed',
     icon: CheckCircle2,
     color: 'text-emerald-400',
     bg: 'bg-emerald-500/15',
     badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
   },
   in_progress: {
-    label: '进行中',
+    label: 'multichain.pipelineInProgress',
     icon: Loader2,
     color: 'text-violet-400',
     bg: 'bg-violet-500/15',
     badge: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
   },
   pending: {
-    label: '待执行',
+    label: 'multichain.pipelinePending',
     icon: Clock,
     color: 'text-slate-400',
     bg: 'bg-slate-500/15',
@@ -230,10 +231,10 @@ function getRelativeTime(timestamp: string, now?: Date | null): string {
   const diffHr = Math.floor(diffMs / 3600000);
   const diffDay = Math.floor(diffMs / 86400000);
 
-  if (diffMin < 1) return '刚刚';
-  if (diffMin < 60) return `${diffMin}分钟前`;
-  if (diffHr < 24) return `${diffHr}小时前`;
-  if (diffDay < 30) return `${diffDay}天前`;
+  if (diffMin < 1) return t('multichain.justNow');
+  if (diffMin < 60) return t('multichain.minutesAgo', { count: String(diffMin) });
+  if (diffHr < 24) return t('multichain.hoursAgo', { count: String(diffHr) });
+  if (diffDay < 30) return t('multichain.daysAgo', { count: String(diffDay) });
   return format(parseISO(timestamp), 'MMM d');
 }
 
@@ -264,7 +265,7 @@ function CopyButton({ text }: { text: string }) {
     <button
       onClick={handleCopy}
       className="inline-flex items-center justify-center size-5 rounded hover:bg-slate-700/50 transition-colors"
-      title="复制"
+      title={t('multichain.copyTitle')}
     >
       {copied ? (
         <CheckCircle className="size-3 text-emerald-400" />
@@ -277,6 +278,7 @@ function CopyButton({ text }: { text: string }) {
 
 // ── Tab 1: Chain Management ────────────────────────────
 function ChainManagementTab({ chains }: { chains: SupportedChain[] }) {
+  const { t } = useI18n();
   const now = useClientTime();
   const activeCount = chains.filter(c => c.status === 'active').length;
   const pendingCount = chains.filter(c => c.status === 'pending').length;
@@ -288,15 +290,15 @@ function ChainManagementTab({ chains }: { chains: SupportedChain[] }) {
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
           <span className="size-2 rounded-full bg-emerald-400" />
-          <span className="text-xs text-emerald-300 font-medium">{activeCount} 活跃</span>
+          <span className="text-xs text-emerald-300 font-medium">{activeCount} {t('multichain.activeCount')}</span>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
           <span className="size-2 rounded-full bg-amber-400" />
-          <span className="text-xs text-amber-300 font-medium">{pendingCount} 准备中</span>
+          <span className="text-xs text-amber-300 font-medium">{pendingCount} {t('multichain.pendingCount')}</span>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-500/10 border border-slate-500/20">
           <span className="size-2 rounded-full bg-slate-400" />
-          <span className="text-xs text-slate-400 font-medium">{plannedCount} 规划中</span>
+          <span className="text-xs text-slate-400 font-medium">{plannedCount} {t('multichain.plannedCount')}</span>
         </div>
       </div>
 
@@ -330,22 +332,22 @@ function ChainManagementTab({ chains }: { chains: SupportedChain[] }) {
                   </div>
                 </div>
                 <Badge variant="outline" className={cn('text-[10px]', config.badge)}>
-                  {config.label}
+                  {t(config.label)}
                 </Badge>
               </div>
 
               {/* Stats Row */}
               <div className="grid grid-cols-3 gap-2 mb-3">
                 <div>
-                  <span className="text-[10px] text-slate-500 block">区块高度</span>
+                  <span className="text-[10px] text-slate-500 block">{t('multichain.blockHeight')}</span>
                   <span className="text-[11px] text-slate-300 font-mono tabular-nums">{formatNumber(chain.blockHeight)}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-500 block">Gas价格</span>
+                  <span className="text-[10px] text-slate-500 block">{t('multichain.gasPrice')}</span>
                   <span className="text-[11px] text-slate-300 font-mono">{chain.gasPrice} Gwei</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-500 block">出块时间</span>
+                  <span className="text-[10px] text-slate-500 block">{t('multichain.avgBlockTime')}</span>
                   <span className="text-[11px] text-slate-300">{chain.avgBlockTime}</span>
                 </div>
               </div>
@@ -354,7 +356,7 @@ function ChainManagementTab({ chains }: { chains: SupportedChain[] }) {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-1.5">
                   <Layers className="size-3 text-violet-400" />
-                  <span className="text-[11px] text-slate-400">{chain.contractsDeployed} 合约</span>
+                  <span className="text-[11px] text-slate-400">{chain.contractsDeployed} {t('multichain.contracts')}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Zap className="size-3 text-emerald-400" />
@@ -366,7 +368,7 @@ function ChainManagementTab({ chains }: { chains: SupportedChain[] }) {
               {/* Last Sync */}
               <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mb-3">
                 <Clock className="size-3" />
-                <span suppressHydrationWarning>最近同步: {getRelativeTime(chain.lastSync, now)}</span>
+                <span suppressHydrationWarning> {t('multichain.lastSync')}: {getRelativeTime(chain.lastSync, now)}</span>
               </div>
 
               {/* Action Button */}
@@ -382,7 +384,7 @@ function ChainManagementTab({ chains }: { chains: SupportedChain[] }) {
                 )}
               >
                 {chain.status === 'active' && <Radio className="mr-1.5 size-3" />}
-                {config.actionLabel}
+                {t(config.actionLabel)}
               </Button>
             </motion.div>
           );
@@ -394,6 +396,7 @@ function ChainManagementTab({ chains }: { chains: SupportedChain[] }) {
 
 // ── Tab 2: Cross-chain Bridge ──────────────────────────
 function CrossChainBridgeTab({ bridges, chains }: { bridges: CrossChainBridge[]; chains: SupportedChain[] }) {
+  const { t } = useI18n();
   const activeBridges = bridges.filter(b => b.status === 'active').length;
   const pendingBridges = bridges.filter(b => b.status === 'pending').length;
 
@@ -403,15 +406,15 @@ function CrossChainBridgeTab({ bridges, chains }: { bridges: CrossChainBridge[];
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/60 border border-slate-700">
           <Link2 className="size-3.5 text-violet-400" />
-          <span className="text-xs text-slate-300 font-medium">{bridges.length} 桥接</span>
+          <span className="text-xs text-slate-300 font-medium">{bridges.length} {t('multichain.bridgeCount')}</span>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
           <span className="size-2 rounded-full bg-emerald-400" />
-          <span className="text-xs text-emerald-300 font-medium">{activeBridges} 活跃</span>
+          <span className="text-xs text-emerald-300 font-medium">{activeBridges} {t('multichain.activeBridges')}</span>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
           <span className="size-2 rounded-full bg-amber-400" />
-          <span className="text-xs text-amber-300 font-medium">{pendingBridges} 待激活</span>
+          <span className="text-xs text-amber-300 font-medium">{pendingBridges} {t('multichain.pendingBridges')}</span>
         </div>
       </div>
 
@@ -453,30 +456,30 @@ function CrossChainBridgeTab({ bridges, chains }: { bridges: CrossChainBridge[];
                   </div>
                 </div>
                 <Badge variant="outline" className={cn('text-[10px]', bConfig.badge)}>
-                  {bConfig.label}
+                  {t(bConfig.label)}
                 </Badge>
               </div>
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
                 <div className="rounded-lg bg-slate-900/50 p-2.5">
-                  <span className="text-[10px] text-slate-500 block">锁定总额</span>
+                  <span className="text-[10px] text-slate-500 block">{t('multichain.lockedTotal')}</span>
                   <span className="text-xs text-slate-200 font-medium tabular-nums">{formatUsd(bridge.totalLocked)}</span>
                 </div>
                 <div className="rounded-lg bg-slate-900/50 p-2.5">
-                  <span className="text-[10px] text-slate-500 block">铸造总额</span>
+                  <span className="text-[10px] text-slate-500 block">{t('multichain.mintedTotal')}</span>
                   <span className="text-xs text-slate-200 font-medium tabular-nums">{formatUsd(bridge.totalMinted)}</span>
                 </div>
                 <div className="rounded-lg bg-slate-900/50 p-2.5">
-                  <span className="text-[10px] text-slate-500 block">手续费</span>
+                  <span className="text-[10px] text-slate-500 block">{t('multichain.fee')}</span>
                   <span className="text-xs text-slate-200 font-medium">{bridge.fee}</span>
                 </div>
                 <div className="rounded-lg bg-slate-900/50 p-2.5">
-                  <span className="text-[10px] text-slate-500 block">平均时间</span>
+                  <span className="text-[10px] text-slate-500 block">{t('multichain.avgTime')}</span>
                   <span className="text-xs text-slate-200 font-medium">{bridge.avgTime}</span>
                 </div>
                 <div className="rounded-lg bg-slate-900/50 p-2.5">
-                  <span className="text-[10px] text-slate-500 block">24h交易</span>
+                  <span className="text-[10px] text-slate-500 block">{t('multichain.transactions24h')}</span>
                   <span className="text-xs text-slate-200 font-medium tabular-nums">{bridge.transactions24h}</span>
                 </div>
               </div>
@@ -485,7 +488,7 @@ function CrossChainBridgeTab({ bridges, chains }: { bridges: CrossChainBridge[];
               {bridge.totalLocked > 0 && (
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] text-slate-500">锁定 vs 铸造比例</span>
+                    <span className="text-[10px] text-slate-500">{t('multichain.lockVsMint')}</span>
                     <span className="text-[10px] text-slate-400 tabular-nums">{mintRatio.toFixed(1)}%</span>
                   </div>
                   <div className="h-2 rounded-full bg-slate-700 overflow-hidden">
@@ -497,8 +500,8 @@ function CrossChainBridgeTab({ bridges, chains }: { bridges: CrossChainBridge[];
                     />
                   </div>
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-[9px] text-violet-400">锁定 {formatUsd(bridge.totalLocked)}</span>
-                    <span className="text-[9px] text-emerald-400">铸造 {formatUsd(bridge.totalMinted)}</span>
+                    <span className="text-[9px] text-violet-400"> {t('multichain.locked')} {formatUsd(bridge.totalLocked)}</span>
+                    <span className="text-[9px] text-emerald-400"> {t('multichain.minted')} {formatUsd(bridge.totalMinted)}</span>
                   </div>
                 </div>
               )}
@@ -533,6 +536,7 @@ function StateSyncTab({
   tvlHistory: TvlHistoryPoint[];
   chains: SupportedChain[];
 }) {
+  const { t } = useI18n();
   const now = useClientTime();
   const allSynced = stateSync.every(s => s.status === 'synced');
   const hasDelayed = stateSync.some(s => s.status === 'delayed');
@@ -549,11 +553,11 @@ function StateSyncTab({
           <AlertTriangle className="size-4 text-amber-400" />
         )}
         <AlertTitle className={cn('text-xs', allSynced ? 'text-emerald-300' : 'text-amber-300')}>
-          状态同步: {allSynced ? '全部已同步' : '存在延迟项'}
+          {allSynced ? t('multichain.syncAllSynced') : t('multichain.syncHasDelayed')}
         </AlertTitle>
         <AlertDescription className={cn('text-[11px]', allSynced ? 'text-emerald-300/70' : 'text-amber-300/70')}>
-          {stateSync.filter(s => s.status === 'synced').length}/{stateSync.length} 项已同步
-          {hasDelayed && ` · ${stateSync.filter(s => s.status === 'delayed').length} 项延迟`}
+          {t('multichain.syncItemCount', { synced: String(stateSync.filter(s => s.status === 'synced').length), total: String(stateSync.length) })}
+          {hasDelayed && ` · ${t('multichain.syncDelayedCount', { count: String(stateSync.filter(s => s.status === 'delayed').length) })}`}
         </AlertDescription>
       </Alert>
 
@@ -562,7 +566,7 @@ function StateSyncTab({
         <div className="p-4 border-b border-slate-700/50">
           <div className="flex items-center gap-2">
             <Activity className="size-4 text-violet-400" />
-            <h4 className="text-xs font-semibold text-slate-200">状态同步监控</h4>
+            <h4 className="text-xs font-semibold text-slate-200">{t('multichain.stateSyncMonitor')}</h4>
           </div>
         </div>
         <div className="divide-y divide-slate-700/50">
@@ -602,15 +606,15 @@ function StateSyncTab({
 
                 <div className="flex items-center gap-4 sm:gap-6">
                   <div className="text-center">
-                    <span className="text-[9px] text-slate-500 block">最近同步</span>
+                    <span className="text-[9px] text-slate-500 block">{t('multichain.recentSync')}</span>
                     <span className="text-[10px] text-slate-400" suppressHydrationWarning>{getRelativeTime(entry.lastSync, now)}</span>
                   </div>
                   <div className="text-center">
-                    <span className="text-[9px] text-slate-500 block">延迟</span>
+                    <span className="text-[9px] text-slate-500 block">{t('multichain.latency')}</span>
                     <span className={cn('text-[11px] font-mono font-medium', latencyColor)}>{entry.latency}</span>
                   </div>
                   <Badge variant="outline" className={cn('text-[10px] shrink-0', sConfig.badge)}>
-                    {sConfig.label}
+                    {t(sConfig.label)}
                   </Badge>
                   {entry.status === 'delayed' && (
                     <Button
@@ -633,7 +637,7 @@ function StateSyncTab({
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-4">
           <Layers className="size-4 text-violet-400" />
-          <h4 className="text-xs font-semibold text-slate-200">部署流水线</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('multichain.deployPipeline')}</h4>
         </div>
         <div className="space-y-0">
           {deploymentPipeline.map((stage, idx) => {
@@ -682,7 +686,7 @@ function StateSyncTab({
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-4">
           <Activity className="size-4 text-emerald-400" />
-          <h4 className="text-xs font-semibold text-slate-200">TVL 历史趋势</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('multichain.tvlHistory')}</h4>
           <div className="ml-auto flex items-center gap-3">
             <div className="flex items-center gap-1.5">
               <span className="size-2 rounded-full" style={{ backgroundColor: '#0052FF' }} />
@@ -777,6 +781,7 @@ function ChainSwitchTab({
   chains: SupportedChain[];
   switchHistory: ChainSwitchHistory[];
 }) {
+  const { t } = useI18n();
   const now = useClientTime();
   const activeChains = chains.filter(c => c.status === 'active');
   const [selectedChain, setSelectedChain] = useState('base');
@@ -790,7 +795,7 @@ function ChainSwitchTab({
           <div className="flex items-center gap-3">
             <span className="text-2xl">{currentChain?.icon ?? '⛓️'}</span>
             <div>
-              <span className="text-[10px] text-slate-500 block">当前链</span>
+              <span className="text-[10px] text-slate-500 block">{t('multichain.currentChain')}</span>
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold text-slate-100">{currentChain?.name ?? 'Unknown'}</span>
                 <Badge
@@ -809,7 +814,7 @@ function ChainSwitchTab({
           </div>
           <div className="flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] text-emerald-400">已连接</span>
+            <span className="text-[10px] text-emerald-400">{t('multichain.connected')}</span>
           </div>
         </div>
       </div>
@@ -818,7 +823,7 @@ function ChainSwitchTab({
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-4">
           <Globe className="size-4 text-violet-400" />
-          <h4 className="text-xs font-semibold text-slate-200">切换链</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('multichain.switchChain')}</h4>
         </div>
         <RadioGroup
           value={selectedChain}
@@ -867,7 +872,7 @@ function ChainSwitchTab({
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-4">
           <Clock className="size-4 text-slate-400" />
-          <h4 className="text-xs font-semibold text-slate-200">最近链切换记录</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('multichain.recentSwitch')}</h4>
         </div>
         <ScrollArea className="max-h-96">
           <div className="space-y-3">
@@ -903,7 +908,7 @@ function ChainSwitchTab({
                     </div>
                     <Badge variant="outline" className={cn('text-[9px]', sConfig.badge)}>
                       <SIcon className="mr-1 size-2.5" />
-                      {sConfig.label}
+                      {t(sConfig.label)}
                     </Badge>
                   </div>
 
@@ -938,6 +943,7 @@ function ChainSwitchTab({
 
 // ── Main Component ─────────────────────────────────────
 export default function MultiChainDeploy() {
+  const { t } = useI18n();
   const [data, setData] = useState<MultiChainData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -957,7 +963,7 @@ export default function MultiChainDeploy() {
         <CardContent className="flex items-center justify-center py-20">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="size-6 text-violet-400 animate-spin" />
-            <span className="text-sm text-slate-400">加载多链数据...</span>
+            <span className="text-sm text-slate-400">{t('multichain.loadingData')}</span>
           </div>
         </CardContent>
       </Card>
@@ -978,14 +984,14 @@ export default function MultiChainDeploy() {
                 <Globe className="size-4 text-violet-400" />
               </div>
               <div>
-                <CardTitle className="text-base text-slate-100">多链部署中心</CardTitle>
+                <CardTitle className="text-base text-slate-100">{t('multichain.title')}</CardTitle>
                 <p className="text-[11px] text-slate-500 mt-0.5">Multi-chain Deployment & Cross-chain Bridge</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="bg-emerald-500/15 text-emerald-300 border-emerald-500/30 text-[10px]">
                 <span className="inline-block size-1.5 rounded-full mr-1.5 bg-emerald-400 animate-pulse" />
-                {data.supportedChains.filter(c => c.status === 'active').length} 链在线
+                {data.supportedChains.filter(c => c.status === 'active').length} {t('multichain.chainOnline')}
               </Badge>
             </div>
           </div>

@@ -403,24 +403,32 @@ const ALERTS: PerformanceAlert[] = [
 
 // ── GET Handler ────────────────────────────────────────
 export async function GET() {
-  const data: PerformanceData = {
-    metrics: METRICS,
-    cacheStrategies: CACHE_STRATEGIES,
-    cdnConfig: CDN_CONFIG,
-    lazyModules: LAZY_MODULES,
-    budget: BUDGET,
-    performanceScore: 94,
-    jsBundleSize: 142,
-    jsBundleBudget: 150,
-    cssBundleSize: 28,
-    imageOptimizationRate: 94,
-    cacheHitRate: 91.2,
-    cdnBandwidthSaved: '847GB/月',
-    sparklines: SPARKLINES,
-    cacheTrend: CACHE_TREND,
-    recommendations: RECOMMENDATIONS,
-    alerts: ALERTS,
-  };
+  try {
+    const data: PerformanceData = {
+      metrics: METRICS,
+      cacheStrategies: CACHE_STRATEGIES,
+      cdnConfig: CDN_CONFIG,
+      lazyModules: LAZY_MODULES,
+      budget: BUDGET,
+      performanceScore: 94,
+      jsBundleSize: 142,
+      jsBundleBudget: 150,
+      cssBundleSize: 28,
+      imageOptimizationRate: 94,
+      cacheHitRate: 91.2,
+      cdnBandwidthSaved: '847GB/月',
+      sparklines: SPARKLINES,
+      cacheTrend: CACHE_TREND,
+      recommendations: RECOMMENDATIONS,
+      alerts: ALERTS,
+    };
 
-  return NextResponse.json(data);
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('[API] Error in GET /api/performance:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }

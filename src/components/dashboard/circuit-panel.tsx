@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import type { AvatarProfile, CircuitState } from '@/lib/types';
+import { useI18n } from '@/hooks/use-i18n';
 
 // ── Props ──────────────────────────────────────────────
 interface CircuitPanelProps {
@@ -29,7 +30,7 @@ const RECOVERY_HOURS = 48;
 const STATE_CONFIG: Record<
   CircuitState,
   {
-    label: string;
+    labelKey: string;
     emoji: string;
     borderClass: string;
     bgClass: string;
@@ -38,7 +39,7 @@ const STATE_CONFIG: Record<
   }
 > = {
   NORMAL: {
-    label: '正常运行',
+    labelKey: 'circuit.normalRun',
     emoji: '🟢',
     borderClass: 'border-l-4 border-l-emerald-500',
     bgClass: 'bg-emerald-500/5',
@@ -46,7 +47,7 @@ const STATE_CONFIG: Record<
     icon: ShieldCheck,
   },
   SOFT_LIMIT: {
-    label: '降级运行',
+    labelKey: 'circuit.degradedRun',
     emoji: '🟡',
     borderClass: 'border-l-4 border-l-amber-500',
     bgClass: 'bg-amber-500/5',
@@ -54,7 +55,7 @@ const STATE_CONFIG: Record<
     icon: ShieldAlert,
   },
   HARD_PAUSE: {
-    label: '已暂停',
+    labelKey: 'circuit.pausedState',
     emoji: '🔴',
     borderClass: 'border-l-4 border-l-red-500',
     bgClass: 'bg-red-500/5',
@@ -62,7 +63,7 @@ const STATE_CONFIG: Record<
     icon: ShieldOff,
   },
   RECOVERY: {
-    label: '恢复中',
+    labelKey: 'circuit.recoveringState',
     emoji: '🔄',
     borderClass: 'border-l-4 border-l-sky-500',
     bgClass: 'bg-sky-500/5',
@@ -74,6 +75,7 @@ const STATE_CONFIG: Record<
 // ── Countdown Hook ─────────────────────────────────────
 function useRecoveryCountdown(totalHours: number) {
   const [secondsLeft, setSecondsLeft] = useState(totalHours * 3600);
+  const { t } = useI18n();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -84,14 +86,15 @@ function useRecoveryCountdown(totalHours: number) {
 
   const hours = Math.floor(secondsLeft / 3600);
   const minutes = Math.floor((secondsLeft % 3600) / 60);
-  return `${hours}小时${String(minutes).padStart(2, '0')}分钟`;
+  return t('circuit.recoveryCountdown', { hours: String(hours), minutes: String(minutes).padStart(2, '0') });
 }
 
 // ── Component ──────────────────────────────────────────
 export default function CircuitPanel({ avatar }: CircuitPanelProps) {
+  const { t } = useI18n();
   const [state, setState] = useState<CircuitState>(avatar.circuitState);
   const [resonanceScore, setResonanceScore] = useState(avatar.resonanceScore);
-  const [lastAction, setLastAction] = useState('生成营销文案 (低风险)');
+  const [lastAction, setLastAction] = useState(t('circuit.defaultAction'));
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [showLog, setShowLog] = useState(false);
 
@@ -104,8 +107,8 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
   const handleManualPause = useCallback(() => {
     setState('SOFT_LIMIT');
     setResonanceScore(58);
-    setLastAction('手动暂停触发降级');
-  }, []);
+    setLastAction(t('circuit.manualPauseDegraded'));
+  }, [t]);
 
   const handleManualReview = useCallback(() => {
     setShowLog(true);
@@ -147,10 +150,10 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
 
   // ── Animated log ────────────────────────────────────
   const mockLogs = [
-    { time: '14:32:01', event: '共振分更新: 82 → 58', level: 'warn' },
-    { time: '14:30:45', event: '生成营销文案请求 — 低风险', level: 'info' },
-    { time: '14:28:12', event: '签署$10,000合约 — 已拦截', level: 'error' },
-    { time: '14:25:00', event: '心跳检测: 正常', level: 'info' },
+    { time: '14:32:01', event: t('circuit.logResonanceUpdate', { from: '82', to: '58' }), level: 'warn' },
+    { time: '14:30:45', event: t('circuit.logGenRequest'), level: 'info' },
+    { time: '14:28:12', event: t('circuit.logContractBlocked'), level: 'error' },
+    { time: '14:25:00', event: t('circuit.logHeartbeatNormal'), level: 'info' },
   ];
 
   return (
@@ -188,7 +191,7 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                 state === 'RECOVERY' && 'text-sky-400',
               )}
             />
-            认知熔断控制面板
+            {t('circuit.title')}
           </CardTitle>
         </CardHeader>
 
@@ -206,12 +209,12 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
               {/* Status row */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-400">认知状态:</span>
+                  <span className="text-sm text-slate-400">{t('circuit.cognitionState')}:</span>
                   <Badge
                     variant="outline"
                     className={cn('font-medium', config.badgeClass)}
                   >
-                    {config.emoji} {config.label}
+                    {config.emoji} {t(config.labelKey)}
                   </Badge>
                 </div>
               </div>
@@ -220,14 +223,14 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
               {state === 'NORMAL' && (
                 <div className="space-y-3">
                   <div className="text-sm text-slate-300">
-                    最后操作:{' '}
+                    {t('circuit.lastAction')}:{' '}
                     <span className="text-slate-100">{lastAction}</span>
                   </div>
 
                   {/* Resonance bar */}
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs text-slate-400">
-                      <span>共振分</span>
+                      <span>{t('circuit.resonanceScoreLabel')}</span>
                       <span>{resonanceScore}/100</span>
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-slate-700">
@@ -239,8 +242,8 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                       />
                     </div>
                     <div className="flex justify-between text-[10px] text-slate-500">
-                      <span>硬阈值 {HARD_THRESHOLD}</span>
-                      <span>软阈值 {SOFT_THRESHOLD}</span>
+                      <span>{t('circuit.hardThresholdLabel')} {HARD_THRESHOLD}</span>
+                      <span>{t('circuit.softThresholdLabel')} {SOFT_THRESHOLD}</span>
                     </div>
                   </div>
                 </div>
@@ -252,20 +255,20 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                   <Alert className="border-amber-500/30 bg-amber-500/5">
                     <AlertTriangle className="size-4 text-amber-400" />
                     <AlertTitle className="text-amber-400">
-                      降级运行中
+                      {t('circuit.degradedRunAlert')}
                     </AlertTitle>
                     <AlertDescription className="text-amber-300/80">
-                      共振分{' '}
+                      {t('circuit.resonanceScoreLabel')}{' '}
                       <span className="font-bold text-amber-200">
                         {resonanceScore}
                       </span>{' '}
-                      (低于阈值 {SOFT_THRESHOLD}) — 高风险操作已暂停
+                      ({t('circuit.belowThreshold', { threshold: String(SOFT_THRESHOLD) })})
                     </AlertDescription>
                   </Alert>
 
                   <div className="flex items-center gap-2 text-sm text-slate-300">
                     <Clock className="size-4 text-amber-400" />
-                    自动恢复:{' '}
+                    {t('circuit.autoRecover')}:{' '}
                     <span className="font-medium text-amber-300">
                       {recoveryLabel}
                     </span>
@@ -274,7 +277,7 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                   {/* Resonance bar */}
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs text-slate-400">
-                      <span>共振分</span>
+                      <span>{t('circuit.resonanceScoreLabel')}</span>
                       <span>{resonanceScore}/100</span>
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-slate-700">
@@ -286,8 +289,8 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                       />
                     </div>
                     <div className="flex justify-between text-[10px] text-slate-500">
-                      <span>硬阈值 {HARD_THRESHOLD}</span>
-                      <span>软阈值 {SOFT_THRESHOLD}</span>
+                      <span>{t('circuit.hardThresholdLabel')} {HARD_THRESHOLD}</span>
+                      <span>{t('circuit.softThresholdLabel')} {SOFT_THRESHOLD}</span>
                     </div>
                   </div>
                 </div>
@@ -302,21 +305,21 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                   >
                     <ShieldOff className="size-4 text-red-400" />
                     <AlertTitle className="text-red-400">
-                      认知已暂停
+                      {t('circuit.cognitionPaused')}
                     </AlertTitle>
                     <AlertDescription className="text-red-300/80">
-                      触发原因: 共振分{' '}
+                      {t('circuit.triggerCause')}{' '}
                       <span className="font-bold text-red-200">
                         {resonanceScore}
                       </span>{' '}
-                      &lt; 硬阈值 {HARD_THRESHOLD}
+                      {t('circuit.lessThanHardThreshold', { threshold: String(HARD_THRESHOLD) })}
                     </AlertDescription>
                   </Alert>
 
                   {pendingAction && (
                     <div className="flex items-center gap-2 rounded-md border border-red-500/20 bg-red-500/5 px-3 py-2 text-sm">
                       <AlertTriangle className="size-4 text-red-400" />
-                      <span className="text-slate-300">待处理操作:</span>
+                      <span className="text-slate-300">{t('circuit.pendingAction')}:</span>
                       <span className="font-medium text-red-300">
                         {pendingAction}
                       </span>
@@ -324,7 +327,7 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                         variant="destructive"
                         className="ml-auto text-[10px]"
                       >
-                        拦截
+                        {t('circuit.intercepted')}
                       </Badge>
                     </div>
                   )}
@@ -332,7 +335,7 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                   {/* Resonance bar */}
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs text-slate-400">
-                      <span>共振分</span>
+                      <span>{t('circuit.resonanceScoreLabel')}</span>
                       <span>{resonanceScore}/100</span>
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-slate-700">
@@ -344,8 +347,8 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                       />
                     </div>
                     <div className="flex justify-between text-[10px] text-slate-500">
-                      <span>硬阈值 {HARD_THRESHOLD}</span>
-                      <span>软阈值 {SOFT_THRESHOLD}</span>
+                      <span>{t('circuit.hardThresholdLabel')} {HARD_THRESHOLD}</span>
+                      <span>{t('circuit.softThresholdLabel')} {SOFT_THRESHOLD}</span>
                     </div>
                   </div>
                 </div>
@@ -356,9 +359,9 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                 <div className="space-y-3">
                   <Alert className="border-sky-500/30 bg-sky-500/5">
                     <ShieldCheck className="size-4 text-sky-400" />
-                    <AlertTitle className="text-sky-400">恢复中</AlertTitle>
+                    <AlertTitle className="text-sky-400">{t('circuit.recoveringState')}</AlertTitle>
                     <AlertDescription className="text-sky-300/80">
-                      共振分正在回升，即将恢复正常运行
+                      {t('circuit.resonanceRecovering')}
                     </AlertDescription>
                   </Alert>
 
@@ -384,7 +387,7 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                   className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-slate-100"
                   onClick={handleManualReview}
                 >
-                  查看详细日志
+                  {t('circuit.viewLog')}
                 </Button>
                 <Button
                   variant="outline"
@@ -392,7 +395,7 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                   className="border-amber-600 text-amber-400 hover:bg-amber-500/10"
                   onClick={handleManualPause}
                 >
-                  手动暂停
+                  {t('circuit.manualPause')}
                 </Button>
               </>
             )}
@@ -405,7 +408,7 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                   className="border-amber-600 text-amber-400 hover:bg-amber-500/10"
                   onClick={handleManualReview}
                 >
-                  人工复核
+                  {t('circuit.manualReview')}
                 </Button>
                 <Button
                   variant="outline"
@@ -413,7 +416,7 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                   className="border-sky-600 text-sky-400 hover:bg-sky-500/10"
                   onClick={handleAdjustParams}
                 >
-                  调整共振参数
+                  {t('circuit.adjustParams')}
                 </Button>
               </>
             )}
@@ -426,14 +429,14 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                   className="border-emerald-600 text-emerald-400 hover:bg-emerald-500/10"
                   onClick={handleApproveAction}
                 >
-                  批准操作
+                  {t('circuit.approveAction')}
                 </Button>
                 <Button
                   variant="destructive"
                   size="sm"
                   onClick={handleFreeze}
                 >
-                  永久冻结
+                  {t('circuit.freezePermanently')}
                 </Button>
                 <Button
                   variant="outline"
@@ -441,7 +444,7 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                   className="border-sky-600 text-sky-400 hover:bg-sky-500/10"
                   onClick={handleRecover}
                 >
-                  恢复运行
+                  {t('circuit.resumeRun')}
                 </Button>
               </>
             )}
@@ -457,7 +460,7 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 >
-                  正在恢复...
+                  {t('circuit.recoveringDots')}
                 </motion.span>
               </Button>
             )}
@@ -474,7 +477,7 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
               >
                 <div className="rounded-md border border-slate-700 bg-slate-900/60 p-3">
                   <p className="mb-2 text-xs font-medium text-slate-400">
-                    操作日志
+                    {t('circuit.operationLog')}
                   </p>
                   <div className="max-h-32 space-y-1 overflow-y-auto text-xs">
                     {mockLogs.map((log, i) => (
@@ -500,7 +503,7 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
           {/* ── Demo controls ───────────────────────────── */}
           <div className="border-t border-slate-700 pt-3">
             <p className="mb-2 text-[10px] text-slate-500">
-              演示: 切换熔断状态
+              {t('circuit.demoSwitch')}
             </p>
             <div className="flex flex-wrap gap-1.5">
               {(['NORMAL', 'SOFT_LIMIT', 'HARD_PAUSE'] as CircuitState[]).map(
@@ -525,11 +528,11 @@ export default function CircuitPanel({ avatar }: CircuitPanelProps) {
                         setPendingAction(null);
                       } else {
                         setResonanceScore(42);
-                        setPendingAction('签署$10,000合约');
+                        setPendingAction(t('circuit.signContractAction'));
                       }
                     }}
                   >
-                    {STATE_CONFIG[s].emoji} {STATE_CONFIG[s].label}
+                    {STATE_CONFIG[s].emoji} {t(STATE_CONFIG[s].labelKey)}
                   </Button>
                 ),
               )}

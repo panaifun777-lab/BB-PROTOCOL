@@ -196,5 +196,13 @@ const DATA: DataInfraData = {
 };
 
 export async function GET() {
-  return NextResponse.json(DATA);
+  try {
+    return NextResponse.json(DATA);
+  } catch (error) {
+    console.error('[API] Error in GET /api/data-infra:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }

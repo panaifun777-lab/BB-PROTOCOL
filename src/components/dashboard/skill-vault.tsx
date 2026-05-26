@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import type { AvatarSkill } from '@/lib/types';
+import { useI18n } from '@/hooks/use-i18n';
 
 // ===== Tier thresholds =====
 const TIER_THRESHOLDS: Record<number, number> = {
@@ -29,11 +30,12 @@ const TIER_THRESHOLDS: Record<number, number> = {
   4: 5000,
 };
 
-const TIER_LABELS: Record<number, string> = {
-  1: '基础',
-  2: '高级RAG',
-  3: '多模态',
-  4: '协作',
+// ===== Tier label keys =====
+const TIER_LABEL_KEYS: Record<number, string> = {
+  1: 'skills.tierBasic',
+  2: 'skills.tierAdvancedRag',
+  3: 'skills.tierMultimodal',
+  4: 'skills.tierCollaboration',
 };
 
 // ===== Category icon mapping =====
@@ -99,6 +101,7 @@ function SkillCard({
   currentTier: 'starter' | 'pro' | 'enterprise';
   onUnlockClick: (skill: AvatarSkill) => void;
 }) {
+  const { t } = useI18n();
   const { skill } = avatarSkill;
   const IconComponent = CATEGORY_ICONS[skill.category] ?? Sparkles;
   const threshold = TIER_THRESHOLDS[skill.tier] ?? 0;
@@ -158,19 +161,19 @@ function SkillCard({
             {isUnlocked && (
               <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25">
                 <Unlock className="mr-1 size-3" />
-                已解锁
+                {t('skills.unlocked')}
               </Badge>
             )}
             {isUnlockable && !avatarSkill.unlocked && cumulativeRevenue < threshold && (
               <Badge className="border-amber-500/30 bg-amber-500/15 text-amber-400 hover:bg-amber-500/25">
                 <TrendingUp className="mr-1 size-3" />
-                可解锁
+                {t('skills.unlockable')}
               </Badge>
             )}
             {isLocked && (
               <Badge className="border-slate-600 bg-slate-700/50 text-slate-400 hover:bg-slate-700">
                 <Lock className="mr-1 size-3" />
-                锁定
+                {t('skills.lockedBadge')}
               </Badge>
             )}
           </div>
@@ -181,13 +184,13 @@ function SkillCard({
           {isUnlocked && (
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
               <span>
-                使用次数:{' '}
+                {t('skills.usageCountLabel')}:{' '}
                 <span className="font-medium text-slate-200">
                   {avatarSkill.usageCount}
                 </span>
               </span>
               <span>
-                平均成本:{' '}
+                {t('skills.avgCostLabel')}:{' '}
                 <span className="font-medium text-slate-200">
                   ${avatarSkill.avgCost.toFixed(3)}
                 </span>
@@ -201,8 +204,8 @@ function SkillCard({
             <div className="mt-3 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-400">
-                  需累计收益 ${threshold}
-                  <span className="text-slate-500"> (当前: ${cumulativeRevenue})</span>
+                  {t('skills.needRevenue', { threshold: String(threshold) })}
+                  <span className="text-slate-500"> {t('skills.currentAmount', { cumulativeRevenue: String(cumulativeRevenue) })}</span>
                 </span>
                 <span className="font-medium text-amber-400">{progressPercent}%</span>
               </div>
@@ -213,7 +216,7 @@ function SkillCard({
                 className="h-7 text-xs text-amber-400 hover:text-amber-300"
                 onClick={() => onUnlockClick(avatarSkill)}
               >
-                查看解锁进度
+                {t('skills.viewUnlockProgress')}
               </Button>
             </div>
           )}
@@ -222,7 +225,7 @@ function SkillCard({
           {isLocked && (
             <div className="mt-3 space-y-2">
               <p className="text-xs text-slate-500">
-                需Pro订阅 ($99/月)
+                {t('skills.needProSubscription')}
               </p>
               <Button
                 variant="outline"
@@ -231,7 +234,7 @@ function SkillCard({
                 onClick={() => onUnlockClick(avatarSkill)}
               >
                 <Sparkles className="mr-1 size-3" />
-                升级套餐
+                {t('skills.upgradePlan')}
               </Button>
             </div>
           )}
@@ -245,7 +248,7 @@ function SkillCard({
                 onClick={() => onUnlockClick(avatarSkill)}
               >
                 <Unlock className="mr-1 size-3" />
-                立即解锁
+                {t('skills.instantUnlock')}
               </Button>
             </div>
           )}
@@ -263,12 +266,13 @@ interface SkillVaultProps {
 }
 
 const TAB_VALUES = ['all', 'general', 'rag', 'multimodal', 'collaboration'] as const;
-const TAB_LABELS: Record<string, string> = {
-  all: '全部',
-  general: '基础',
-  rag: '高级RAG',
-  multimodal: '多模态',
-  collaboration: '协作',
+
+const TAB_LABEL_KEYS: Record<string, string> = {
+  all: 'skills.tabAll',
+  general: 'skills.tabGeneral',
+  rag: 'skills.tabRag',
+  multimodal: 'skills.tabMultimodal',
+  collaboration: 'skills.tabCollaboration',
 };
 
 export default function SkillVault({
@@ -276,6 +280,7 @@ export default function SkillVault({
   cumulativeRevenue,
   currentTier,
 }: SkillVaultProps) {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<string>('all');
 
   const filteredSkills = useMemo(() => {
@@ -298,13 +303,13 @@ export default function SkillVault({
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Sparkles className="size-5 text-amber-400" />
-            技能库
+            {t('skills.title')}
           </CardTitle>
           <Badge
             variant="outline"
             className="border-slate-600 bg-slate-700/50 text-xs text-slate-300"
           >
-            {unlockedCount}/{totalSkills} 已解锁
+            {t('skills.unlockedCountLabel', { count: String(unlockedCount), total: String(totalSkills) })}
           </Badge>
         </div>
       </CardHeader>
@@ -323,7 +328,7 @@ export default function SkillVault({
                 value={tab}
                 className="h-7 px-2.5 text-xs data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100"
               >
-                {TAB_LABELS[tab]}
+                {t(TAB_LABEL_KEYS[tab])}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -356,7 +361,7 @@ export default function SkillVault({
                 animate={{ opacity: 1 }}
                 className="py-8 text-center text-sm text-slate-500"
               >
-                该分类下暂无技能
+                {t('skills.noSkillsInCategory')}
               </motion.div>
             )}
           </div>
@@ -365,7 +370,7 @@ export default function SkillVault({
         {/* Revenue progress to next tier */}
         <div className="mt-4 rounded-lg border border-slate-700/50 bg-slate-900/50 p-3">
           <div className="mb-2 flex items-center justify-between text-xs">
-            <span className="text-slate-400">累计收益</span>
+            <span className="text-slate-400">{t('skills.cumulativeRevenue')}</span>
             <span className="font-medium text-emerald-400">
               ${cumulativeRevenue.toLocaleString()}
             </span>
@@ -385,6 +390,7 @@ function TierProgressBar({
   cumulativeRevenue: number;
   currentTier: 'starter' | 'pro' | 'enterprise';
 }) {
+  const { t } = useI18n();
   // Find the next tier that hasn't been reached
   const tiers = [1, 2, 3, 4];
   let nextTier: number | null = null;
@@ -401,7 +407,7 @@ function TierProgressBar({
     return (
       <div className="flex items-center gap-2 text-xs text-emerald-400">
         <Unlock className="size-3.5" />
-        所有收益门槛技能已解锁
+        {t('skills.allRevenueUnlocked')}
       </div>
     );
   }
@@ -419,7 +425,7 @@ function TierProgressBar({
     <div className="space-y-1.5">
       <div className="flex items-center justify-between text-xs">
         <span className="text-slate-500">
-          下一阶段: {TIER_LABELS[nextTier]} (${threshold})
+          {t('skills.nextStage', { tierLabel: t(TIER_LABEL_KEYS[nextTier]), threshold: String(threshold) })}
         </span>
         <span className="font-medium text-amber-400">{rangeProgress}%</span>
       </div>

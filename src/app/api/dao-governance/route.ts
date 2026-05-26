@@ -4,7 +4,8 @@ import { NextResponse } from 'next/server';
 // Returns deterministic mock data for the DAO Governance dashboard.
 
 export async function GET() {
-  const data = {
+  try {
+    const data = {
     proposals: [
       {
         id: 'prop-1',
@@ -158,4 +159,11 @@ export async function GET() {
   };
 
   return NextResponse.json(data);
+  } catch (error) {
+    console.error('[API] Error in GET /api/dao-governance:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }

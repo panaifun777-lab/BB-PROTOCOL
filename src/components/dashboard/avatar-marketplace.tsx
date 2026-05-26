@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/hooks/use-i18n';
 
 // ── Types ──────────────────────────────────────────────
 interface MarketplaceAvatar {
@@ -53,21 +54,21 @@ const MARKETPLACE_DATA: MarketplaceAvatar[] = [
   { id: 'm6', name: '全栈架构.soul', soulId: '0xu1v2...w3x4', resonanceScore: 75, hourlyRate: 15, skills: ['代码生成', '架构设计', '代码审查'], domain: '技术开发' },
 ];
 
-// ── Domain options ─────────────────────────────────────
+// ── Domain options (values used as filter keys) ────────
 const DOMAIN_OPTIONS = [
-  { value: 'all', label: '全部领域' },
-  { value: '内容创作', label: '内容创作' },
-  { value: '数据分析', label: '数据分析' },
-  { value: '商务谈判', label: '商务谈判' },
-  { value: '客户服务', label: '客户服务' },
-  { value: '技术开发', label: '技术开发' },
+  { value: 'all', labelKey: 'marketplace.allDomains' },
+  { value: '内容创作', labelKey: 'marketplace.domainContent' },
+  { value: '数据分析', labelKey: 'marketplace.domainData' },
+  { value: '商务谈判', labelKey: 'marketplace.domainBusiness' },
+  { value: '客户服务', labelKey: 'marketplace.domainCustomer' },
+  { value: '技术开发', labelKey: 'marketplace.domainTech' },
 ];
 
 const SORT_OPTIONS = [
-  { value: 'default', label: '默认排序' },
-  { value: 'resonance', label: '共振分' },
-  { value: 'price-low', label: '价格低→高' },
-  { value: 'price-high', label: '价格高→低' },
+  { value: 'default', labelKey: 'marketplace.sortDefault' },
+  { value: 'resonance', labelKey: 'marketplace.sortResonance' },
+  { value: 'price-low', labelKey: 'marketplace.sortPriceLow' },
+  { value: 'price-high', labelKey: 'marketplace.sortPriceHigh' },
 ];
 
 // ── Domain icon mapping ────────────────────────────────
@@ -86,6 +87,45 @@ function getResonanceColor(score: number) {
   return { dot: 'bg-red-400', text: 'text-red-400', bg: 'bg-red-400/10' };
 }
 
+// ── Translation key mappings ───────────────────────────
+const DOMAIN_LABEL_KEYS: Record<string, string> = {
+  '内容创作': 'marketplace.domainContent',
+  '数据分析': 'marketplace.domainData',
+  '商务谈判': 'marketplace.domainBusiness',
+  '客户服务': 'marketplace.domainCustomer',
+  '技术开发': 'marketplace.domainTech',
+};
+
+const SKILL_LABEL_KEYS: Record<string, string> = {
+  '文案生成': 'marketplace.skillCopyGen',
+  'SEO优化': 'marketplace.skillSeo',
+  '内容策划': 'marketplace.skillContentPlan',
+  '数据分析': 'marketplace.skillDataAnalysis',
+  'BI报表': 'marketplace.skillBiReport',
+  '预测建模': 'marketplace.skillPredictModel',
+  '商务谈判': 'marketplace.skillBizNegotiate',
+  '合同审核': 'marketplace.skillContractReview',
+  '风险评估': 'marketplace.skillRiskAssess',
+  '图像生成': 'marketplace.skillImageGen',
+  '视频剪辑': 'marketplace.skillVideoEdit',
+  'UI设计': 'marketplace.skillUiDesign',
+  '客户服务': 'marketplace.skillCustomerService',
+  'FAQ生成': 'marketplace.skillFaqGen',
+  '工单处理': 'marketplace.skillTicketProcess',
+  '代码生成': 'marketplace.skillCodeGen',
+  '架构设计': 'marketplace.skillArchDesign',
+  '代码审查': 'marketplace.skillCodeReview',
+};
+
+const AVATAR_NAME_KEYS: Record<string, string> = {
+  'm1': 'marketplace.nameCopywriting',
+  'm2': 'marketplace.nameDataHunter',
+  'm3': 'marketplace.nameNegotiator',
+  'm4': 'marketplace.nameVisualArtisan',
+  'm5': 'marketplace.nameServiceElf',
+  'm6': 'marketplace.nameFullStack',
+};
+
 // ── Props ──────────────────────────────────────────────
 interface AvatarMarketplaceProps {
   onRent?: (avatar: MarketplaceAvatar) => void;
@@ -95,9 +135,17 @@ interface AvatarMarketplaceProps {
 function AvatarCard({
   avatar,
   onRent,
+  domainLabel,
+  nameLabel,
+  skillLabelMap,
+  t,
 }: {
   avatar: MarketplaceAvatar;
   onRent: (avatar: MarketplaceAvatar) => void;
+  domainLabel: string;
+  nameLabel: string;
+  skillLabelMap: Record<string, string>;
+  t: (key: string) => string;
 }) {
   const resonance = getResonanceColor(avatar.resonanceScore);
   const DomainIcon = DOMAIN_ICONS[avatar.domain] ?? Star;
@@ -120,7 +168,7 @@ function AvatarCard({
               className="border-slate-600/50 bg-slate-700/30 text-[10px] text-slate-300 gap-1"
             >
               <DomainIcon className="size-3" />
-              {avatar.domain}
+              {domainLabel}
             </Badge>
             <div
               className={cn(
@@ -139,7 +187,7 @@ function AvatarCard({
           {/* Name & soulId */}
           <div>
             <h3 className="text-sm font-semibold text-slate-100 truncate">
-              {avatar.name}
+              {nameLabel}
             </h3>
             <p className="mt-0.5 font-mono text-[11px] text-slate-500 truncate">
               {avatar.soulId}
@@ -152,7 +200,7 @@ function AvatarCard({
             <span className="text-base font-bold text-violet-400">
               ${avatar.hourlyRate}
             </span>
-            <span className="text-[11px] text-slate-500">/小时</span>
+            <span className="text-[11px] text-slate-500">{t('marketplace.perHour')}</span>
           </div>
 
           {/* Skill badges */}
@@ -163,7 +211,7 @@ function AvatarCard({
                 variant="outline"
                 className="border-slate-600/30 bg-slate-700/20 text-[10px] text-slate-300 hover:bg-slate-700/40"
               >
-                {skill}
+                {skillLabelMap[skill] || skill}
               </Badge>
             ))}
           </div>
@@ -175,7 +223,7 @@ function AvatarCard({
             onClick={() => onRent(avatar)}
           >
             <Zap className="size-3.5" />
-            租用
+            {t('marketplace.rent')}
           </Button>
         </CardContent>
       </Card>
@@ -185,9 +233,35 @@ function AvatarCard({
 
 // ── Main Component ─────────────────────────────────────
 export default function AvatarMarketplace({ onRent }: AvatarMarketplaceProps) {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
   const [domainFilter, setDomainFilter] = useState('all');
   const [sortBy, setSortBy] = useState('default');
+
+  // Build translation mappings
+  const domainLabelMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const key of Object.keys(DOMAIN_LABEL_KEYS)) {
+      map[key] = t(DOMAIN_LABEL_KEYS[key]);
+    }
+    return map;
+  }, [t]);
+
+  const skillLabelMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const key of Object.keys(SKILL_LABEL_KEYS)) {
+      map[key] = t(SKILL_LABEL_KEYS[key]);
+    }
+    return map;
+  }, [t]);
+
+  const nameLabelMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const key of Object.keys(AVATAR_NAME_KEYS)) {
+      map[key] = t(AVATAR_NAME_KEYS[key]);
+    }
+    return map;
+  }, [t]);
 
   // Filter & sort logic
   const filteredAvatars = useMemo(() => {
@@ -199,8 +273,10 @@ export default function AvatarMarketplace({ onRent }: AvatarMarketplaceProps) {
       result = result.filter(
         (a) =>
           a.name.toLowerCase().includes(q) ||
-          a.skills.some((s) => s.toLowerCase().includes(q)) ||
-          a.domain.toLowerCase().includes(q)
+          (nameLabelMap[a.id]?.toLowerCase().includes(q)) ||
+          a.skills.some((s) => s.toLowerCase().includes(q) || (skillLabelMap[s]?.toLowerCase().includes(q))) ||
+          a.domain.toLowerCase().includes(q) ||
+          (domainLabelMap[a.domain]?.toLowerCase().includes(q))
       );
     }
 
@@ -225,7 +301,7 @@ export default function AvatarMarketplace({ onRent }: AvatarMarketplaceProps) {
     }
 
     return result;
-  }, [searchQuery, domainFilter, sortBy]);
+  }, [searchQuery, domainFilter, sortBy, nameLabelMap, skillLabelMap, domainLabelMap]);
 
   const handleRent = (avatar: MarketplaceAvatar) => {
     if (onRent) {
@@ -238,7 +314,7 @@ export default function AvatarMarketplace({ onRent }: AvatarMarketplaceProps) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Users className="size-5 text-violet-400" />
-          分身市场
+          {t('marketplace.title')}
         </CardTitle>
       </CardHeader>
 
@@ -249,7 +325,7 @@ export default function AvatarMarketplace({ onRent }: AvatarMarketplaceProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500" />
             <Input
-              placeholder="搜索技能/领域/价格..."
+              placeholder={t('marketplace.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-9 border-slate-700 bg-slate-900/60 pl-9 text-sm text-slate-200 placeholder:text-slate-500 focus-visible:ring-violet-500/30"
@@ -263,12 +339,12 @@ export default function AvatarMarketplace({ onRent }: AvatarMarketplaceProps) {
                 size="sm"
                 className="h-8 w-auto min-w-[110px] border-slate-700 bg-slate-900/60 text-xs text-slate-300 [&_svg]:text-slate-500"
               >
-                <SelectValue placeholder="领域" />
+                <SelectValue placeholder={t('marketplace.domainPlaceholder')} />
               </SelectTrigger>
               <SelectContent className="border-slate-700 bg-slate-800 text-slate-200">
                 {DOMAIN_OPTIONS.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value} className="text-xs focus:bg-slate-700 focus:text-slate-100">
-                    {opt.label}
+                    {t(opt.labelKey)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -279,12 +355,12 @@ export default function AvatarMarketplace({ onRent }: AvatarMarketplaceProps) {
                 size="sm"
                 className="h-8 w-auto min-w-[110px] border-slate-700 bg-slate-900/60 text-xs text-slate-300 [&_svg]:text-slate-500"
               >
-                <SelectValue placeholder="排序" />
+                <SelectValue placeholder={t('marketplace.sortPlaceholder')} />
               </SelectTrigger>
               <SelectContent className="border-slate-700 bg-slate-800 text-slate-200">
                 {SORT_OPTIONS.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value} className="text-xs focus:bg-slate-700 focus:text-slate-100">
-                    {opt.label}
+                    {t(opt.labelKey)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -292,7 +368,7 @@ export default function AvatarMarketplace({ onRent }: AvatarMarketplaceProps) {
 
             {/* Result count */}
             <span className="ml-auto text-[11px] text-slate-500">
-              {filteredAvatars.length} 个分身
+              {t('marketplace.avatarCount', { count: filteredAvatars.length })}
             </span>
           </div>
         </div>
@@ -305,6 +381,10 @@ export default function AvatarMarketplace({ onRent }: AvatarMarketplaceProps) {
                 key={avatar.id}
                 avatar={avatar}
                 onRent={handleRent}
+                domainLabel={domainLabelMap[avatar.domain] || avatar.domain}
+                nameLabel={`${nameLabelMap[avatar.id] || avatar.name.replace('.soul', '')}.soul`}
+                skillLabelMap={skillLabelMap}
+                t={t}
               />
             ))}
           </AnimatePresence>
@@ -318,8 +398,8 @@ export default function AvatarMarketplace({ onRent }: AvatarMarketplaceProps) {
             className="flex flex-col items-center gap-3 py-10 text-center"
           >
             <Search className="size-8 text-slate-600" />
-            <p className="text-sm text-slate-500">未找到匹配的分身</p>
-            <p className="text-xs text-slate-600">尝试调整搜索条件或筛选器</p>
+            <p className="text-sm text-slate-500">{t('marketplace.emptyTitle')}</p>
+            <p className="text-xs text-slate-600">{t('marketplace.emptyHint')}</p>
           </motion.div>
         )}
       </CardContent>

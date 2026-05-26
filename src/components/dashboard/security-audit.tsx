@@ -30,6 +30,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import { useClientTime } from '@/hooks/use-client-time';
+import { useI18n } from '@/hooks/use-i18n';
 
 // ── Types ──────────────────────────────────────────────
 type InvariantStatus = 'pass' | 'fail';
@@ -93,7 +94,7 @@ interface SecurityAuditData {
 const MOCK_INVARIANTS: CertoraInvariant[] = [
   {
     id: 'inv_1',
-    name: '分账守恒律',
+    name: 'security.invSplitConservation',
     formula: 'humanAmt + avatarAmt + protocolAmt == totalAmount',
     status: 'pass',
     counterexamples: 0,
@@ -102,7 +103,7 @@ const MOCK_INVARIANTS: CertoraInvariant[] = [
   },
   {
     id: 'inv_2',
-    name: '权重归一化',
+    name: 'security.invWeightNormalized',
     formula: 'Σ W_normalized == 10000 BPS',
     status: 'pass',
     counterexamples: 0,
@@ -111,7 +112,7 @@ const MOCK_INVARIANTS: CertoraInvariant[] = [
   },
   {
     id: 'inv_3',
-    name: '熔断拦截',
+    name: 'security.invCircuitIntercept',
     formula: 'State == HARD_PAUSE ⇒ !allowHighRisk()',
     status: 'pass',
     branchCoverage: 100,
@@ -119,10 +120,10 @@ const MOCK_INVARIANTS: CertoraInvariant[] = [
   },
   {
     id: 'inv_4',
-    name: '防女巫衰减',
+    name: 'security.invSybilDecay',
     formula: 'dS/dt ≤ 0 (无新参与)',
     status: 'pass',
-    proofMethod: 'Lyapunov稳定性证明',
+    proofMethod: 'security.lyapunovProof',
     lastVerified: '2026-03-04T10:00:00Z',
   },
 ];
@@ -131,37 +132,37 @@ const MOCK_FINDINGS: SlitherFinding[] = [
   {
     id: 'f1',
     severity: 'medium',
-    title: '未检查的外部调用返回值',
+    title: 'security.findingUncheckedReturn',
     contract: 'DynamicSplitter.sol',
     function: 'executeSplit',
-    description: 'ERC20 transfer返回值未检查',
+    description: 'security.findingUncheckedReturnDesc',
     status: 'fixed',
   },
   {
     id: 'f2',
     severity: 'low',
-    title: 'Gas优化建议: Storage Packing',
+    title: 'security.findingGasOpt',
     contract: 'AvatarCore.sol',
     function: 'getAvatarProfile',
-    description: '结构体字段可重新排列以节省Gas',
+    description: 'security.findingGasOptDesc',
     status: 'accepted_risk',
   },
   {
     id: 'f3',
     severity: 'high',
-    title: '重入风险 (已防护)',
+    title: 'security.findingReentrancy',
     contract: 'TokenVault.sol',
     function: 'withdraw',
-    description: 'ReentrancyGuard已应用，建议增加CEI模式注释',
+    description: 'security.findingReentrancyDesc',
     status: 'fixed',
   },
   {
     id: 'f4',
     severity: 'low',
-    title: '事件缺失',
+    title: 'security.findingMissingEvent',
     contract: 'IFDRouter.sol',
     function: 'revokeDelegation',
-    description: '建议在委托撤销时发出Revoke事件',
+    description: 'security.findingMissingEventDesc',
     status: 'pending',
   },
 ];
@@ -171,7 +172,7 @@ const MOCK_AUDIT_LOG: AuditLogEntry[] = [
     id: 'al1',
     type: 'invariant_violation',
     severity: 'info',
-    details: 'Certora Prover运行完成: 4/4不变量通过',
+    details: 'security.logCertoraComplete',
     txHash: '0xcert1...001',
     createdAt: '2026-03-04T14:00:00Z',
   },
@@ -179,7 +180,7 @@ const MOCK_AUDIT_LOG: AuditLogEntry[] = [
     id: 'al2',
     type: 'vulnerability_detected',
     severity: 'high',
-    details: 'Slither检测到重入风险 (TokenVault.sol) — 已修复',
+    details: 'security.logSlitherReentrancy',
     txHash: '0xslit1...002',
     createdAt: '2026-03-04T10:30:00Z',
   },
@@ -187,7 +188,7 @@ const MOCK_AUDIT_LOG: AuditLogEntry[] = [
     id: 'al3',
     type: 'circuit_trigger',
     severity: 'warn',
-    details: '认知熔断触发: NORMAL → SOFT_LIMIT (共振分58)',
+    details: 'security.logCircuitTrigger',
     txHash: '0xcirc1...003',
     createdAt: '2026-03-03T22:10:00Z',
   },
@@ -195,7 +196,7 @@ const MOCK_AUDIT_LOG: AuditLogEntry[] = [
     id: 'al4',
     type: 'access_change',
     severity: 'info',
-    details: 'ORACLE_ROLE已授予0xOracle...MultiSig',
+    details: 'security.logOracleRole',
     txHash: '0xacc1...004',
     createdAt: '2026-03-03T08:00:00Z',
   },
@@ -203,7 +204,7 @@ const MOCK_AUDIT_LOG: AuditLogEntry[] = [
     id: 'al5',
     type: 'vulnerability_detected',
     severity: 'medium',
-    details: 'ERC20返回值未检查 (DynamicSplitter.sol) — 已修复',
+    details: 'security.logErc20Unchecked',
     txHash: '0xslit2...005',
     createdAt: '2026-03-02T16:00:00Z',
   },
@@ -235,15 +236,15 @@ type TabId = 'overview' | 'invariants' | 'findings' | 'log';
 
 interface TabConfig {
   id: TabId;
-  label: string;
+  labelKey: string;
   icon: React.ElementType;
 }
 
 const TABS: TabConfig[] = [
-  { id: 'overview', label: '总览', icon: Gauge },
-  { id: 'invariants', label: '不变量', icon: ShieldCheck },
-  { id: 'findings', label: '发现', icon: Bug },
-  { id: 'log', label: '日志', icon: ScrollText },
+  { id: 'overview', labelKey: 'security.tabOverview', icon: Gauge },
+  { id: 'invariants', labelKey: 'security.tabInvariants', icon: ShieldCheck },
+  { id: 'findings', labelKey: 'security.tabFindings', icon: Bug },
+  { id: 'log', labelKey: 'security.tabLog', icon: ScrollText },
 ];
 
 // ── Severity Colors ────────────────────────────────────
@@ -292,33 +293,8 @@ const SEVERITY_CONFIG: Record<FindingSeverity | AuditLogSeverity, { color: strin
   },
 };
 
-const STATUS_CONFIG: Record<FindingStatus, { label: string; icon: React.ElementType; badge: string }> = {
-  fixed: {
-    label: '已修复',
-    icon: CheckCircle,
-    badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  },
-  pending: {
-    label: '待处理',
-    icon: AlertTriangle,
-    badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  },
-  accepted_risk: {
-    label: '接受风险',
-    icon: ShieldAlert,
-    badge: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
-  },
-};
-
-const LOG_TYPE_CONFIG: Record<AuditLogType, { label: string; icon: React.ElementType; color: string }> = {
-  vulnerability_detected: { label: '漏洞检测', icon: Bug, color: 'text-orange-400' },
-  invariant_violation: { label: '不变量', icon: ShieldCheck, color: 'text-violet-400' },
-  circuit_trigger: { label: '熔断触发', icon: ShieldAlert, color: 'text-amber-400' },
-  access_change: { label: '权限变更', icon: Lock, color: 'text-sky-400' },
-};
-
 // ── Helper: relative time ──────────────────────────────
-function getRelativeTime(timestamp: string, now: Date | null): string {
+function getRelativeTime(timestamp: string, now: Date | null, t: (key: string, params?: Record<string, string | number>) => string): string {
   if (!now) return '...';  // SSR placeholder to avoid hydration mismatch
   const date = new Date(timestamp);
   const diffMs = now.getTime() - date.getTime();
@@ -326,16 +302,17 @@ function getRelativeTime(timestamp: string, now: Date | null): string {
   const diffHr = Math.floor(diffMs / 3600000);
   const diffDay = Math.floor(diffMs / 86400000);
 
-  if (diffMin < 1) return '刚刚';
-  if (diffMin < 60) return `${diffMin}分钟前`;
-  if (diffHr < 24) return `${diffHr}小时前`;
-  if (diffDay < 30) return `${diffDay}天前`;
+  if (diffMin < 1) return t('security.justNow');
+  if (diffMin < 60) return t('security.minutesAgo', { count: diffMin });
+  if (diffHr < 24) return t('security.hoursAgo', { count: diffHr });
+  if (diffDay < 30) return t('security.daysAgo', { count: diffDay });
   return format(parseISO(timestamp), 'MMM d');
 }
 
 // ── Security Score Gauge ───────────────────────────────
 function SecurityScoreGauge({ score }: { score: number }) {
   const now = useClientTime();
+  const { t } = useI18n();
   const radius = 54;
   const circumference = 2 * Math.PI * radius;
   const progress = (score / 100) * circumference;
@@ -405,10 +382,10 @@ function SecurityScoreGauge({ score }: { score: number }) {
       </div>
       <div className="text-center">
         <p className={cn('text-sm font-semibold', scoreColor)}>
-          {score >= 90 ? '安全等级: 优秀' : score >= 70 ? '安全等级: 良好' : '安全等级: 需关注'}
+          {score >= 90 ? t('security.scoreExcellent') : score >= 70 ? t('security.scoreGood') : t('security.scoreNeedsAttention')}
         </p>
         <p className="mt-0.5 text-[10px] text-slate-500" suppressHydrationWarning>
-          上次全量审计: {getRelativeTime(MOCK_DATA.lastFullAudit, now)}
+          {t('security.lastFullAudit')} {getRelativeTime(MOCK_DATA.lastFullAudit, now, t)}
         </p>
       </div>
     </div>
@@ -418,6 +395,7 @@ function SecurityScoreGauge({ score }: { score: number }) {
 // ── Invariant Card ─────────────────────────────────────
 function InvariantCard({ invariant }: { invariant: CertoraInvariant }) {
   const now = useClientTime();
+  const { t } = useI18n();
   const isPass = invariant.status === 'pass';
   const StatusIcon = isPass ? ShieldCheck : ShieldX;
 
@@ -447,7 +425,7 @@ function InvariantCard({ invariant }: { invariant: CertoraInvariant }) {
                 />
               </div>
               <div className="min-w-0">
-                <h4 className="text-sm font-medium text-slate-100">{invariant.name}</h4>
+                <h4 className="text-sm font-medium text-slate-100">{t(invariant.name)}</h4>
                 <p className="mt-1 font-mono text-[11px] text-slate-400 leading-relaxed break-all">
                   {invariant.formula}
                 </p>
@@ -463,7 +441,7 @@ function InvariantCard({ invariant }: { invariant: CertoraInvariant }) {
                   : 'bg-red-500/20 text-red-300 border-red-500/30',
               )}
             >
-              {isPass ? '✅ 通过' : '❌ 失败'}
+              {isPass ? t('security.invariantPass') : t('security.invariantFail')}
             </Badge>
           </div>
 
@@ -471,7 +449,7 @@ function InvariantCard({ invariant }: { invariant: CertoraInvariant }) {
           <div className="mt-3 flex flex-wrap gap-3 text-[10px]">
             {invariant.counterexamples !== undefined && (
               <div className="flex items-center gap-1">
-                <span className="text-slate-500">反例:</span>
+                <span className="text-slate-500">{t('security.counterexamplesLabel')}</span>
                 <span className={cn('font-medium', invariant.counterexamples === 0 ? 'text-emerald-400' : 'text-red-400')}>
                   {invariant.counterexamples}
                 </span>
@@ -479,7 +457,7 @@ function InvariantCard({ invariant }: { invariant: CertoraInvariant }) {
             )}
             {invariant.proverRuns !== undefined && (
               <div className="flex items-center gap-1">
-                <span className="text-slate-500">Prover运行:</span>
+                <span className="text-slate-500">{t('security.proverRunsLabel')}</span>
                 <span className="font-medium text-violet-400">
                   {invariant.proverRuns.toLocaleString()}
                 </span>
@@ -487,7 +465,7 @@ function InvariantCard({ invariant }: { invariant: CertoraInvariant }) {
             )}
             {invariant.fuzzRuns !== undefined && (
               <div className="flex items-center gap-1">
-                <span className="text-slate-500">模糊测试:</span>
+                <span className="text-slate-500">{t('security.fuzzRunsLabel')}</span>
                 <span className="font-medium text-violet-400">
                   {invariant.fuzzRuns.toLocaleString()}
                 </span>
@@ -495,7 +473,7 @@ function InvariantCard({ invariant }: { invariant: CertoraInvariant }) {
             )}
             {invariant.branchCoverage !== undefined && (
               <div className="flex items-center gap-1">
-                <span className="text-slate-500">分支覆盖:</span>
+                <span className="text-slate-500">{t('security.branchCoverageLabel')}</span>
                 <span className={cn('font-medium', invariant.branchCoverage === 100 ? 'text-emerald-400' : 'text-amber-400')}>
                   {invariant.branchCoverage}%
                 </span>
@@ -503,8 +481,8 @@ function InvariantCard({ invariant }: { invariant: CertoraInvariant }) {
             )}
             {invariant.proofMethod && (
               <div className="flex items-center gap-1">
-                <span className="text-slate-500">证明方法:</span>
-                <span className="font-medium text-sky-400">{invariant.proofMethod}</span>
+                <span className="text-slate-500">{t('security.proofMethodShort')}</span>
+                <span className="font-medium text-sky-400">{t(invariant.proofMethod)}</span>
               </div>
             )}
           </div>
@@ -512,7 +490,7 @@ function InvariantCard({ invariant }: { invariant: CertoraInvariant }) {
           {/* Last verified */}
           <div className="mt-2 flex items-center gap-1 text-[10px] text-slate-500">
             <Clock className="size-3" />
-            <span suppressHydrationWarning>最后验证: {getRelativeTime(invariant.lastVerified, now)}</span>
+            <span suppressHydrationWarning>{t('security.lastVerifiedLabel')} {getRelativeTime(invariant.lastVerified, now, t)}</span>
           </div>
         </CardContent>
       </Card>
@@ -522,15 +500,27 @@ function InvariantCard({ invariant }: { invariant: CertoraInvariant }) {
 
 // ── Finding Row ────────────────────────────────────────
 function FindingRow({ finding }: { finding: SlitherFinding }) {
+  const { t } = useI18n();
   const sevConfig = SEVERITY_CONFIG[finding.severity];
-  const statConfig = STATUS_CONFIG[finding.status];
-  const StatusIcon = statConfig.icon;
+  const StatusIcon = finding.status === 'fixed' ? CheckCircle : finding.status === 'pending' ? AlertTriangle : ShieldAlert;
 
-  const severityLabel: Record<FindingSeverity, string> = {
-    critical: '严重',
-    high: '高危',
-    medium: '中危',
-    low: '低危',
+  const severityLabelKey: Record<FindingSeverity, string> = {
+    critical: 'security.sevCritical',
+    high: 'security.sevHigh',
+    medium: 'security.sevMedium',
+    low: 'security.sevLow',
+  };
+
+  const statusLabelKey: Record<FindingStatus, string> = {
+    fixed: 'security.statusFixed',
+    pending: 'security.statusPending',
+    accepted_risk: 'security.statusAcceptedRisk',
+  };
+
+  const statusBadgeClass: Record<FindingStatus, string> = {
+    fixed: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+    pending: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    accepted_risk: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
   };
 
   return (
@@ -551,21 +541,21 @@ function FindingRow({ finding }: { finding: SlitherFinding }) {
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-xs font-medium text-slate-200 truncate">{finding.title}</p>
+              <p className="text-xs font-medium text-slate-200 truncate">{t(finding.title)}</p>
               <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0', sevConfig.badge)}>
-                {severityLabel[finding.severity]}
+                {t(severityLabelKey[finding.severity])}
               </Badge>
             </div>
-            <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">{finding.description}</p>
+            <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">{t(finding.description)}</p>
             <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-500">
-              <span>合约: <span className="text-slate-300 font-mono">{finding.contract}</span></span>
-              <span>函数: <span className="text-slate-300 font-mono">{finding.function}</span></span>
+              <span>{t('security.contractLabel')} <span className="text-slate-300 font-mono">{finding.contract}</span></span>
+              <span>{t('security.functionLabel')} <span className="text-slate-300 font-mono">{finding.function}</span></span>
             </div>
           </div>
         </div>
-        <Badge variant="outline" className={cn('shrink-0 text-[9px] px-1.5 py-0', statConfig.badge)}>
+        <Badge variant="outline" className={cn('shrink-0 text-[9px] px-1.5 py-0', statusBadgeClass[finding.status])}>
           <StatusIcon className="mr-0.5 size-2.5" />
-          {statConfig.label}
+          {t(statusLabelKey[finding.status])}
         </Badge>
       </div>
     </motion.div>
@@ -575,7 +565,16 @@ function FindingRow({ finding }: { finding: SlitherFinding }) {
 // ── Audit Log Row ──────────────────────────────────────
 function AuditLogRow({ entry }: { entry: AuditLogEntry }) {
   const now = useClientTime();
-  const typeConfig = LOG_TYPE_CONFIG[entry.type];
+  const { t } = useI18n();
+
+  const logTypeConfig: Record<AuditLogType, { labelKey: string; icon: React.ElementType; color: string }> = {
+    vulnerability_detected: { labelKey: 'security.logTypeVulnerability', icon: Bug, color: 'text-orange-400' },
+    invariant_violation: { labelKey: 'security.logTypeInvariant', icon: ShieldCheck, color: 'text-violet-400' },
+    circuit_trigger: { labelKey: 'security.logTypeCircuit', icon: ShieldAlert, color: 'text-amber-400' },
+    access_change: { labelKey: 'security.logTypeAccess', icon: Lock, color: 'text-sky-400' },
+  };
+
+  const typeConfig = logTypeConfig[entry.type];
   const sevConfig = SEVERITY_CONFIG[entry.severity];
   const TypeIcon = typeConfig.icon;
 
@@ -592,13 +591,13 @@ function AuditLogRow({ entry }: { entry: AuditLogEntry }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">
           <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0', sevConfig.badge)}>
-            {typeConfig.label}
+            {t(typeConfig.labelKey)}
           </Badge>
           <span className="text-[10px] text-slate-500" suppressHydrationWarning>
-            {getRelativeTime(entry.createdAt, now)}
+            {getRelativeTime(entry.createdAt, now, t)}
           </span>
         </div>
-        <p className="mt-1 text-[11px] text-slate-300 leading-relaxed">{entry.details}</p>
+        <p className="mt-1 text-[11px] text-slate-300 leading-relaxed">{t(entry.details)}</p>
         <div className="mt-1 flex items-center gap-1 text-[10px] text-slate-500">
           <ExternalLink className="size-2.5" />
           <span className="font-mono">{entry.txHash}</span>
@@ -613,6 +612,7 @@ export default function SecurityAudit() {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [expandedInvariant, setExpandedInvariant] = useState<string | null>(null);
   const now = useClientTime();
+  const { t } = useI18n();
 
   const data = MOCK_DATA;
   const passedCount = data.invariants.filter((inv) => inv.status === 'pass').length;
@@ -630,18 +630,18 @@ export default function SecurityAudit() {
           <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
             <div className="flex items-center gap-2 mb-3">
               <ShieldCheck className="size-4 text-violet-400" />
-              <h4 className="text-xs font-semibold text-slate-200">Certora 形式化验证</h4>
+              <h4 className="text-xs font-semibold text-slate-200">{t('security.certoraFormalVerification')}</h4>
             </div>
             <div className="flex items-center gap-3 mb-2">
               <span className="text-2xl font-bold text-emerald-400">{passedCount}/{data.invariants.length}</span>
-              <span className="text-xs text-slate-400">不变量通过</span>
+              <span className="text-xs text-slate-400">{t('security.invariantPassed')}</span>
             </div>
             <Progress
               value={(passedCount / data.invariants.length) * 100}
               className="h-1.5 bg-slate-700 [&>div]:bg-emerald-500"
             />
             <p className="mt-2 text-[10px] text-slate-500">
-              {allPassed ? '✅ 所有关键不变量验证通过，0反例' : '⚠️ 存在未通过的不变量'}
+              {allPassed ? t('security.allInvariantPass') : t('security.someInvariantFail')}
             </p>
           </div>
 
@@ -649,7 +649,7 @@ export default function SecurityAudit() {
           <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Bug className="size-4 text-orange-400" />
-              <h4 className="text-xs font-semibold text-slate-200">Slither 静态分析</h4>
+              <h4 className="text-xs font-semibold text-slate-200">{t('security.slitherStaticAnalysis')}</h4>
             </div>
             <div className="grid grid-cols-4 gap-2 mb-3">
               {(['critical', 'high', 'medium', 'low'] as FindingSeverity[]).map((sev) => {
@@ -666,15 +666,15 @@ export default function SecurityAudit() {
             <div className="flex items-center gap-4 text-[10px]">
               <div className="flex items-center gap-1">
                 <CheckCircle className="size-3 text-emerald-400" />
-                <span className="text-slate-400">已修复: <span className="text-emerald-300 font-medium">{data.slitherSummary.fixed}</span></span>
+                <span className="text-slate-400">{t('security.fixedLabel')}: <span className="text-emerald-300 font-medium">{data.slitherSummary.fixed}</span></span>
               </div>
               <div className="flex items-center gap-1">
                 <AlertTriangle className="size-3 text-amber-400" />
-                <span className="text-slate-400">待处理: <span className="text-amber-300 font-medium">{data.slitherSummary.pending}</span></span>
+                <span className="text-slate-400">{t('security.pendingLabel')}: <span className="text-amber-300 font-medium">{data.slitherSummary.pending}</span></span>
               </div>
               <div className="flex items-center gap-1">
                 <ShieldAlert className="size-3 text-slate-400" />
-                <span className="text-slate-400">接受风险: <span className="text-slate-300 font-medium">{data.slitherSummary.acceptedRisk}</span></span>
+                <span className="text-slate-400">{t('security.acceptedRiskLabel')}: <span className="text-slate-300 font-medium">{data.slitherSummary.acceptedRisk}</span></span>
               </div>
             </div>
           </div>
@@ -686,7 +686,7 @@ export default function SecurityAudit() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Shield className="size-4 text-violet-400" />
-            <h4 className="text-xs font-semibold text-slate-200">核心不变量速览</h4>
+            <h4 className="text-xs font-semibold text-slate-200">{t('security.coreInvariantQuickView')}</h4>
           </div>
           <Button
             variant="ghost"
@@ -694,7 +694,7 @@ export default function SecurityAudit() {
             className="h-6 text-[10px] text-violet-400 hover:text-violet-300 hover:bg-violet-500/10"
             onClick={() => setActiveTab('invariants')}
           >
-            查看详情 <ChevronRight className="ml-0.5 size-3" />
+            {t('security.viewDetails')} <ChevronRight className="ml-0.5 size-3" />
           </Button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -713,7 +713,7 @@ export default function SecurityAudit() {
                 ) : (
                   <ShieldX className="size-3.5 text-red-400 shrink-0" />
                 )}
-                <span className="text-slate-200 font-medium truncate">{inv.name}</span>
+                <span className="text-slate-200 font-medium truncate">{t(inv.name)}</span>
                 <span className="ml-auto text-[10px] text-slate-500 font-mono truncate hidden sm:inline">
                   {inv.formula.length > 30 ? inv.formula.slice(0, 30) + '...' : inv.formula}
                 </span>
@@ -728,7 +728,7 @@ export default function SecurityAudit() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Activity className="size-4 text-violet-400" />
-            <h4 className="text-xs font-semibold text-slate-200">最近安全事件</h4>
+            <h4 className="text-xs font-semibold text-slate-200">{t('security.recentSecurityEvents')}</h4>
           </div>
           <Button
             variant="ghost"
@@ -736,7 +736,7 @@ export default function SecurityAudit() {
             className="h-6 text-[10px] text-violet-400 hover:text-violet-300 hover:bg-violet-500/10"
             onClick={() => setActiveTab('log')}
           >
-            完整日志 <ChevronRight className="ml-0.5 size-3" />
+            {t('security.fullLog')} <ChevronRight className="ml-0.5 size-3" />
           </Button>
         </div>
         <div className="space-y-1">
@@ -749,9 +749,9 @@ export default function SecurityAudit() {
       {/* Next Audit Info */}
       <Alert className="border-violet-500/20 bg-violet-500/5">
         <Eye className="size-4 text-violet-400" />
-        <AlertTitle className="text-violet-300 text-xs">下次审计</AlertTitle>
+        <AlertTitle className="text-violet-300 text-xs">{t('security.nextAudit')}</AlertTitle>
         <AlertDescription className="text-violet-300/70 text-[11px]" suppressHydrationWarning>
-          全量安全审计计划于 {getRelativeTime(data.nextScheduledAudit, now)} 后执行
+          {t('security.scheduledAuditMessage', { time: getRelativeTime(data.nextScheduledAudit, now, t) })}
         </AlertDescription>
       </Alert>
     </div>
@@ -762,7 +762,7 @@ export default function SecurityAudit() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ShieldCheck className="size-4 text-violet-400" />
-          <h4 className="text-sm font-semibold text-slate-200">Certora 形式化验证不变量</h4>
+          <h4 className="text-sm font-semibold text-slate-200">{t('security.certoraFormalVerificationInvariant')}</h4>
         </div>
         <Badge
           variant="outline"
@@ -773,7 +773,7 @@ export default function SecurityAudit() {
               : 'bg-red-500/20 text-red-300 border-red-500/30',
           )}
         >
-          {passedCount}/{data.invariants.length} 通过
+          {t('security.passedCount', { passed: passedCount, total: data.invariants.length })}
         </Badge>
       </div>
 
@@ -787,22 +787,22 @@ export default function SecurityAudit() {
 
       {/* Verification Summary */}
       <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-4">
-        <h5 className="text-xs font-medium text-slate-300 mb-2">验证总结</h5>
+        <h5 className="text-xs font-medium text-slate-300 mb-2">{t('security.verificationSummary')}</h5>
         <div className="grid grid-cols-2 gap-3 text-[11px]">
           <div>
-            <span className="text-slate-500">验证引擎:</span>
+            <span className="text-slate-500">{t('security.verificationEngine')}:</span>
             <span className="ml-1 text-slate-200">Certora Prover v2.4</span>
           </div>
           <div>
-            <span className="text-slate-500">证明方法:</span>
+            <span className="text-slate-500">{t('security.proofMethodLabel')}:</span>
             <span className="ml-1 text-slate-200">CVL + Fuzz + Lyapunov</span>
           </div>
           <div>
-            <span className="text-slate-500">累计运行次数:</span>
+            <span className="text-slate-500">{t('security.totalRuns')}:</span>
             <span className="ml-1 text-violet-300 font-medium">30,000+</span>
           </div>
           <div>
-            <span className="text-slate-500">反例总计:</span>
+            <span className="text-slate-500">{t('security.totalCounterexamples')}:</span>
             <span className="ml-1 text-emerald-300 font-medium">0</span>
           </div>
         </div>
@@ -810,98 +810,110 @@ export default function SecurityAudit() {
     </div>
   );
 
-  const renderFindings = () => (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Bug className="size-4 text-orange-400" />
-          <h4 className="text-sm font-semibold text-slate-200">Slither 静态分析发现</h4>
+  const renderFindings = () => {
+    const severityLabelKey: Record<FindingSeverity, string> = { critical: 'security.sevCritical', high: 'security.sevHigh', medium: 'security.sevMedium', low: 'security.sevLow' };
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bug className="size-4 text-orange-400" />
+            <h4 className="text-sm font-semibold text-slate-200">{t('security.slitherStaticFindings')}</h4>
+          </div>
+          <span className="text-[10px] text-slate-500">{t('security.findingCount', { count: data.findings.length })}</span>
         </div>
-        <span className="text-[10px] text-slate-500">{data.findings.length} 项发现</span>
-      </div>
 
-      {/* Severity Distribution */}
-      <div className="grid grid-cols-4 gap-2">
-        {(['critical', 'high', 'medium', 'low'] as FindingSeverity[]).map((sev) => {
-          const count = data.slitherSummary[sev as keyof typeof data.slitherSummary] as number;
-          const config = SEVERITY_CONFIG[sev];
-          const labels: Record<FindingSeverity, string> = { critical: '严重', high: '高危', medium: '中危', low: '低危' };
-          return (
-            <motion.div
-              key={sev}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={cn('rounded-lg border p-3 text-center', config.border, config.bg)}
-            >
-              <div className={cn('text-xl font-bold', config.color)}>{count}</div>
-              <div className="text-[10px] text-slate-400">{labels[sev]}</div>
-            </motion.div>
-          );
-        })}
-      </div>
+        {/* Severity Distribution */}
+        <div className="grid grid-cols-4 gap-2">
+          {(['critical', 'high', 'medium', 'low'] as FindingSeverity[]).map((sev) => {
+            const count = data.slitherSummary[sev as keyof typeof data.slitherSummary] as number;
+            const config = SEVERITY_CONFIG[sev];
+            return (
+              <motion.div
+                key={sev}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={cn('rounded-lg border p-3 text-center', config.border, config.bg)}
+              >
+                <div className={cn('text-xl font-bold', config.color)}>{count}</div>
+                <div className="text-[10px] text-slate-400">{t(severityLabelKey[sev])}</div>
+              </motion.div>
+            );
+          })}
+        </div>
 
-      {/* Findings list */}
-      <div className="space-y-2">
-        {data.findings.map((finding) => (
-          <FindingRow key={finding.id} finding={finding} />
-        ))}
-      </div>
-
-      {/* Remediation Progress */}
-      <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-4">
-        <h5 className="text-xs font-medium text-slate-300 mb-3">修复进度</h5>
+        {/* Findings list */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="text-slate-400">已修复</span>
-            <span className="text-emerald-300 font-medium">{data.slitherSummary.fixed}/{data.slitherSummary.total}</span>
-          </div>
-          <Progress
-            value={(data.slitherSummary.fixed / data.slitherSummary.total) * 100}
-            className="h-2 bg-slate-700 [&>div]:bg-emerald-500"
-          />
-          <div className="flex justify-between text-[10px] text-slate-500">
-            <span>待处理: {data.slitherSummary.pending}</span>
-            <span>接受风险: {data.slitherSummary.acceptedRisk}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderLog = () => (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <ScrollText className="size-4 text-violet-400" />
-          <h4 className="text-sm font-semibold text-slate-200">安全审计日志</h4>
-        </div>
-        <span className="text-[10px] text-slate-500">{data.auditLog.length} 条记录</span>
-      </div>
-
-      {/* Log type filter legend */}
-      <div className="flex flex-wrap gap-2">
-        {(Object.entries(LOG_TYPE_CONFIG) as [AuditLogType, typeof LOG_TYPE_CONFIG[AuditLogType]][]).map(
-          ([type, config]) => (
-            <div key={type} className="flex items-center gap-1.5 text-[10px]">
-              <config.icon className={cn('size-3', config.color)} />
-              <span className="text-slate-400">{config.label}</span>
-            </div>
-          ),
-        )}
-      </div>
-
-      <Separator className="bg-slate-700/50" />
-
-      {/* Log entries */}
-      <ScrollArea className="max-h-96">
-        <div className="space-y-1">
-          {data.auditLog.map((entry) => (
-            <AuditLogRow key={entry.id} entry={entry} />
+          {data.findings.map((finding) => (
+            <FindingRow key={finding.id} finding={finding} />
           ))}
         </div>
-      </ScrollArea>
-    </div>
-  );
+
+        {/* Remediation Progress */}
+        <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-4">
+          <h5 className="text-xs font-medium text-slate-300 mb-3">{t('security.remediationProgress')}</h5>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-slate-400">{t('security.fixedLabel')}</span>
+              <span className="text-emerald-300 font-medium">{data.slitherSummary.fixed}/{data.slitherSummary.total}</span>
+            </div>
+            <Progress
+              value={(data.slitherSummary.fixed / data.slitherSummary.total) * 100}
+              className="h-2 bg-slate-700 [&>div]:bg-emerald-500"
+            />
+            <div className="flex justify-between text-[10px] text-slate-500">
+              <span>{t('security.pendingLabel')}: {data.slitherSummary.pending}</span>
+              <span>{t('security.acceptedRiskLabel')}: {data.slitherSummary.acceptedRisk}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderLog = () => {
+    const logTypeConfig: Record<AuditLogType, { labelKey: string; icon: React.ElementType; color: string }> = {
+      vulnerability_detected: { labelKey: 'security.logTypeVulnerability', icon: Bug, color: 'text-orange-400' },
+      invariant_violation: { labelKey: 'security.logTypeInvariant', icon: ShieldCheck, color: 'text-violet-400' },
+      circuit_trigger: { labelKey: 'security.logTypeCircuit', icon: ShieldAlert, color: 'text-amber-400' },
+      access_change: { labelKey: 'security.logTypeAccess', icon: Lock, color: 'text-sky-400' },
+    };
+
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ScrollText className="size-4 text-violet-400" />
+            <h4 className="text-sm font-semibold text-slate-200">{t('security.securityAuditLog')}</h4>
+          </div>
+          <span className="text-[10px] text-slate-500">{t('security.recordCount', { count: data.auditLog.length })}</span>
+        </div>
+
+        {/* Log type filter legend */}
+        <div className="flex flex-wrap gap-2">
+          {(Object.entries(logTypeConfig) as [AuditLogType, typeof logTypeConfig[AuditLogType]][]).map(
+            ([type, config]) => (
+              <div key={type} className="flex items-center gap-1.5 text-[10px]">
+                <config.icon className={cn('size-3', config.color)} />
+                <span className="text-slate-400">{t(config.labelKey)}</span>
+              </div>
+            ),
+          )}
+        </div>
+
+        <Separator className="bg-slate-700/50" />
+
+        {/* Log entries */}
+        <ScrollArea className="max-h-96">
+          <div className="space-y-1">
+            {data.auditLog.map((entry) => (
+              <AuditLogRow key={entry.id} entry={entry} />
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+    );
+  };
 
   // ── Tab content map ──
   const tabContent: Record<TabId, () => React.ReactNode> = {
@@ -929,7 +941,7 @@ export default function SecurityAudit() {
         <CardHeader className="pb-0 pt-5">
           <CardTitle className="flex items-center gap-2 text-base text-slate-100">
             <Shield className="size-5 text-violet-400" />
-            安全审计面板
+            {t('security.title')}
           </CardTitle>
         </CardHeader>
 
@@ -951,7 +963,7 @@ export default function SecurityAudit() {
                   )}
                 >
                   <TabIcon className="size-3.5" />
-                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="hidden sm:inline">{t(tab.labelKey)}</span>
                 </button>
               );
             })}

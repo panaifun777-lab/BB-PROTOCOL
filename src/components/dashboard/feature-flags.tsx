@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useI18n } from '@/hooks/use-i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Flag,
@@ -152,68 +153,68 @@ interface TabConfig {
 }
 
 const TABS: TabConfig[] = [
-  { id: 'flags', label: '功能开关', icon: Flag },
-  { id: 'ab', label: 'A/B 测试', icon: FlaskConical },
-  { id: 'rollback', label: '回滚机制', icon: RotateCcw },
-  { id: 'pipeline', label: '发布管道', icon: Rocket },
+  { id: 'flags', label: 'features.tabFlags', icon: Flag },
+  { id: 'ab', label: 'features.tabAbTest', icon: FlaskConical },
+  { id: 'rollback', label: 'features.tabRollback', icon: RotateCcw },
+  { id: 'pipeline', label: 'features.tabPipeline', icon: Rocket },
 ];
 
 // ── Color Config ───────────────────────────────────────
 const STATUS_CONFIG: Record<FlagStatus, { label: string; badge: string; dot: string }> = {
   active: {
-    label: '活跃',
+    label: 'features.statusActive',
     badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     dot: 'bg-emerald-400',
   },
   inactive: {
-    label: '停用',
+    label: 'features.statusInactive',
     badge: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
     dot: 'bg-slate-400',
   },
   scheduled: {
-    label: '计划中',
+    label: 'features.statusScheduled',
     badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     dot: 'bg-amber-400',
   },
 };
 
 const ENV_CONFIG: Record<Environment, { label: string; badge: string }> = {
-  production: { label: '生产', badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-  staging: { label: '预发布', badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  development: { label: '开发', badge: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
+  production: { label: 'features.envProduction', badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+  staging: { label: 'features.envStaging', badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+  development: { label: 'features.envDevelopment', badge: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
 };
 
 const TARGETING_LABELS: Record<TargetingRule, string> = {
-  all: '所有用户',
-  tier_pro: 'Pro及以上',
-  opt_in: '自主开启',
-  beta_testers: 'Beta用户',
-  internal_only: '仅内部',
-  enterprise_only: '仅企业',
-  premium_users: '高级用户',
+  all: 'features.targetingAll',
+  tier_pro: 'features.targetingTierPro',
+  opt_in: 'features.targetingOptIn',
+  beta_testers: 'features.targetingBetaTesters',
+  internal_only: 'features.targetingInternalOnly',
+  enterprise_only: 'features.targetingEnterpriseOnly',
+  premium_users: 'features.targetingPremiumUsers',
 };
 
 const ROLLBACK_ACTION_CONFIG: Record<RollbackAction, { label: string; icon: React.ElementType; badge: string; color: string }> = {
   deployed: {
-    label: '部署',
+    label: 'features.actionDeployed',
     icon: Rocket,
     badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     color: 'text-emerald-400',
   },
   rolled_back: {
-    label: '回滚',
+    label: 'features.actionRolledBack',
     icon: RotateCcw,
     badge: 'bg-red-500/20 text-red-300 border-red-500/30',
     color: 'text-red-400',
   },
   paused: {
-    label: '暂停',
+    label: 'features.actionPaused',
     icon: Pause,
     badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     color: 'text-amber-400',
   },
   resumed: {
-    label: '恢复',
+    label: 'features.actionResumed',
     icon: Play,
     badge: 'bg-sky-500/20 text-sky-400 border-sky-500/20',
     color: 'text-sky-400',
@@ -222,17 +223,17 @@ const ROLLBACK_ACTION_CONFIG: Record<RollbackAction, { label: string; icon: Reac
 
 const AB_STATUS_CONFIG: Record<ABTestStatus, { label: string; badge: string; dot: string }> = {
   running: {
-    label: '运行中',
+    label: 'features.abRunning',
     badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     dot: 'bg-emerald-400',
   },
   completed: {
-    label: '已完成',
+    label: 'features.abCompleted',
     badge: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
     dot: 'bg-violet-400',
   },
   draft: {
-    label: '草稿',
+    label: 'features.abDraft',
     badge: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
     dot: 'bg-slate-400',
   },
@@ -241,63 +242,63 @@ const AB_STATUS_CONFIG: Record<ABTestStatus, { label: string; badge: string; dot
 // ── Deterministic Mock Data (fallback) ─────────────────
 const MOCK_FLAGS: FeatureFlag[] = [
   {
-    id: 'ff_01', name: '分身市场', key: 'avatar-marketplace',
-    description: '分身租赁市场，支持认知分身的共享与变现',
+    id: 'ff_01', name: 'features.flagAvatarMarketplace', key: 'avatar-marketplace',
+    description: 'features.flagAvatarMarketplaceDesc',
     status: 'active', rolloutPercentage: 100, targetingRules: 'all', environment: 'production',
     createdAt: '2025-12-01T08:00:00Z', updatedAt: '2026-02-28T10:00:00Z', enabledForUsers: 12847, totalUsers: 12847,
   },
   {
-    id: 'ff_02', name: '合约模拟器', key: 'contract-simulation',
-    description: '智能合约模拟执行与Gas估算工具',
+    id: 'ff_02', name: 'features.flagContractSimulation', key: 'contract-simulation',
+    description: 'features.flagContractSimulationDesc',
     status: 'active', rolloutPercentage: 75, targetingRules: 'tier_pro', environment: 'production',
     createdAt: '2026-01-15T08:00:00Z', updatedAt: '2026-02-28T14:00:00Z', enabledForUsers: 6423, totalUsers: 8564,
   },
   {
-    id: 'ff_03', name: 'LP流动性面板', key: 'lp-liquidity',
-    description: '流动性提供者仪表盘，深度图与代币经济',
+    id: 'ff_03', name: 'features.flagLpLiquidity', key: 'lp-liquidity',
+    description: 'features.flagLpLiquidityDesc',
     status: 'active', rolloutPercentage: 50, targetingRules: 'opt_in', environment: 'production',
     createdAt: '2026-01-20T08:00:00Z', updatedAt: '2026-02-25T16:00:00Z', enabledForUsers: 3200, totalUsers: 6400,
   },
   {
-    id: 'ff_04', name: 'IFD v2 委托', key: 'ifd-v2-delegation',
-    description: '流体民主委托系统v2，支持多级委托与权重衰减',
+    id: 'ff_04', name: 'features.flagIfdV2Delegation', key: 'ifd-v2-delegation',
+    description: 'features.flagIfdV2DelegationDesc',
     status: 'active', rolloutPercentage: 25, targetingRules: 'beta_testers', environment: 'production',
     createdAt: '2026-02-01T08:00:00Z', updatedAt: '2026-02-27T09:00:00Z', enabledForUsers: 856, totalUsers: 3424,
   },
   {
-    id: 'ff_05', name: 'ZK实体验证', key: 'zk-identity',
-    description: '零知识证明身份验证，隐私保护的身份认证',
+    id: 'ff_05', name: 'features.flagZkIdentity', key: 'zk-identity',
+    description: 'features.flagZkIdentityDesc',
     status: 'inactive', rolloutPercentage: 0, targetingRules: 'internal_only', environment: 'staging',
     createdAt: '2026-02-10T08:00:00Z', updatedAt: '2026-02-10T08:00:00Z', enabledForUsers: 0, totalUsers: 150,
   },
   {
-    id: 'ff_06', name: '多链部署', key: 'multi-chain',
-    description: '多链部署支持，跨链分身同步',
+    id: 'ff_06', name: 'features.flagMultiChain', key: 'multi-chain',
+    description: 'features.flagMultiChainDesc',
     status: 'inactive', rolloutPercentage: 0, targetingRules: 'internal_only', environment: 'development',
     createdAt: '2026-02-15T08:00:00Z', updatedAt: '2026-02-15T08:00:00Z', enabledForUsers: 0, totalUsers: 45,
   },
   {
-    id: 'ff_07', name: 'DAO治理模块', key: 'dao-governance',
-    description: '去中心化治理提案与投票系统',
+    id: 'ff_07', name: 'features.flagDaoGovernance', key: 'dao-governance',
+    description: 'features.flagDaoGovernanceDesc',
     status: 'scheduled', rolloutPercentage: 0, targetingRules: 'all', environment: 'production',
     createdAt: '2026-02-20T08:00:00Z', updatedAt: '2026-02-20T08:00:00Z', enabledForUsers: 0, totalUsers: 12847,
     scheduledDate: '2026-04-01T00:00:00Z',
   },
   {
-    id: 'ff_08', name: 'SDK/API平台', key: 'sdk-api',
-    description: '开发者SDK与API管理平台',
+    id: 'ff_08', name: 'features.flagSdkApi', key: 'sdk-api',
+    description: 'features.flagSdkApiDesc',
     status: 'inactive', rolloutPercentage: 0, targetingRules: 'enterprise_only', environment: 'staging',
     createdAt: '2026-02-18T08:00:00Z', updatedAt: '2026-02-18T08:00:00Z', enabledForUsers: 0, totalUsers: 200,
   },
   {
-    id: 'ff_09', name: '跨链桥集成', key: 'cross-chain-bridge',
-    description: '跨链桥协议集成，支持资产跨链转移',
+    id: 'ff_09', name: 'features.flagCrossChainBridge', key: 'cross-chain-bridge',
+    description: 'features.flagCrossChainBridgeDesc',
     status: 'inactive', rolloutPercentage: 0, targetingRules: 'internal_only', environment: 'development',
     createdAt: '2026-02-22T08:00:00Z', updatedAt: '2026-02-22T08:00:00Z', enabledForUsers: 0, totalUsers: 45,
   },
   {
-    id: 'ff_10', name: '高级分析', key: 'advanced-analytics',
-    description: '高级数据分析与BI可视化工具',
+    id: 'ff_10', name: 'features.flagAdvancedAnalytics', key: 'advanced-analytics',
+    description: 'features.flagAdvancedAnalyticsDesc',
     status: 'active', rolloutPercentage: 10, targetingRules: 'premium_users', environment: 'production',
     createdAt: '2026-02-25T08:00:00Z', updatedAt: '2026-02-28T11:00:00Z', enabledForUsers: 128, totalUsers: 1280,
   },
@@ -305,29 +306,29 @@ const MOCK_FLAGS: FeatureFlag[] = [
 
 const MOCK_AB_TESTS: ABTest[] = [
   {
-    id: 'ab_01', name: '分账比例优化', description: '测试不同分账比例对收益和用户行为的影响', status: 'running',
+    id: 'ab_01', name: 'features.abRevenueOpt', description: 'features.abRevenueOptDesc', status: 'running',
     variants: [
-      { name: 'Control', description: '70/20/10 分账比例', trafficPercent: 45, metricChange: 'baseline', metricValue: '100%' },
-      { name: 'Variant A', description: '65/25/10 分账比例', trafficPercent: 45, metricChange: '+8.2%', metricValue: '108.2%' },
-      { name: 'Variant B', description: '75/15/10 分账比例', trafficPercent: 10, metricChange: '-3.1%', metricValue: '96.9%' },
+      { name: 'Control', description: 'features.variant70Split', trafficPercent: 45, metricChange: 'baseline', metricValue: '100%' },
+      { name: 'Variant A', description: 'features.variant65Split', trafficPercent: 45, metricChange: '+8.2%', metricValue: '108.2%' },
+      { name: 'Variant B', description: 'features.variant75Split', trafficPercent: 10, metricChange: '-3.1%', metricValue: '96.9%' },
     ],
     startDate: '2026-02-15T00:00:00Z', confidence: 87,
     metrics: { primary: 'revenue', secondary: 'user_retention' },
   },
   {
-    id: 'ab_02', name: '技能解锁门槛', description: '测试降低技能解锁门槛对解锁率和收入的影响', status: 'completed',
+    id: 'ab_02', name: 'features.abSkillThreshold', description: 'features.abSkillThresholdDesc', status: 'completed',
     variants: [
-      { name: 'Control', description: '$500/$2000/$8000 门槛', trafficPercent: 50, metricChange: 'baseline', metricValue: '100%' },
-      { name: 'Variant', description: '$300/$1500/$6000 门槛', trafficPercent: 50, metricChange: '+34%', metricValue: '134%' },
+      { name: 'Control', description: 'features.variant500Threshold', trafficPercent: 50, metricChange: 'baseline', metricValue: '100%' },
+      { name: 'Variant', description: 'features.variant300Threshold', trafficPercent: 50, metricChange: '+34%', metricValue: '134%' },
     ],
     startDate: '2026-01-15T00:00:00Z', endDate: '2026-02-28T00:00:00Z', winner: 'Variant', confidence: 95,
     metrics: { primary: 'unlock_rate', secondary: 'revenue' },
   },
   {
-    id: 'ab_03', name: '共振分UI展示', description: '测试共振分不同展示方式的用户交互效果', status: 'draft',
+    id: 'ab_03', name: 'features.abResonanceUI', description: 'features.abResonanceUIDesc', status: 'draft',
     variants: [
-      { name: 'Control', description: '数值显示', trafficPercent: 50 },
-      { name: 'Variant', description: '波形+数值', trafficPercent: 50 },
+      { name: 'Control', description: 'features.numericDisplay', trafficPercent: 50 },
+      { name: 'Variant', description: 'features.waveNumeric', trafficPercent: 50 },
     ],
     startDate: '2026-03-15T00:00:00Z',
     metrics: { primary: 'engagement', secondary: 'session_duration' },
@@ -335,27 +336,28 @@ const MOCK_AB_TESTS: ABTest[] = [
 ];
 
 const MOCK_ROLLBACK_HISTORY: RollbackHistoryEntry[] = [
-  { id: 'rb_01', flagName: 'contract-simulation', action: 'deployed', reason: '灰度放量第三阶段', timestamp: '2026-02-28T14:00:00Z', operator: 'devops_lead' },
-  { id: 'rb_02', flagName: 'contract-simulation', action: 'paused', reason: '发现Gas估算偏差', timestamp: '2026-02-25T16:00:00Z', operator: 'devops_lead' },
-  { id: 'rb_03', flagName: 'contract-simulation', action: 'resumed', reason: 'Gas估算修复完成', timestamp: '2026-02-20T10:00:00Z', operator: 'engineer_zhang' },
-  { id: 'rb_04', flagName: 'contract-simulation', action: 'rolled_back', reason: '模拟结果不一致', timestamp: '2026-02-15T18:00:00Z', operator: 'engineer_li' },
-  { id: 'rb_05', flagName: 'contract-simulation', action: 'deployed', reason: '开始灰度发布', timestamp: '2026-02-10T09:00:00Z', operator: 'devops_lead' },
+  { id: 'rb_01', flagName: 'contract-simulation', action: 'deployed', reason: 'features.rbPhase3', timestamp: '2026-02-28T14:00:00Z', operator: 'devops_lead' },
+  { id: 'rb_02', flagName: 'contract-simulation', action: 'paused', reason: 'features.rbGasDeviation', timestamp: '2026-02-25T16:00:00Z', operator: 'devops_lead' },
+  { id: 'rb_03', flagName: 'contract-simulation', action: 'resumed', reason: 'features.rbGasFixed', timestamp: '2026-02-20T10:00:00Z', operator: 'engineer_zhang' },
+  { id: 'rb_04', flagName: 'contract-simulation', action: 'rolled_back', reason: 'features.rbResultMismatch', timestamp: '2026-02-15T18:00:00Z', operator: 'engineer_li' },
+  { id: 'rb_05', flagName: 'contract-simulation', action: 'deployed', reason: 'features.rbStartCanary', timestamp: '2026-02-10T09:00:00Z', operator: 'devops_lead' },
 ];
 
+// Pipeline data uses i18n keys as name/detail values — resolved via t() at render time
 const MOCK_RELEASE_PIPELINE: ReleasePipeline = {
   currentVersion: 'v2.1.0',
   nextVersion: 'v2.2.0',
   pipeline: [
-    { name: '代码合并', status: 'completed', details: '12 commits' },
-    { name: '自动化测试', status: 'completed', details: '97.2% pass' },
-    { name: 'Canary部署(5%)', status: 'in_progress', details: '5% 流量' },
-    { name: '灰度扩展(25%→50%→75%)', status: 'pending', details: '渐进放量' },
-    { name: '全量发布(100%)', status: 'pending', details: '全量上线' },
+    { name: 'features.codeMerge', status: 'completed', details: '12 commits' },
+    { name: 'features.autoTest', status: 'completed', details: '97.2% pass' },
+    { name: 'features.canaryDeploy5', status: 'in_progress', details: 'features.pipelineTraffic5' },
+    { name: 'features.gradualExpand', status: 'pending', details: 'features.gradualRollout' },
+    { name: 'features.fullRelease100', status: 'pending', details: 'features.fullRelease' },
   ],
   canaryMetrics: [
-    { name: '错误率', value: '0.08%', threshold: '< 1%', passing: true },
-    { name: 'P95延迟', value: '165ms', threshold: '< 500ms', passing: true },
-    { name: '崩溃率', value: '0%', threshold: '< 0.1%', passing: true },
+    { name: 'features.errorRate', value: '0.08%', threshold: '< 1%', passing: true },
+    { name: 'features.p95Latency', value: '165ms', threshold: '< 500ms', passing: true },
+    { name: 'features.crashRate', value: '0%', threshold: '< 0.1%', passing: true },
   ],
   canaryPercentage: 5,
 };
@@ -468,24 +470,24 @@ function FlagCard({
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="text-sm font-medium text-slate-100">{flag.name}</h4>
+                  <h4 className="text-sm font-medium text-slate-100">{t(flag.name)}</h4>
                   <code className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300 font-mono">
                     {flag.key}
                   </code>
                 </div>
-                <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">{flag.description}</p>
+                <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">{t(flag.description)}</p>
 
                 {/* Badges row */}
                 <div className="mt-2 flex items-center gap-1.5 flex-wrap">
                   <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0', statusConfig.badge)}>
                     <span className={cn('inline-block size-1.5 rounded-full mr-1', statusConfig.dot)} />
-                    {statusConfig.label}
+                    {t(statusConfig.label)}
                   </Badge>
                   <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0', envConfig.badge)}>
-                    {envConfig.label}
+                    {t(envConfig.label)}
                   </Badge>
                   <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-violet-500/10 text-violet-300 border-violet-500/20">
-                    {TARGETING_LABELS[flag.targetingRules]}
+                    {t(TARGETING_LABELS[flag.targetingRules])}
                   </Badge>
                   {flag.scheduledDate && (
                     <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-amber-500/10 text-amber-300 border-amber-500/20">
@@ -498,7 +500,7 @@ function FlagCard({
                 {/* Rollout */}
                 <div className="mt-3">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] text-slate-500">灰度进度</span>
+                    <span className="text-[10px] text-slate-500">{t('features.rolloutProgress')}</span>
                     <button
                       onClick={() => setEditingRollout(!editingRollout)}
                       className="text-[10px] text-violet-400 hover:text-violet-300 transition-colors"
@@ -560,6 +562,7 @@ function FlagCard({
 
 // ── A/B Test Card ──────────────────────────────────────
 function ABTestCard({ test }: { test: ABTest }) {
+  const { t } = useI18n();
   const statusConfig = AB_STATUS_CONFIG[test.status];
   const isRunning = test.status === 'running';
   const isCompleted = test.status === 'completed';
@@ -595,16 +598,16 @@ function ABTestCard({ test }: { test: ABTest }) {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="text-sm font-medium text-slate-100">{test.name}</h4>
+                  <h4 className="text-sm font-medium text-slate-100">{t(test.name)}</h4>
                   <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0', statusConfig.badge)}>
                     {isRunning && <span className={cn('inline-block size-1.5 rounded-full mr-1 animate-pulse', statusConfig.dot)} />}
-                    {statusConfig.label}
+                    {t(statusConfig.label)}
                   </Badge>
                 </div>
-                <p className="mt-1 text-[11px] text-slate-400">{test.description}</p>
+                <p className="mt-1 text-[11px] text-slate-400">{t(test.description)}</p>
                 <div className="mt-1 flex items-center gap-3 text-[10px] text-slate-500">
-                  <span>开始: {formatDateShort(test.startDate)}</span>
-                  {test.endDate && <span>结束: {formatDateShort(test.endDate)}</span>}
+                  <span> {t('features.startLabel')}: {formatDateShort(test.startDate)}</span>
+                  {test.endDate && <span> {t('features.endLabel')}: {formatDateShort(test.endDate)}</span>}
                 </div>
               </div>
             </div>
@@ -612,7 +615,7 @@ function ABTestCard({ test }: { test: ABTest }) {
 
           {/* Traffic Distribution Bar */}
           <div>
-            <div className="text-[10px] text-slate-500 mb-1.5">流量分配</div>
+            <div className="text-[10px] text-slate-500 mb-1.5">{t('features.trafficAllocation')}</div>
             <div className="flex h-3 rounded-full overflow-hidden bg-slate-700/50">
               {test.variants.map((variant, idx) => {
                 const colors = ['bg-violet-500', 'bg-emerald-500', 'bg-amber-500'];
@@ -664,9 +667,9 @@ function ABTestCard({ test }: { test: ABTest }) {
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-medium text-slate-200">{variant.name}</span>
-                    {isWinner && <Badge className="text-[9px] px-1.5 py-0 bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20">胜出</Badge>}
+                    {isWinner && <Badge className="text-[9px] px-1.5 py-0 bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20">{t('features.winner')}</Badge>}
                   </div>
-                  <p className="text-[10px] text-slate-400 mb-2">{variant.description}</p>
+                  <p className="text-[10px] text-slate-400 mb-2">{t(variant.description)}</p>
                   {variant.metricChange && (
                     <div className="flex items-center gap-1">
                       {isPositive && <TrendingUp className="size-3 text-emerald-400" />}
@@ -690,7 +693,7 @@ function ABTestCard({ test }: { test: ABTest }) {
           {isRunning && test.confidence !== undefined && (
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[10px] text-slate-500">统计显著性</span>
+                <span className="text-[10px] text-slate-500">{t('features.statisticalSignificance')}</span>
                 <span className={cn(
                   'text-xs font-semibold',
                   test.confidence >= 95 ? 'text-emerald-400' :
@@ -718,7 +721,7 @@ function ABTestCard({ test }: { test: ABTest }) {
               </div>
               <div className="mt-1 flex items-center justify-between text-[9px] text-slate-600">
                 <span>0%</span>
-                <span className="text-slate-400">95% 阈值</span>
+                <span className="text-slate-400">{t('features.threshold95')}</span>
                 <span>100%</span>
               </div>
             </div>
@@ -729,12 +732,10 @@ function ABTestCard({ test }: { test: ABTest }) {
             <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle className="size-4 text-emerald-400" />
-                <span className="text-xs font-semibold text-emerald-300">结果: {test.winner} 胜出</span>
+                <span className="text-xs font-semibold text-emerald-300">{t('features.resultWinner', { winner: test.winner })}</span>
               </div>
               <p className="text-[11px] text-slate-400">
-                {test.name === '技能解锁门槛'
-                  ? '解锁率提升34%，收入保持中性 — 推荐采用新门槛'
-                  : '实验已达到统计显著性阈值'}
+                {t('features.skillUnlockSummary')}
               </p>
             </div>
           )}
@@ -743,7 +744,7 @@ function ABTestCard({ test }: { test: ABTest }) {
           {test.status === 'draft' && (
             <div className="rounded-lg border border-slate-600/30 bg-slate-700/20 p-3 flex items-center gap-2">
               <CircleDot className="size-3.5 text-slate-400" />
-              <span className="text-[11px] text-slate-400">草稿状态 — 配置变体后可启动实验</span>
+              <span className="text-[11px] text-slate-400">{t('features.draftHint')}</span>
             </div>
           )}
         </CardContent>
@@ -754,6 +755,7 @@ function ABTestCard({ test }: { test: ABTest }) {
 
 // ── Timeline Entry ─────────────────────────────────────
 function TimelineEntry({ entry, isLast }: { entry: RollbackHistoryEntry; isLast: boolean }) {
+  const { t } = useI18n();
   const actionConfig = ROLLBACK_ACTION_CONFIG[entry.action];
   const ActionIcon = actionConfig.icon;
 
@@ -779,14 +781,14 @@ function TimelineEntry({ entry, isLast }: { entry: RollbackHistoryEntry; isLast:
       <div className={cn('pb-4 min-w-0 flex-1', isLast && 'pb-0')}>
         <div className="flex items-center gap-2 flex-wrap">
           <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0', actionConfig.badge)}>
-            {actionConfig.label}
+            {t(actionConfig.label)}
           </Badge>
           <span className="text-xs font-medium text-slate-200">{entry.flagName}</span>
           <span className="text-[10px] text-slate-500" suppressHydrationWarning>{formatDate(entry.timestamp)}</span>
         </div>
-        <p className="mt-1 text-[11px] text-slate-400">{entry.reason}</p>
+        <p className="mt-1 text-[11px] text-slate-400">{t(entry.reason)}</p>
         <div className="mt-1 text-[10px] text-slate-500">
-          操作人: <span className="text-slate-300 font-mono">{entry.operator}</span>
+          {t('features.operator')}: <span className="text-slate-300 font-mono">{entry.operator}</span>
         </div>
       </div>
     </div>
@@ -795,6 +797,7 @@ function TimelineEntry({ entry, isLast }: { entry: RollbackHistoryEntry; isLast:
 
 // ── Pipeline Stage ─────────────────────────────────────
 function PipelineStageView({ stage, isLast }: { stage: PipelineStage; isLast: boolean }) {
+  const { t } = useI18n();
   const isCompleted = stage.status === 'completed';
   const isInProgress = stage.status === 'in_progress';
 
@@ -838,9 +841,9 @@ function PipelineStageView({ stage, isLast }: { stage: PipelineStage; isLast: bo
           isCompleted ? 'text-emerald-300' :
           isInProgress ? 'text-violet-300' : 'text-slate-500'
         )}>
-          {stage.name}
+          {t(stage.name)}
         </p>
-        <p className="text-[10px] text-slate-500 mt-0.5">{stage.details}</p>
+        <p className="text-[10px] text-slate-500 mt-0.5">{stage.details.startsWith('features.') ? t(stage.details) : stage.details}</p>
       </div>
     </div>
   );
@@ -878,6 +881,7 @@ function CanaryGauge({ percentage }: { percentage: number }) {
 
 // ── Main Component ─────────────────────────────────────
 export default function FeatureFlags() {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<TabId>('flags');
   const [data, setData] = useState<FeatureFlagsData>(INITIAL_DATA);
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -966,7 +970,7 @@ export default function FeatureFlags() {
         id: `rb_${String(prev.rollbackHistory.length + 1).padStart(2, '0')}`,
         flagName: flag?.key || '',
         action: 'rolled_back',
-        reason: `回滚 ${flag?.rolloutPercentage || 0}% → 0%`,
+        reason: t('features.rollbackReason', { pct: String(flag?.rolloutPercentage || 0) }),
         timestamp: new Date().toISOString(),
         operator: 'admin',
       };
@@ -1001,8 +1005,8 @@ export default function FeatureFlags() {
     const newPipeline = { ...pipeline, canaryPercentage: nextPct };
     const newPipelineStages = newPipeline.pipeline.map((stage, idx) => {
       if (idx < 2) return { ...stage, status: 'completed' as const };
-      if (idx === 2) return { ...stage, status: nextPct >= 25 ? 'completed' as const : 'in_progress' as const, details: `${nextPct}% 流量` };
-      if (idx === 3) return { ...stage, status: nextPct >= 25 && nextPct < 100 ? 'in_progress' as const : (nextPct >= 100 ? 'completed' as const : 'pending' as const), details: nextPct >= 100 ? '已完成' : `${nextPct}% 放量` };
+      if (idx === 2) return { ...stage, status: nextPct >= 25 ? 'completed' as const : 'in_progress' as const, details: t('features.pipelineTraffic', { pct: String(nextPct) }) };
+      if (idx === 3) return { ...stage, status: nextPct >= 25 && nextPct < 100 ? 'in_progress' as const : (nextPct >= 100 ? 'completed' as const : 'pending' as const), details: nextPct >= 100 ? t('features.completedLabel') : t('features.pipelineRollout', { pct: String(nextPct) }) };
       if (idx === 4) return { ...stage, status: nextPct >= 100 ? 'completed' as const : 'pending' as const };
       return stage;
     });
@@ -1033,42 +1037,42 @@ export default function FeatureFlags() {
       <div className="flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <div className="size-2 rounded-full bg-emerald-400" />
-          <span className="text-xs text-slate-300"><span className="font-semibold text-emerald-400">{stats.active}</span> 活跃</span>
+          <span className="text-xs text-slate-300"><span className="font-semibold text-emerald-400">{stats.active}</span> {t('features.activeCount')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="size-2 rounded-full bg-slate-400" />
-          <span className="text-xs text-slate-300"><span className="font-semibold text-slate-400">{stats.inactive}</span> 停用</span>
+          <span className="text-xs text-slate-300"><span className="font-semibold text-slate-400">{stats.inactive}</span> {t('features.inactiveCount')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="size-2 rounded-full bg-amber-400" />
-          <span className="text-xs text-slate-300"><span className="font-semibold text-amber-400">{stats.scheduled}</span> 计划中</span>
+          <span className="text-xs text-slate-300"><span className="font-semibold text-amber-400">{stats.scheduled}</span> {t('features.scheduledCount')}</span>
         </div>
         <Separator orientation="vertical" className="h-4 bg-slate-700" />
-        <span className="text-[10px] text-slate-500">共 {stats.total} 个功能开关</span>
+        <span className="text-[10px] text-slate-500"> {t('features.totalFlags', { count: stats.total })}</span>
       </div>
 
       {/* Filters */}
       <div className="flex items-center gap-2 flex-wrap">
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-[130px] h-7 text-xs bg-slate-800/50 border-slate-700">
-            <SelectValue placeholder="状态筛选" />
+            <SelectValue placeholder={t('features.statusFilter')} />
           </SelectTrigger>
           <SelectContent className="bg-slate-800 border-slate-700">
-            <SelectItem value="all">全部状态</SelectItem>
-            <SelectItem value="active">活跃</SelectItem>
-            <SelectItem value="inactive">停用</SelectItem>
-            <SelectItem value="scheduled">计划中</SelectItem>
+            <SelectItem value="all">{t('features.allStatus')}</SelectItem>
+            <SelectItem value="active">{t('features.statusActive')}</SelectItem>
+            <SelectItem value="inactive">{t('features.statusInactive')}</SelectItem>
+            <SelectItem value="scheduled">{t('features.statusScheduled')}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterEnv} onValueChange={setFilterEnv}>
           <SelectTrigger className="w-[130px] h-7 text-xs bg-slate-800/50 border-slate-700">
-            <SelectValue placeholder="环境筛选" />
+            <SelectValue placeholder={t('features.envFilter')} />
           </SelectTrigger>
           <SelectContent className="bg-slate-800 border-slate-700">
-            <SelectItem value="all">全部环境</SelectItem>
-            <SelectItem value="production">生产</SelectItem>
-            <SelectItem value="staging">预发布</SelectItem>
-            <SelectItem value="development">开发</SelectItem>
+            <SelectItem value="all">{t('features.allEnv')}</SelectItem>
+            <SelectItem value="production">{t('features.envProduction')}</SelectItem>
+            <SelectItem value="staging">{t('features.envStaging')}</SelectItem>
+            <SelectItem value="development">{t('features.envDevelopment')}</SelectItem>
           </SelectContent>
         </Select>
         {(filterStatus !== 'all' || filterEnv !== 'all') && (
@@ -1097,7 +1101,7 @@ export default function FeatureFlags() {
           {filteredFlags.length === 0 && (
             <div className="flex flex-col items-center py-8 text-slate-500">
               <Flag className="size-8 mb-2 opacity-50" />
-              <p className="text-xs">没有匹配的功能开关</p>
+              <p className="text-xs">{t('features.noMatchingFlags')}</p>
             </div>
           )}
         </div>
@@ -1112,9 +1116,9 @@ export default function FeatureFlags() {
         <div className="flex items-center gap-2">
           <FlaskConical className="size-4 text-violet-400" />
           <span className="text-xs text-slate-300">
-            <span className="font-semibold text-violet-400">{data.abTests.filter((t) => t.status === 'running').length}</span> 运行中 ·{' '}
-            <span className="font-semibold text-emerald-400">{data.abTests.filter((t) => t.status === 'completed').length}</span> 已完成 ·{' '}
-            <span className="font-semibold text-slate-400">{data.abTests.filter((t) => t.status === 'draft').length}</span> 草稿
+            <span className="font-semibold text-violet-400">{data.abTests.filter((t) => t.status === 'running').length}</span> {t('features.runningCount')} ·{' '}
+            <span className="font-semibold text-emerald-400">{data.abTests.filter((t) => t.status === 'completed').length}</span> {t('features.completedCount')} ·{' '}
+            <span className="font-semibold text-slate-400">{data.abTests.filter((t) => t.status === 'draft').length}</span> {t('features.draftCount')}
           </span>
         </div>
         <Button
@@ -1142,7 +1146,7 @@ export default function FeatureFlags() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Clock className="size-4 text-violet-400" />
-          <h4 className="text-sm font-semibold text-slate-200">回滚历史</h4>
+          <h4 className="text-sm font-semibold text-slate-200">{t('features.rollbackHistory')}</h4>
         </div>
         <div className="space-y-0">
           {data.rollbackHistory.map((entry, idx) => (
@@ -1161,7 +1165,7 @@ export default function FeatureFlags() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <RotateCcw className="size-4 text-red-400" />
-          <h4 className="text-sm font-semibold text-slate-200">快速回滚</h4>
+          <h4 className="text-sm font-semibold text-slate-200">{t('features.quickRollback')}</h4>
         </div>
         <div className="space-y-2">
           {data.featureFlags
@@ -1174,9 +1178,9 @@ export default function FeatureFlags() {
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="size-2 rounded-full bg-emerald-400 shrink-0" />
                   <div className="min-w-0">
-                    <span className="text-xs text-slate-200 font-medium">{flag.name}</span>
+                    <span className="text-xs text-slate-200 font-medium">{t(flag.name)}</span>
                     <div className="text-[10px] text-slate-500">
-                      当前: {flag.rolloutPercentage}% → 回滚至: 0%
+                      {t('features.currentRollout')}: {flag.rolloutPercentage}% → {t('features.rollbackTo')}: 0%
                     </div>
                   </div>
                 </div>
@@ -1201,13 +1205,13 @@ export default function FeatureFlags() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Shield className="size-4 text-amber-400" />
-          <h4 className="text-sm font-semibold text-slate-200">自动回滚触发条件</h4>
+          <h4 className="text-sm font-semibold text-slate-200">{t('features.autoRollbackConditions')}</h4>
         </div>
         <div className="space-y-2">
           {[
-            { condition: '错误率 > 1%', current: '0.08%', status: 'safe' as const },
-            { condition: 'P95延迟 > 500ms', current: '165ms', status: 'safe' as const },
-            { condition: '崩溃率 > 0.1%', current: '0%', status: 'safe' as const },
+            { condition: t('features.errorRateCondition'), current: '0.08%', status: 'safe' as const },
+            { condition: t('features.p95Condition'), current: '165ms', status: 'safe' as const },
+            { condition: t('features.crashCondition'), current: '0%', status: 'safe' as const },
           ].map((check) => (
             <div
               key={check.condition}
@@ -1227,7 +1231,7 @@ export default function FeatureFlags() {
                 <span className="text-xs text-slate-300">{check.condition}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-slate-500">当前:</span>
+                <span className="text-[10px] text-slate-500">{t('features.current')}:</span>
                 <span className={cn(
                   'text-xs font-semibold',
                   check.status === 'safe' ? 'text-emerald-400' : 'text-red-400'
@@ -1265,14 +1269,14 @@ export default function FeatureFlags() {
           </DialogHeader>
           <div className="py-4">
             <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
-              <p className="text-xs text-red-300 font-medium mb-2">将回滚以下功能开关:</p>
+              <p className="text-xs text-red-300 font-medium mb-2">{t('features.willRollbackFollowing')}</p>
               <ul className="space-y-1">
                 {data.featureFlags
                   .filter((f) => f.status === 'active' && f.rolloutPercentage > 0)
                   .map((f) => (
                     <li key={f.id} className="text-[11px] text-slate-300 flex items-center gap-2">
                       <ArrowRight className="size-3 text-red-400" />
-                      {f.name} ({f.rolloutPercentage}% → 0%)
+                      {t(f.name)} ({f.rolloutPercentage}% → 0%)
                     </li>
                   ))}
               </ul>
@@ -1313,18 +1317,18 @@ export default function FeatureFlags() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-            <span className="text-[10px] text-emerald-400">当前</span>
+            <span className="text-[10px] text-emerald-400">{t('features.currentVersion')}</span>
             <span className="text-xs font-semibold text-emerald-300 font-mono">{pipeline.currentVersion}</span>
           </div>
           <ArrowRight className="size-4 text-slate-600" />
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20">
-            <span className="text-[10px] text-violet-400">目标</span>
+            <span className="text-[10px] text-violet-400">{t('features.targetVersion')}</span>
             <span className="text-xs font-semibold text-violet-300 font-mono">{pipeline.nextVersion}</span>
           </div>
         </div>
         <div className="flex items-center gap-1.5 text-[10px] text-emerald-400">
           <Shield className="size-3" />
-          <span>自动回滚: 已启用</span>
+          <span>{t('features.autoRollbackEnabled')}</span>
         </div>
       </div>
 
@@ -1332,7 +1336,7 @@ export default function FeatureFlags() {
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-4">
           <Rocket className="size-4 text-violet-400" />
-          <h4 className="text-sm font-semibold text-slate-200">发布管道</h4>
+          <h4 className="text-sm font-semibold text-slate-200">{t('features.releasePipelineTitle')}</h4>
         </div>
 
         {/* Desktop: horizontal stepper */}
@@ -1379,9 +1383,9 @@ export default function FeatureFlags() {
                       isCompleted ? 'text-emerald-300' :
                       isInProgress ? 'text-violet-300' : 'text-slate-500'
                     )}>
-                      {stage.name}
+                      {t(stage.name)}
                     </p>
-                    <p className="text-[9px] text-slate-600 mt-0.5 truncate">{stage.details}</p>
+                    <p className="text-[9px] text-slate-600 mt-0.5 truncate">{stage.details.startsWith('features.') ? t(stage.details) : stage.details}</p>
                   </div>
                 </div>
               </div>
@@ -1403,7 +1407,7 @@ export default function FeatureFlags() {
         <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4 flex flex-col items-center justify-center">
           <div className="flex items-center gap-2 mb-3 self-start">
             <Zap className="size-4 text-violet-400" />
-            <h4 className="text-sm font-semibold text-slate-200">Canary 部署</h4>
+            <h4 className="text-sm font-semibold text-slate-200">{t('features.canaryDeploy')}</h4>
           </div>
           <CanaryGauge percentage={pipeline.canaryPercentage} />
           <div className="mt-3 w-full">
@@ -1424,7 +1428,7 @@ export default function FeatureFlags() {
         <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
           <div className="flex items-center gap-2 mb-3">
             <Activity className="size-4 text-violet-400" />
-            <h4 className="text-sm font-semibold text-slate-200">Canary 指标</h4>
+            <h4 className="text-sm font-semibold text-slate-200">{t('features.canaryMetrics')}</h4>
           </div>
           <div className="space-y-3">
             {pipeline.canaryMetrics.map((metric) => (
@@ -1436,7 +1440,7 @@ export default function FeatureFlags() {
                 )}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-slate-300">{metric.name}</span>
+                  <span className="text-xs text-slate-300">{t(metric.name)}</span>
                   {metric.passing ? (
                     <CheckCircle className="size-3.5 text-emerald-400" />
                   ) : (
@@ -1450,7 +1454,7 @@ export default function FeatureFlags() {
                   )}>
                     {metric.value}
                   </span>
-                  <span className="text-[10px] text-slate-500">阈值: {metric.threshold}</span>
+                  <span className="text-[10px] text-slate-500">{t('features.threshold')}: {metric.threshold}</span>
                 </div>
               </div>
             ))}
@@ -1503,7 +1507,7 @@ export default function FeatureFlags() {
                   )}
                 >
                   <TabIcon className="size-3.5" />
-                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="hidden sm:inline">{t(tab.label)}</span>
                 </button>
               );
             })}

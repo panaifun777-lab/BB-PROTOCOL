@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useI18n } from '@/hooks/use-i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Key,
@@ -154,11 +155,11 @@ function getRelativeTime(iso: string): string {
   const then = new Date(iso);
   const diffMs = now.getTime() - then.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 60) return `${diffMin}分钟前`;
+  if (diffMin < 60) return t('sdk.minutesAgo', { count: String(diffMin) });
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}小时前`;
+  if (diffHr < 24) return t('sdk.hoursAgo', { count: String(diffHr) });
   const diffDay = Math.floor(diffHr / 24);
-  return `${diffDay}天前`;
+  return t('sdk.daysAgo', { count: String(diffDay) });
 }
 
 function truncateUrl(url: string, maxLen = 40): string {
@@ -181,14 +182,14 @@ function getInstallCommand(pkg: SdkPackage): string {
 }
 
 // ── Custom Tooltip for Usage Chart ─────────────────────
-function UsageChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; dataKey: string; color: string }>; label?: string }) {
+function UsageChartTooltip({ active, payload, label, t }: { active?: boolean; payload?: Array<{ value: number; dataKey: string; color: string }>; label?: string; t: (key: string, params?: Record<string, string | number>) => string }) {
   if (!active || !payload || !payload.length) return null;
   return (
     <div className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-xs shadow-xl">
       <p className="text-slate-300 font-medium mb-1">{label}</p>
       {payload.map((entry, i) => (
         <p key={i} className="tabular-nums" style={{ color: entry.color }}>
-          {entry.dataKey === 'calls' ? '调用次数' : entry.dataKey === 'errors' ? '错误数' : '平均延迟'}: {entry.dataKey === 'avgLatency' ? `${entry.value}ms` : entry.value.toLocaleString()}
+          {t(entry.dataKey === 'calls' ? 'sdk.callCount' : entry.dataKey === 'errors' ? 'sdk.errorCount' : 'sdk.avgLatencyLabel')}: {entry.dataKey === 'avgLatency' ? `${entry.value}ms` : entry.value.toLocaleString()}
         </p>
       ))}
     </div>
@@ -214,7 +215,7 @@ function CopyButton({ text, className }: { text: string; className?: string }) {
         copied ? 'bg-emerald-500/20' : 'bg-slate-700/50 hover:bg-slate-600/50',
         className,
       )}
-      aria-label="复制"
+      aria-label={t('sdk.copyLabel')}
     >
       {copied ? (
         <CheckCircle className="size-3.5 text-emerald-400" />
@@ -274,22 +275,22 @@ function EndpointRow({ endpoint, expanded, onToggle }: { endpoint: ApiEndpoint; 
           >
             <div className="px-3 pb-3 pt-1 border-t border-slate-700/30 space-y-2">
               <div className="flex flex-wrap gap-2 text-[10px]">
-                <span className="text-slate-500">认证:</span>
+                <span className="text-slate-500">{t('sdk.auth')}</span>
                 <Badge variant="outline" className="text-[9px] bg-violet-500/10 text-violet-300 border-violet-500/20">{endpoint.auth}</Badge>
-                <span className="text-slate-500 ml-2">限速:</span>
+                <span className="text-slate-500 ml-2">{t('sdk.rateLimitLabel')}</span>
                 <Badge variant="outline" className="text-[9px] bg-slate-600/20 text-slate-300 border-slate-600/30">{endpoint.rateLimit}</Badge>
-                <span className="text-slate-500 ml-2">版本:</span>
+                <span className="text-slate-500 ml-2">{t('sdk.versionLabel')}</span>
                 <Badge variant="outline" className="text-[9px] bg-slate-600/20 text-slate-300 border-slate-600/30">{endpoint.version}</Badge>
               </div>
               <div>
-                <p className="text-[10px] text-slate-500 mb-1 font-medium">cURL 示例</p>
+                <p className="text-[10px] text-slate-500 mb-1 font-medium">{t('sdk.curlExample')}</p>
                 <div className="relative rounded-md bg-slate-900/80 p-2.5">
                   <pre className="text-[10px] text-emerald-300/90 font-mono whitespace-pre-wrap overflow-x-auto">{curlExample}</pre>
                   <CopyButton text={curlExample} className="absolute top-1.5 right-1.5" />
                 </div>
               </div>
               <div>
-                <p className="text-[10px] text-slate-500 mb-1 font-medium">JSON 响应</p>
+                <p className="text-[10px] text-slate-500 mb-1 font-medium">{t('sdk.jsonResponse')}</p>
                 <div className="relative rounded-md bg-slate-900/80 p-2.5">
                   <pre className="text-[10px] text-violet-300/90 font-mono whitespace-pre-wrap overflow-x-auto">{jsonResponse}</pre>
                   <CopyButton text={jsonResponse} className="absolute top-1.5 right-1.5" />
@@ -305,6 +306,7 @@ function EndpointRow({ endpoint, expanded, onToggle }: { endpoint: ApiEndpoint; 
 
 // ── API Key Card ───────────────────────────────────────
 function ApiKeyCard({ apiKey }: { apiKey: ApiKeyEntry }) {
+  const { t } = useI18n();
   const statusConf = STATUS_COLORS[apiKey.status] || STATUS_COLORS.active;
   const isRevoked = apiKey.status === 'revoked';
 
@@ -330,7 +332,7 @@ function ApiKeyCard({ apiKey }: { apiKey: ApiKeyEntry }) {
           </div>
         </div>
         <Badge variant="outline" className={cn('shrink-0 text-[10px]', statusConf.bg, statusConf.text, statusConf.border)}>
-          {apiKey.status === 'active' ? '活跃' : '已吊销'}
+          {apiKey.status === 'active' ? t('sdk.keyActive') : t('sdk.keyRevoked')}
         </Badge>
       </div>
 
@@ -349,20 +351,20 @@ function ApiKeyCard({ apiKey }: { apiKey: ApiKeyEntry }) {
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
         <div className="flex justify-between">
-          <span className="text-slate-500">限速</span>
+          <span className="text-slate-500">{t('sdk.rateLimit')}</span>
           <span className="text-slate-300 font-medium">{apiKey.rateLimit}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-slate-500">30天调用</span>
+          <span className="text-slate-500">{t('sdk.calls30d')}</span>
           <span className="text-emerald-400 font-medium tabular-nums">{formatNumber(apiKey.usage30d)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-slate-500">创建</span>
+          <span className="text-slate-500">{t('sdk.created')}</span>
           <span className="text-slate-300">{apiKey.createdAt}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-slate-500">最后使用</span>
-          <span className="text-slate-300">{getRelativeTime(apiKey.lastUsed)}</span>
+          <span className="text-slate-500">{t('sdk.lastUsed')}</span>
+          <span className="text-slate-300">{getRelativeTime(apiKey.lastUsed, t)}</span>
         </div>
       </div>
 
@@ -411,7 +413,7 @@ function SdkPackageCard({ pkg }: { pkg: SdkPackage }) {
         <div className="flex items-center gap-1.5">
           <Download className="size-3 text-emerald-400" />
           <span className="text-slate-300 tabular-nums">{formatNumber(pkg.downloads)}</span>
-          <span className="text-slate-500">下载</span>
+          <span className="text-slate-500">{t('sdk.downloads')}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <Package className="size-3 text-violet-400" />
@@ -425,7 +427,7 @@ function SdkPackageCard({ pkg }: { pkg: SdkPackage }) {
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-[9px] text-slate-500">更新于 {pkg.lastUpdate}</span>
+        <span className="text-[9px] text-slate-500"> {t('sdk.updatedOn')} {pkg.lastUpdate}</span>
         <Button variant="outline" size="sm" className="h-6 text-[10px] border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 hover:text-violet-200">
           <FileText className="mr-1 size-3" /> 查看文档
         </Button>
@@ -436,6 +438,7 @@ function SdkPackageCard({ pkg }: { pkg: SdkPackage }) {
 
 // ── Webhook Card ───────────────────────────────────────
 function WebhookCard({ webhook }: { webhook: WebhookEntry }) {
+  const { t } = useI18n();
   const statusConf = STATUS_COLORS[webhook.status] || STATUS_COLORS.active;
 
   return (
@@ -456,7 +459,7 @@ function WebhookCard({ webhook }: { webhook: WebhookEntry }) {
           </div>
         </div>
         <Badge variant="outline" className={cn('shrink-0 text-[10px]', statusConf.bg, statusConf.text, statusConf.border)}>
-          {webhook.status === 'active' ? '活跃' : '已暂停'}
+          {webhook.status === 'active' ? t('sdk.webhookActive') : t('sdk.webhookPaused')}
         </Badge>
       </div>
 
@@ -469,7 +472,7 @@ function WebhookCard({ webhook }: { webhook: WebhookEntry }) {
       <div className="space-y-2">
         <div>
           <div className="flex items-center justify-between text-[10px] mb-1">
-            <span className="text-slate-400">成功率</span>
+            <span className="text-slate-400">{t('sdk.successRate')}</span>
             <span className={cn('font-medium tabular-nums', webhook.successRate >= 99 ? 'text-emerald-400' : webhook.successRate >= 97 ? 'text-amber-400' : 'text-red-400')}>
               {webhook.successRate}%
             </span>
@@ -487,8 +490,8 @@ function WebhookCard({ webhook }: { webhook: WebhookEntry }) {
           </div>
         </div>
         <div className="flex items-center justify-between text-[10px]">
-          <span className="text-slate-500">最后投递</span>
-          <span className="text-slate-300">{getRelativeTime(webhook.lastDelivery)}</span>
+          <span className="text-slate-500">{t('sdk.lastDelivery')}</span>
+          <span className="text-slate-300">{getRelativeTime(webhook.lastDelivery, t)}</span>
         </div>
       </div>
     </motion.div>
@@ -520,18 +523,18 @@ function TierCard({ quota, isCurrent }: { quota: RateLimitQuota; isCurrent: bool
 
       <div className="space-y-2 text-[11px]">
         <div className="flex justify-between">
-          <span className="text-slate-400">RPM 限制</span>
+          <span className="text-slate-400">{t('sdk.rpmLimit')}</span>
           <span className="text-slate-200 font-medium tabular-nums">{quota.rpm.toLocaleString()}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-slate-400">月度配额</span>
+          <span className="text-slate-400">{t('sdk.monthlyQuota')}</span>
           <span className="text-slate-200 font-medium">{typeof quota.monthlyQuota === 'number' ? quota.monthlyQuota.toLocaleString() : quota.monthlyQuota}</span>
         </div>
       </div>
 
       <div className="mt-3 pt-3 border-t border-slate-700/30">
         {isCurrent ? (
-          <Badge className="w-full justify-center bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px]">当前方案</Badge>
+          <Badge className="w-full justify-center bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px]">{t('sdk.currentPlan')}</Badge>
         ) : (
           <Button variant="outline" size="sm" className="w-full h-7 text-[10px] border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 hover:text-violet-200">
             升级
@@ -544,6 +547,7 @@ function TierCard({ quota, isCurrent }: { quota: RateLimitQuota; isCurrent: bool
 
 // ── Main Component ─────────────────────────────────────
 export default function SdkPlatform() {
+  const { t } = useI18n();
   const [data, setData] = useState<SdkPlatformData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('docs');
@@ -623,7 +627,7 @@ export default function SdkPlatform() {
             className="flex flex-col items-center gap-3"
           >
             <Code2 className="size-8 text-violet-400 animate-pulse" />
-            <p className="text-slate-400 text-sm">加载 SDK/API 平台数据...</p>
+            <p className="text-slate-400 text-sm">{t('sdk.loadingSdk')}</p>
           </motion.div>
         </CardContent>
       </Card>
@@ -636,7 +640,7 @@ export default function SdkPlatform() {
       {/* API Overview Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: '总端点', value: endpointStats.total, color: 'text-slate-200', bg: 'bg-slate-800/60' },
+          { label: t('sdk.totalEndpoints'), value: endpointStats.total, color: 'text-slate-200', bg: 'bg-slate-800/60' },
           { label: 'Stable', value: endpointStats.stable, color: 'text-emerald-400', bg: 'bg-emerald-500/5' },
           { label: 'Beta', value: endpointStats.beta, color: 'text-amber-400', bg: 'bg-amber-500/5' },
           { label: 'Alpha', value: endpointStats.alpha, color: 'text-violet-400', bg: 'bg-violet-500/5' },
@@ -653,7 +657,7 @@ export default function SdkPlatform() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500" />
           <Input
-            placeholder="搜索端点路径或描述..."
+            placeholder={t('sdk.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 h-9 bg-slate-800/60 border-slate-700 text-slate-200 text-xs placeholder:text-slate-500"
@@ -683,7 +687,7 @@ export default function SdkPlatform() {
           {filteredEndpoints.length === 0 ? (
             <div className="text-center py-8">
               <Search className="size-6 text-slate-600 mx-auto mb-2" />
-              <p className="text-xs text-slate-500">未找到匹配的端点</p>
+              <p className="text-xs text-slate-500">{t('sdk.noMatchingEndpoints')}</p>
             </div>
           ) : (
             filteredEndpoints.map((ep) => (
@@ -707,11 +711,11 @@ export default function SdkPlatform() {
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg border border-slate-700 bg-emerald-500/5 p-3 text-center">
             <p className="text-xl font-bold text-emerald-400 tabular-nums">{keyStats.activeKeys}</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">活跃密钥</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">{t('sdk.activeKeys')}</p>
           </div>
           <div className="rounded-lg border border-slate-700 bg-violet-500/5 p-3 text-center">
             <p className="text-xl font-bold text-violet-400 tabular-nums">{formatNumber(keyStats.totalCalls)}</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">30天总调用</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">{t('sdk.totalCalls30d')}</p>
           </div>
         </div>
 
@@ -719,10 +723,10 @@ export default function SdkPlatform() {
         <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
           <div className="flex items-center gap-2 mb-3">
             <Zap className="size-4 text-amber-400" />
-            <h4 className="text-xs font-semibold text-slate-200">速率限制</h4>
+            <h4 className="text-xs font-semibold text-slate-200">{t('sdk.rateLimitTitle')}</h4>
           </div>
           <div className="flex items-center justify-between text-[11px] mb-1.5">
-            <span className="text-slate-400">当前 RPM</span>
+            <span className="text-slate-400">{t('sdk.currentRpm')}</span>
             <span className="text-emerald-400 font-bold tabular-nums">{data.rateLimitStats.currentRpm}</span>
           </div>
           <div className="h-3 rounded-full bg-slate-700/50 overflow-hidden mb-2">
@@ -740,7 +744,7 @@ export default function SdkPlatform() {
           </div>
           <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-700/30">
             <AlertTriangle className="size-3 text-amber-400" />
-            <span className="text-[10px] text-slate-400">突发限制: <span className="text-amber-300 font-medium">{data.rateLimitStats.burstLimit} req</span></span>
+            <span className="text-[10px] text-slate-400"> {t('sdk.burstLimit')}: <span className="text-amber-300 font-medium">{data.rateLimitStats.burstLimit} req</span></span>
           </div>
         </div>
       </div>
@@ -778,7 +782,7 @@ export default function SdkPlatform() {
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-3">
           <Code2 className="size-4 text-emerald-400" />
-          <h4 className="text-xs font-semibold text-slate-200">API 调用量 & 延迟趋势 (7天)</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('sdk.apiUsageLatency')}</h4>
         </div>
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
@@ -792,7 +796,7 @@ export default function SdkPlatform() {
               <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#334155' }} tickLine={false} />
               <YAxis yAxisId="left" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#334155' }} tickLine={false} tickFormatter={(v: number) => formatNumber(v)} />
               <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#334155' }} tickLine={false} tickFormatter={(v: number) => `${v}ms`} />
-              <Tooltip content={<UsageChartTooltip />} />
+              <Tooltip content={<UsageChartTooltip t={t} />} />
               <Bar yAxisId="left" dataKey="calls" fill="url(#barGrad)" radius={[3, 3, 0, 0]} barSize={24} />
               <Line yAxisId="right" type="monotone" dataKey="avgLatency" stroke="#8b5cf6" strokeWidth={2} dot={{ fill: '#8b5cf6', r: 3 }} />
             </ComposedChart>
@@ -801,11 +805,11 @@ export default function SdkPlatform() {
         <div className="flex items-center justify-center gap-6 mt-2 text-[10px]">
           <div className="flex items-center gap-1.5">
             <div className="size-2.5 rounded-sm bg-emerald-500" />
-            <span className="text-slate-400">API 调用次数</span>
+            <span className="text-slate-400">{t('sdk.apiCallCount')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="size-2.5 rounded-full bg-violet-500" />
-            <span className="text-slate-400">平均延迟 (ms)</span>
+            <span className="text-slate-400">{t('sdk.avgLatencyMs')}</span>
           </div>
         </div>
       </div>
@@ -820,11 +824,11 @@ export default function SdkPlatform() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
               <div className="size-2 rounded-full bg-emerald-400" />
-              <span className="text-[11px] text-slate-300">{webhookStats.active} 活跃</span>
+              <span className="text-[11px] text-slate-300">{webhookStats.active} {t('sdk.activeWebhooks')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="size-2 rounded-full bg-amber-400" />
-              <span className="text-[11px] text-slate-300">{webhookStats.paused} 暂停</span>
+              <span className="text-[11px] text-slate-300">{webhookStats.paused} {t('sdk.pausedWebhooks')}</span>
             </div>
           </div>
           <Button variant="outline" size="sm" className="h-7 text-[10px] border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 hover:text-violet-200">
@@ -843,7 +847,7 @@ export default function SdkPlatform() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Shield className="size-4 text-emerald-400" />
-          <h4 className="text-xs font-semibold text-slate-200">配额方案</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('sdk.quotaPlans')}</h4>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {data.rateLimitStats.quotas.map((quota) => (
@@ -856,13 +860,13 @@ export default function SdkPlatform() {
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-3">
           <Zap className="size-4 text-amber-400" />
-          <h4 className="text-xs font-semibold text-slate-200">当前用量概览</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('sdk.usageOverview')}</h4>
         </div>
         <div className="space-y-4">
           {/* RPM Usage */}
           <div>
             <div className="flex items-center justify-between text-[11px] mb-1.5">
-              <span className="text-slate-400">RPM 用量</span>
+              <span className="text-slate-400">{t('sdk.rpmUsage')}</span>
               <span className="text-slate-200 tabular-nums">
                 <span className="text-emerald-400 font-bold">{data.rateLimitStats.currentRpm}</span>
                 <span className="text-slate-500"> / {data.rateLimitStats.maxRpm.toLocaleString()}</span>
@@ -879,7 +883,7 @@ export default function SdkPlatform() {
             <div className="flex items-center justify-between text-[9px] mt-1">
               <span className="text-slate-600">0</span>
               <span className="text-emerald-400 font-medium tabular-nums">
-                {(data.rateLimitStats.currentRpm / data.rateLimitStats.maxRpm * 100).toFixed(1)}% 已用
+                {(data.rateLimitStats.currentRpm / data.rateLimitStats.maxRpm * 100).toFixed(1)}% {t('sdk.used')}
               </span>
               <span className="text-slate-600">{data.rateLimitStats.maxRpm.toLocaleString()}</span>
             </div>
@@ -888,7 +892,7 @@ export default function SdkPlatform() {
           {/* Monthly Quota (Pro) */}
           <div>
             <div className="flex items-center justify-between text-[11px] mb-1.5">
-              <span className="text-slate-400">月度配额 (Pro)</span>
+              <span className="text-slate-400">{t('sdk.monthlyQuotaPro')}</span>
               <span className="text-slate-200 tabular-nums">
                 <span className="text-emerald-400 font-bold">{formatNumber(keyStats.totalCalls)}</span>
                 <span className="text-slate-500"> / 500K</span>
@@ -905,7 +909,7 @@ export default function SdkPlatform() {
             <div className="flex items-center justify-between text-[9px] mt-1">
               <span className="text-slate-600">0</span>
               <span className={cn('font-medium tabular-nums', keyStats.totalCalls / 500000 > 0.8 ? 'text-amber-400' : 'text-emerald-400')}>
-                {(keyStats.totalCalls / 500000 * 100).toFixed(1)}% 已用
+                {(keyStats.totalCalls / 500000 * 100).toFixed(1)}% {t('sdk.used')}
               </span>
               <span className="text-slate-600">500,000</span>
             </div>
@@ -916,11 +920,11 @@ export default function SdkPlatform() {
             <div className="grid grid-cols-3 gap-3 text-center">
               <div>
                 <p className="text-sm font-bold text-emerald-400 tabular-nums">{formatNumber(data.usageHistory.reduce((s, d) => s + d.calls, 0))}</p>
-                <p className="text-[9px] text-slate-500">7天总调用</p>
+                <p className="text-[9px] text-slate-500">{t('sdk.calls7d')}</p>
               </div>
               <div>
                 <p className="text-sm font-bold text-red-400 tabular-nums">{data.usageHistory.reduce((s, d) => s + d.errors, 0)}</p>
-                <p className="text-[9px] text-slate-500">7天总错误</p>
+                <p className="text-[9px] text-slate-500">{t('sdk.errors7d')}</p>
               </div>
               <div>
                 <p className="text-sm font-bold text-violet-400 tabular-nums">{Math.round(data.usageHistory.reduce((s, d) => s + d.avgLatency, 0) / data.usageHistory.length)}ms</p>
@@ -934,10 +938,10 @@ export default function SdkPlatform() {
   );
 
   const TAB_CONFIG = [
-    { id: 'docs', label: 'API 文档', icon: Code2 },
-    { id: 'keys', label: 'API 密钥', icon: Key },
-    { id: 'downloads', label: 'SDK 下载', icon: Download },
-    { id: 'webhooks', label: 'Webhook & 配额', icon: Webhook },
+    { id: 'docs', label: t('sdk.apiDocs'), icon: Code2 },
+    { id: 'keys', label: t('sdk.apiKey'), icon: Key },
+    { id: 'downloads', label: t('sdk.sdkDownload'), icon: Download },
+    { id: 'webhooks', label: t('sdk.webhookQuota'), icon: Webhook },
   ];
 
   return (
@@ -949,13 +953,13 @@ export default function SdkPlatform() {
               <Terminal className="size-4 text-violet-400" />
             </div>
             <div>
-              <CardTitle className="text-sm text-slate-100">SDK/API 开放平台</CardTitle>
-              <p className="text-[10px] text-slate-500 mt-0.5">RESTful API · 多语言 SDK · Webhook 集成</p>
+              <CardTitle className="text-sm text-slate-100">{t('sdk.title')}</CardTitle>
+              <p className="text-[10px] text-slate-500 mt-0.5">RESTful API · Multi-language SDK · Webhook</p>
             </div>
           </div>
           <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-300 border-emerald-500/20">
             <div className="size-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
-            在线
+            {t('common.online')}
           </Badge>
         </div>
       </CardHeader>

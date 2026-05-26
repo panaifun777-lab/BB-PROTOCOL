@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { Activity, ArrowUpRight, ArrowDownRight, Minus, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/hooks/use-i18n';
 import type { ResonanceDataPoint, AvatarProfile } from '@/lib/types';
 import {
   Card,
@@ -55,24 +56,25 @@ function getScoreColor(score: number): { text: string; dot: string; fill: string
   };
 }
 
-function getCircuitBadge(state: string) {
+function getCircuitBadge(state: string, t: (key: string, params?: Record<string, string | number>) => string) {
   switch (state) {
     case 'NORMAL':
-      return { label: '正常运行', cls: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' };
+      return { label: t('resonance.normalOperation'), cls: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' };
     case 'SOFT_LIMIT':
-      return { label: '软限制', cls: 'bg-amber-500/10 text-amber-300 border-amber-500/30' };
+      return { label: t('resonance.softLimit'), cls: 'bg-amber-500/10 text-amber-300 border-amber-500/30' };
     case 'HARD_PAUSE':
-      return { label: '硬暂停', cls: 'bg-red-500/10 text-red-300 border-red-500/30' };
+      return { label: t('resonance.hardPause'), cls: 'bg-red-500/10 text-red-300 border-red-500/30' };
     case 'RECOVERY':
-      return { label: '恢复中', cls: 'bg-blue-500/10 text-blue-300 border-blue-500/30' };
+      return { label: t('resonance.recovery'), cls: 'bg-blue-500/10 text-blue-300 border-blue-500/30' };
     default:
       return { label: state, cls: 'bg-slate-500/10 text-slate-300 border-slate-500/30' };
   }
 }
 
 export default function ResonanceWave({ data, currentScore, circuitState }: ResonanceWaveProps) {
+  const { t } = useI18n();
   const scoreColor = getScoreColor(currentScore);
-  const circuitBadge = getCircuitBadge(circuitState);
+  const circuitBadge = getCircuitBadge(circuitState, t);
 
   // Calculate trend (compare last 6h avg vs previous 6h avg)
   const trend = useMemo(() => {
@@ -102,10 +104,10 @@ export default function ResonanceWave({ data, currentScore, circuitState }: Reso
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Activity className="h-4 w-4 text-emerald-400" />
-                情绪共振波形
+                {t('resonance.title')}
               </CardTitle>
               <CardDescription className="text-xs text-slate-400 mt-0.5">
-                24小时共振强度监测
+                {t('resonance.subtitle')}
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -157,11 +159,11 @@ export default function ResonanceWave({ data, currentScore, circuitState }: Reso
             <div className="hidden sm:flex items-center gap-3 text-[10px] text-slate-500">
               <span className="flex items-center gap-1">
                 <span className="inline-block w-4 h-0 border-t-2 border-dashed border-amber-500" />
-                软限制 70
+                {t('resonance.softLimit')} 70
               </span>
               <span className="flex items-center gap-1">
                 <span className="inline-block w-4 h-0 border-t-2 border-dashed border-red-500" />
-                硬暂停 50
+                {t('resonance.hardPause')} 50
               </span>
             </div>
           </div>
@@ -198,7 +200,7 @@ export default function ResonanceWave({ data, currentScore, circuitState }: Reso
                   strokeDasharray="6 4"
                   strokeWidth={1.5}
                   label={{
-                    value: '软限制',
+                    value: t('resonance.softLimit'),
                     position: 'right',
                     fill: '#f59e0b',
                     fontSize: 10,
@@ -210,7 +212,7 @@ export default function ResonanceWave({ data, currentScore, circuitState }: Reso
                   strokeDasharray="6 4"
                   strokeWidth={1.5}
                   label={{
-                    value: '硬暂停',
+                    value: t('resonance.hardPause'),
                     position: 'right',
                     fill: '#ef4444',
                     fontSize: 10,
@@ -240,11 +242,11 @@ export default function ResonanceWave({ data, currentScore, circuitState }: Reso
                 <span />
                 <span className="flex items-center gap-1">
                   <ShieldAlert className="h-2.5 w-2.5 text-red-500/50" />
-                  危险区 &lt;50
+                  {t('resonance.dangerZone')} &lt;50
                 </span>
                 <span className="flex items-center gap-1">
                   <AlertTriangle className="h-2.5 w-2.5 text-amber-500/50" />
-                  警告区 50-70
+                  {t('resonance.warningZone')} 50-70
                 </span>
                 <span />
               </div>
@@ -254,19 +256,19 @@ export default function ResonanceWave({ data, currentScore, circuitState }: Reso
           {/* Zone Summary */}
           <div className="grid grid-cols-3 gap-2">
             <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/20 p-2 text-center">
-              <p className="text-[10px] text-emerald-400/70">安全区</p>
+              <p className="text-[10px] text-emerald-400/70">{t('resonance.safeZone')}</p>
               <p className="text-xs font-semibold text-emerald-300">≥70</p>
-              <p className="text-[10px] text-slate-500">正常运行</p>
+              <p className="text-[10px] text-slate-500">{t('resonance.normalOperation')}</p>
             </div>
             <div className="rounded-lg bg-amber-500/5 border border-amber-500/20 p-2 text-center">
-              <p className="text-[10px] text-amber-400/70">警告区</p>
+              <p className="text-[10px] text-amber-400/70">{t('resonance.warningZone')}</p>
               <p className="text-xs font-semibold text-amber-300">50-69</p>
-              <p className="text-[10px] text-slate-500">软限制生效</p>
+              <p className="text-[10px] text-slate-500">{t('resonance.softLimitActive')}</p>
             </div>
             <div className="rounded-lg bg-red-500/5 border border-red-500/20 p-2 text-center">
-              <p className="text-[10px] text-red-400/70">危险区</p>
+              <p className="text-[10px] text-red-400/70">{t('resonance.dangerZone')}</p>
               <p className="text-xs font-semibold text-red-300">&lt;50</p>
-              <p className="text-[10px] text-slate-500">硬暂停触发</p>
+              <p className="text-[10px] text-slate-500">{t('resonance.hardPauseTriggered')}</p>
             </div>
           </div>
         </CardContent>

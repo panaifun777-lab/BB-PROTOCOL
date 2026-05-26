@@ -271,10 +271,18 @@ const DATA_FLOW: DataFlow[] = [
 // ── GET Handler ────────────────────────────────────────────────
 
 export async function GET() {
-  return NextResponse.json({
-    modules: MODULES,
-    systemMetrics: SYSTEM_METRICS,
-    performanceBenchmarks: PERFORMANCE_BENCHMARKS,
-    dataFlow: DATA_FLOW,
-  });
+  try {
+    return NextResponse.json({
+      modules: MODULES,
+      systemMetrics: SYSTEM_METRICS,
+      performanceBenchmarks: PERFORMANCE_BENCHMARKS,
+      dataFlow: DATA_FLOW,
+    });
+  } catch (error) {
+    console.error('[API] Error in GET /api/engine-arch:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }

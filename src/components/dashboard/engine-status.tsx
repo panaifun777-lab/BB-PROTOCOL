@@ -18,6 +18,7 @@ import {
   Wifi,
   WifiOff,
 } from 'lucide-react'
+import { useI18n } from '@/hooks/use-i18n'
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -195,11 +196,11 @@ function ModuleCard({ module, index }: { module: EngineModuleStatus; index: numb
           <div className="flex items-center justify-between text-[10px] text-slate-500 border-t border-slate-700/50 pt-2">
             <div className="flex items-center gap-1.5">
               <Clock className="h-3 w-3" />
-              <span>Uptime: {module.uptime}</span>
+            <span>Uptime: {module.uptime}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Wifi className="h-3 w-3" />
-              <span>Updated {relativeTime(module.lastUpdate)}</span>
+            <span>{t('engineStatus.updated')} {relativeTime(module.lastUpdate)}</span>
             </div>
           </div>
 
@@ -236,6 +237,7 @@ interface EngineStatusDashboardProps {
 // ── Main Dashboard Component ─────────────────────────────────
 
 export default function EngineStatusDashboard({ engineStatus }: EngineStatusDashboardProps) {
+  const { t } = useI18n()
   const [data, setData] = useState<EngineStatusData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -266,7 +268,7 @@ export default function EngineStatusDashboard({ engineStatus }: EngineStatusDash
       <div className="bg-slate-800/80 border border-slate-700 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-4">
           <Zap className="h-5 w-5 text-emerald-400 animate-pulse" />
-          <h3 className="text-white font-semibold">Engine Status</h3>
+          <h3 className="text-white font-semibold">{t('engineStatus.loading')}</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[0, 1, 2, 3].map((i) => (
@@ -283,9 +285,9 @@ export default function EngineStatusDashboard({ engineStatus }: EngineStatusDash
       <div className="bg-slate-800/80 border border-red-500/30 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-2">
           <WifiOff className="h-5 w-5 text-red-400" />
-          <h3 className="text-white font-semibold">Engine Status — Connection Error</h3>
+          <h3 className="text-white font-semibold">{t('engineStatus.connectionError')}</h3>
         </div>
-        <p className="text-sm text-slate-400">{error || 'No data available'}</p>
+        <p className="text-sm text-slate-400">{error || t('engineStatus.noData')}</p>
       </div>
     )
   }
@@ -306,9 +308,9 @@ export default function EngineStatusDashboard({ engineStatus }: EngineStatusDash
             <Zap className="h-5 w-5 text-emerald-400" />
           </div>
           <div>
-            <h3 className="text-white font-semibold text-base">Off-Chain Engine Status</h3>
+            <h3 className="text-white font-semibold text-base">{t('engineStatus.title')}</h3>
             <p className="text-xs text-slate-400">
-              Real-time monitoring of 4 engine microservices
+              {t('engineStatus.subtitle')}
               {engineStatus && (
                 <> · <span className={engineStatus.allConnected ? 'text-emerald-400' : 'text-amber-400'}>
                   {engineStatus.connectedCount}/{engineStatus.totalServices} live
@@ -335,7 +337,7 @@ export default function EngineStatusDashboard({ engineStatus }: EngineStatusDash
             </Badge>
           )}
           <span className="text-[10px] text-slate-500 ml-1">
-            System Uptime: {summary.systemUptime}
+            {t('engineStatus.systemUptime')}: {summary.systemUptime}
           </span>
         </div>
       </div>
@@ -348,8 +350,8 @@ export default function EngineStatusDashboard({ engineStatus }: EngineStatusDash
         className="mb-5 bg-slate-900/50 rounded-lg p-3 border border-slate-700/50"
       >
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-medium">System Health</span>
-          <span className="text-[10px] text-emerald-400 font-mono">{summary.online}/{summary.totalModules} modules operational</span>
+          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-medium">{t('engineStatus.systemHealth')}</span>
+          <span className="text-[10px] text-emerald-400 font-mono">{summary.online}/{summary.totalModules} {t('engineStatus.modulesOperational')}</span>
         </div>
         <div className="h-2 bg-slate-900 rounded-full overflow-hidden">
           <motion.div
@@ -360,9 +362,9 @@ export default function EngineStatusDashboard({ engineStatus }: EngineStatusDash
           />
         </div>
         <div className="flex items-center justify-between mt-1.5">
-          <span className="text-[9px] text-slate-500">{summary.totalEvents} event types registered</span>
+          <span className="text-[9px] text-slate-500">{summary.totalEvents} {t('engineStatus.eventTypesRegistered')}</span>
           <span className="text-[9px] text-slate-500">
-            Last update: {relativeTime(summary.lastGlobalUpdate)}
+            {t('engineStatus.lastUpdate')}: {relativeTime(summary.lastGlobalUpdate)}
           </span>
         </div>
       </motion.div>

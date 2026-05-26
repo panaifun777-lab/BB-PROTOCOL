@@ -178,7 +178,8 @@ const MOCK_SECURITY_SCORE = 92;
 
 // ── GET Handler ────────────────────────────────────────
 export async function GET() {
-  const slitherSummary = {
+  try {
+    const slitherSummary = {
     critical: MOCK_FINDINGS.filter((f) => f.severity === 'critical').length,
     high: MOCK_FINDINGS.filter((f) => f.severity === 'high').length,
     medium: MOCK_FINDINGS.filter((f) => f.severity === 'medium').length,
@@ -200,4 +201,11 @@ export async function GET() {
   };
 
   return NextResponse.json(data);
+  } catch (error) {
+    console.error('[API] Error in GET /api/security:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }

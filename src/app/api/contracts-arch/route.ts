@@ -317,13 +317,21 @@ const MOCK_VERIFICATION: VerificationEntry[] = [
 
 // ── GET Handler ────────────────────────────────────────
 export async function GET() {
-  const data: ContractsArchData = {
-    contracts: MOCK_CONTRACTS,
-    contractInteractions: MOCK_INTERACTIONS,
-    testCoverage: MOCK_TEST_COVERAGE,
-    gasReport: MOCK_GAS_REPORT,
-    verificationStatus: MOCK_VERIFICATION,
-  };
+  try {
+    const data: ContractsArchData = {
+      contracts: MOCK_CONTRACTS,
+      contractInteractions: MOCK_INTERACTIONS,
+      testCoverage: MOCK_TEST_COVERAGE,
+      gasReport: MOCK_GAS_REPORT,
+      verificationStatus: MOCK_VERIFICATION,
+    };
 
-  return NextResponse.json(data);
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('[API] Error in GET /api/contracts-arch:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }

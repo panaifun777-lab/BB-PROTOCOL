@@ -22,25 +22,27 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/hooks/use-i18n';
+import type { TranslateFn } from '@/hooks/use-i18n';
 import { format, parseISO } from 'date-fns';
 
 // ── Types ──────────────────────────────────────────────
 interface Notification {
   id: string;
   type: 'resonance' | 'revenue' | 'skill' | 'circuit' | 'system';
-  title: string;
-  message: string;
+  titleKey: string;
+  messageKey: string;
   timestamp: string;
   read: boolean;
 }
 
 // ── Mock Data ──────────────────────────────────────────
 const MOCK_NOTIFICATIONS: Notification[] = [
-  { id: 'n1', type: 'revenue', title: '收到新收益', message: 'GPT-4o技能调用收入 $45.20', timestamp: '2026-03-04T14:32:18Z', read: false },
-  { id: 'n2', type: 'resonance', title: '共振分更新', message: '共振分从68上升至72 (+4)', timestamp: '2026-03-04T09:08:11Z', read: false },
-  { id: 'n3', type: 'skill', title: '技能解锁', message: '知识图谱构建已解锁 (累计收益$500+)', timestamp: '2026-02-15T16:00:00Z', read: true },
-  { id: 'n4', type: 'circuit', title: '状态恢复', message: '认知状态从SOFT_LIMIT恢复至NORMAL', timestamp: '2026-03-02T08:00:00Z', read: true },
-  { id: 'n5', type: 'system', title: '系统通知', message: 'AFC金库自动回购完成，当前余额 $1,245.80', timestamp: '2026-03-04T06:00:00Z', read: true },
+  { id: 'n1', type: 'revenue', titleKey: 'notifications.titleRevenue', messageKey: 'notifications.msgRevenue', timestamp: '2026-03-04T14:32:18Z', read: false },
+  { id: 'n2', type: 'resonance', titleKey: 'notifications.titleResonance', messageKey: 'notifications.msgResonance', timestamp: '2026-03-04T09:08:11Z', read: false },
+  { id: 'n3', type: 'skill', titleKey: 'notifications.titleSkill', messageKey: 'notifications.msgSkill', timestamp: '2026-02-15T16:00:00Z', read: true },
+  { id: 'n4', type: 'circuit', titleKey: 'notifications.titleCircuit', messageKey: 'notifications.msgCircuit', timestamp: '2026-03-02T08:00:00Z', read: true },
+  { id: 'n5', type: 'system', titleKey: 'notifications.titleSystem', messageKey: 'notifications.msgSystem', timestamp: '2026-03-04T06:00:00Z', read: true },
 ];
 
 // ── Notification type config ───────────────────────────
@@ -78,7 +80,7 @@ const TYPE_CONFIG: Record<
 };
 
 // ── Relative time helper ───────────────────────────────
-function getRelativeTime(timestamp: string, now?: Date | null): string {
+function getRelativeTime(timestamp: string, now: Date | null | undefined, t: TranslateFn): string {
   const currentDate = now ?? new Date('2026-03-04');
   const date = new Date(timestamp);
   const diffMs = currentDate.getTime() - date.getTime();
@@ -86,10 +88,10 @@ function getRelativeTime(timestamp: string, now?: Date | null): string {
   const diffHr = Math.floor(diffMs / 3600000);
   const diffDay = Math.floor(diffMs / 86400000);
 
-  if (diffMin < 1) return '刚刚';
-  if (diffMin < 60) return `${diffMin}分钟前`;
-  if (diffHr < 24) return `${diffHr}小时前`;
-  if (diffDay < 30) return `${diffDay}天前`;
+  if (diffMin < 1) return t('notifications.justNow');
+  if (diffMin < 60) return t('notifications.minutesAgo', { count: diffMin });
+  if (diffHr < 24) return t('notifications.hoursAgo', { count: diffHr });
+  if (diffDay < 30) return t('notifications.daysAgo', { count: diffDay });
   return format(parseISO(timestamp), 'MMM d');
 }
 
@@ -97,9 +99,11 @@ function getRelativeTime(timestamp: string, now?: Date | null): string {
 function NotificationItem({
   notification,
   onMarkRead,
+  t,
 }: {
   notification: Notification;
   onMarkRead: (id: string) => void;
+  t: TranslateFn;
 }) {
   const now = useClientTime();
   const config = TYPE_CONFIG[notification.type];
@@ -142,14 +146,14 @@ function NotificationItem({
               notification.read ? 'text-slate-300' : 'text-slate-100'
             )}
           >
-            {notification.title}
+            {t(notification.titleKey)}
           </p>
           <span className="shrink-0 text-[10px] text-slate-500" suppressHydrationWarning>
-            {getRelativeTime(notification.timestamp, now)}
+            {getRelativeTime(notification.timestamp, now, t)}
           </span>
         </div>
         <p className="mt-0.5 text-[11px] leading-relaxed text-slate-400">
-          {notification.message}
+          {t(notification.messageKey)}
         </p>
       </div>
 
@@ -161,7 +165,7 @@ function NotificationItem({
             onMarkRead(notification.id);
           }}
           className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity rounded p-1 hover:bg-slate-600/50"
-          title="标为已读"
+          title={t('notifications.markAsRead')}
         >
           <Check className="size-3.5 text-slate-400 hover:text-slate-200" />
         </button>
@@ -172,6 +176,7 @@ function NotificationItem({
 
 // ── Main Component ─────────────────────────────────────
 export default function NotificationCenter() {
+  const { t } = useI18n();
   const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -216,13 +221,13 @@ export default function NotificationCenter() {
         <div className="flex items-center justify-between border-b border-slate-700/50 px-4 py-3">
           <div className="flex items-center gap-2">
             <Bell className="size-4 text-violet-400" />
-            <h3 className="text-sm font-semibold text-slate-100">通知</h3>
+            <h3 className="text-sm font-semibold text-slate-100">{t('notifications.title')}</h3>
             {unreadCount > 0 && (
               <Badge
                 variant="outline"
                 className="border-violet-500/30 bg-violet-500/10 text-[10px] text-violet-300"
               >
-                {unreadCount} 未读
+                {t('notifications.unreadCount', { count: unreadCount })}
               </Badge>
             )}
           </div>
@@ -234,7 +239,7 @@ export default function NotificationCenter() {
               onClick={handleMarkAllRead}
             >
               <Check className="mr-1 size-3" />
-              全部标为已读
+              {t('notifications.markAllRead')}
             </Button>
           )}
         </div>
@@ -248,6 +253,7 @@ export default function NotificationCenter() {
                   key={notification.id}
                   notification={notification}
                   onMarkRead={handleMarkRead}
+                  t={t}
                 />
               ))}
             </AnimatePresence>
@@ -255,7 +261,7 @@ export default function NotificationCenter() {
             {notifications.length === 0 && (
               <div className="flex flex-col items-center gap-2 py-8 text-center">
                 <Bell className="size-6 text-slate-600" />
-                <p className="text-xs text-slate-500">暂无通知</p>
+                <p className="text-xs text-slate-500">{t('notifications.empty')}</p>
               </div>
             )}
           </div>
@@ -272,7 +278,7 @@ export default function NotificationCenter() {
                 className="w-full text-[11px] text-slate-400 hover:text-violet-300 hover:bg-slate-700/30"
                 onClick={() => setIsOpen(false)}
               >
-                查看全部通知
+                {t('notifications.viewAll')}
               </Button>
             </div>
           </>

@@ -18,38 +18,63 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import type { Delegation } from '@/lib/types';
+import { useI18n } from '@/hooks/use-i18n';
 
 // ── Props ──────────────────────────────────────────────
 interface IFDDelegationProps {
   delegations: Delegation[];
 }
 
-// ── Constants ──────────────────────────────────────────
-const AVAILABLE = [
-  { id: 'sub1', name: '文案分身.soul', domain: '内容创作', cognitiveMatch: 85 },
-  { id: 'sub2', name: '视频分身.soul', domain: '内容创作', cognitiveMatch: 78 },
-  { id: 'sub3', name: '谈判分身.soul', domain: '商务谈判', cognitiveMatch: 82 },
-  { id: 'sub4', name: '数据分身.soul', domain: '数据分析', cognitiveMatch: 91 },
-  { id: 'sub5', name: '客服分身.soul', domain: '客户服务', cognitiveMatch: 75 },
-];
+// ── Internal domain keys (not translated, used as identifiers) ──
+type DomainKey = 'content' | 'negotiation' | 'data' | 'service';
 
-const DOMAINS = ['内容创作', '商务谈判', '数据分析', '客户服务'] as const;
-type Domain = (typeof DOMAINS)[number];
+const DOMAIN_KEYS: DomainKey[] = ['content', 'negotiation', 'data', 'service'];
 
 // ── Domain icon color ──────────────────────────────────
-const DOMAIN_COLORS: Record<Domain, string> = {
-  内容创作: 'text-violet-400',
-  商务谈判: 'text-amber-400',
-  数据分析: 'text-cyan-400',
-  客户服务: 'text-emerald-400',
+const DOMAIN_COLORS: Record<DomainKey, string> = {
+  content: 'text-violet-400',
+  negotiation: 'text-amber-400',
+  data: 'text-cyan-400',
+  service: 'text-emerald-400',
 };
 
-const DOMAIN_BAR_COLORS: Record<Domain, string> = {
-  内容创作: 'bg-violet-500',
-  商务谈判: 'bg-amber-500',
-  数据分析: 'bg-cyan-500',
-  客户服务: 'bg-emerald-500',
+const DOMAIN_BAR_COLORS: Record<DomainKey, string> = {
+  content: 'bg-violet-500',
+  negotiation: 'bg-amber-500',
+  data: 'bg-cyan-500',
+  service: 'bg-emerald-500',
 };
+
+// ── Full domain label key mapping ──────────────────────
+const DOMAIN_LABEL_KEYS: Record<DomainKey, string> = {
+  content: 'delegation.domainContent',
+  negotiation: 'delegation.domainNegotiation',
+  data: 'delegation.domainData',
+  service: 'delegation.domainService',
+};
+
+const DOMAIN_SHORT_LABEL_KEYS: Record<DomainKey, string> = {
+  content: 'delegation.domainContentShort',
+  negotiation: 'delegation.domainNegotiationShort',
+  data: 'delegation.domainDataShort',
+  service: 'delegation.domainServiceShort',
+};
+
+// ── Available sub-avatars (domain keys, not display labels) ──
+interface AvailableSub {
+  id: string;
+  nameKey: string;
+  domain: DomainKey;
+  cognitiveMatch: number;
+}
+
+const AVAILABLE_SUBS: AvailableSub[] = [
+  { id: 'sub1', nameKey: 'delegation.subCopyName', domain: 'content', cognitiveMatch: 85 },
+  { id: 'sub2', nameKey: 'delegation.subVideoName', domain: 'content', cognitiveMatch: 78 },
+  { id: 'sub3', nameKey: 'delegation.subNegotiationName', domain: 'negotiation', cognitiveMatch: 82 },
+  { id: 'sub4', nameKey: 'delegation.subDataName', domain: 'data', cognitiveMatch: 91 },
+  { id: 'sub5', nameKey: 'delegation.subServiceName', domain: 'service', cognitiveMatch: 75 },
+];
 
 // ── Internal state for weight allocation ───────────────
 interface WeightEntry {
@@ -61,48 +86,50 @@ interface WeightEntry {
 
 // ── Component ──────────────────────────────────────────
 export default function IFDDelegation({ delegations }: IFDDelegationProps) {
-  const [activeDomain, setActiveDomain] = useState<Domain>('内容创作');
+  const { t } = useI18n();
+  const [activeDomain, setActiveDomain] = useState<DomainKey>('content');
 
   // Selected sub-avatars per domain
-  const [selected, setSelected] = useState<Record<Domain, string[]>>({
-    内容创作: ['sub1'],
-    商务谈判: [],
-    数据分析: [],
-    客户服务: [],
+  const [selected, setSelected] = useState<Record<DomainKey, string[]>>({
+    content: ['sub1'],
+    negotiation: [],
+    data: [],
+    service: [],
   });
 
   // Slider weights per domain (primary avatar weight)
-  const [primaryWeights, setPrimaryWeights] = useState<Record<Domain, number>>({
-    内容创作: 60,
-    商务谈判: 100,
-    数据分析: 100,
-    客户服务: 100,
+  const [primaryWeights, setPrimaryWeights] = useState<Record<DomainKey, number>>({
+    content: 60,
+    negotiation: 100,
+    data: 100,
+    service: 100,
   });
 
   // Confirmation UI state
   const [confirmAction, setConfirmAction] = useState<'save' | 'revoke' | null>(null);
-  const [confirmDomain, setConfirmDomain] = useState<Domain | null>(null);
+  const [confirmDomain, setConfirmDomain] = useState<DomainKey | null>(null);
 
   // ── Derived: weight entries for current domain ────────
   const weightEntries = useMemo<WeightEntry[]>(() => {
     const domainSelected = selected[activeDomain];
     const primaryWeight = primaryWeights[activeDomain];
+    const primaryLabel = t('delegation.primaryAvatar', { name: '飘叔.soul' });
 
     if (domainSelected.length === 0) {
-      return [{ id: 'primary', name: '飘叔.soul (本体)', weight: 100, isPrimary: true }];
+      return [{ id: 'primary', name: primaryLabel, weight: 100, isPrimary: true }];
     }
 
     const remaining = 100 - primaryWeight;
     const perSub = domainSelected.length > 0 ? Math.round(remaining / domainSelected.length) : 0;
 
     const entries: WeightEntry[] = [
-      { id: 'primary', name: '飘叔.soul (本体)', weight: primaryWeight, isPrimary: true },
+      { id: 'primary', name: primaryLabel, weight: primaryWeight, isPrimary: true },
     ];
 
     domainSelected.forEach((subId) => {
-      const sub = AVAILABLE.find((a) => a.id === subId);
+      const sub = AVAILABLE_SUBS.find((a) => a.id === subId);
       if (sub) {
-        entries.push({ id: sub.id, name: sub.name, weight: perSub, isPrimary: false });
+        entries.push({ id: sub.id, name: t(sub.nameKey), weight: perSub, isPrimary: false });
       }
     });
 
@@ -113,11 +140,11 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
     }
 
     return entries;
-  }, [activeDomain, selected, primaryWeights]);
+  }, [activeDomain, selected, primaryWeights, t]);
 
   // ── Available subs for current domain ────────────────
   const domainSubs = useMemo(
-    () => AVAILABLE.filter((a) => a.domain === activeDomain),
+    () => AVAILABLE_SUBS.filter((a) => a.domain === activeDomain),
     [activeDomain],
   );
 
@@ -180,46 +207,40 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base text-slate-100">
             <Vote className="size-5 text-violet-400" />
-            流体民主委托
+            {t('delegation.title')}
           </CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-4">
           <Tabs
             value={activeDomain}
-            onValueChange={(v) => setActiveDomain(v as Domain)}
+            onValueChange={(v) => setActiveDomain(v as DomainKey)}
           >
             {/* ── Domain tabs ──────────────────────────── */}
             <TabsList className="h-8 w-full bg-slate-900/60 p-0.5">
-              {DOMAINS.map((d) => (
+              {DOMAIN_KEYS.map((d) => (
                 <TabsTrigger
                   key={d}
                   value={d}
                   className="h-7 flex-1 text-xs data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100"
                 >
                   <span className={cn('hidden sm:inline', DOMAIN_COLORS[d])}>
-                    {d}
+                    {t(DOMAIN_LABEL_KEYS[d])}
                   </span>
                   <span className="sm:hidden">
-                    {d === '内容创作'
-                      ? '内容'
-                      : d === '商务谈判'
-                        ? '商务'
-                        : d === '数据分析'
-                          ? '数据'
-                          : '客服'}
+                    {t(DOMAIN_SHORT_LABEL_KEYS[d])}
                   </span>
                 </TabsTrigger>
               ))}
             </TabsList>
 
             {/* ── Single content area driven by activeDomain ── */}
-            {DOMAINS.map((domain) => (
+            {DOMAIN_KEYS.map((domain) => (
               <TabsContent key={domain} value={domain} className="mt-3 space-y-4">
                 {/* ── Current weight distribution ──────────── */}
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-slate-400">
-                    当前权重分配
+                    {t('delegation.currentWeight')}
                   </p>
 
                   <AnimatePresence mode="wait">
@@ -272,7 +293,7 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
                 {domainSubs.length > 0 && (
                   <div className="space-y-2">
                     <p className="text-xs font-medium text-slate-400">
-                      可委托对象
+                      {t('delegation.availableDelegates')}
                     </p>
                     <div className="space-y-2">
                       {domainSubs.map((sub) => {
@@ -301,7 +322,7 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
                                 isSelected ? 'text-slate-100' : 'text-slate-300',
                               )}
                             >
-                              {sub.name}
+                              {t(sub.nameKey)}
                             </span>
                             <Badge
                               variant="outline"
@@ -312,7 +333,7 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
                                   : 'border-amber-500/30 text-amber-400',
                               )}
                             >
-                              认知匹配度: {sub.cognitiveMatch}%
+                              {t('delegation.cognitiveMatch')}: {sub.cognitiveMatch}%
                             </Badge>
                           </motion.div>
                         );
@@ -323,7 +344,7 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
 
                 {domainSubs.length === 0 && (
                   <p className="py-4 text-center text-xs text-slate-500">
-                    该领域暂无可委托分身
+                    {t('delegation.noAvailableDelegates')}
                   </p>
                 )}
 
@@ -331,7 +352,7 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
                 {selected[domain].length > 0 && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400">本体权重</span>
+                      <span className="text-slate-400">{t('delegation.primaryWeight')}</span>
                       <span className="font-mono text-slate-300">
                         {primaryWeights[domain]}%
                       </span>
@@ -365,7 +386,7 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
                     onClick={handleSave}
                   >
                     <Check className="size-3.5" />
-                    保存委托
+                    {t('delegation.saveDelegation')}
                   </Button>
                   {selected[domain].length > 0 && (
                     <Button
@@ -375,20 +396,20 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
                       onClick={handleRevoke}
                     >
                       <X className="size-3.5" />
-                      撤销委托
+                      {t('delegation.revokeDelegation')}
                     </Button>
                   )}
                 </div>
 
                 {/* ── Delegation history (from props) ─────── */}
-                {delegations.filter((d) => d.domain === domain && d.isActive)
+                {delegations.filter((d) => d.domain === t(DOMAIN_LABEL_KEYS[domain]) && d.isActive)
                   .length > 0 && (
                   <div className="border-t border-slate-700 pt-3">
                     <p className="mb-2 text-xs font-medium text-slate-400">
-                      已激活委托
+                      {t('delegation.activeDelegations')}
                     </p>
                     {delegations
-                      .filter((d) => d.domain === domain && d.isActive)
+                      .filter((d) => d.domain === t(DOMAIN_LABEL_KEYS[domain]) && d.isActive)
                       .map((d) => (
                         <div
                           key={d.id}
@@ -421,8 +442,8 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
               >
                 <p className="mb-3 text-sm text-slate-200">
                   {confirmAction === 'save'
-                    ? `确认保存「${confirmDomain}」领域的委托配置?`
-                    : `确认撤销「${confirmDomain}」领域的所有委托?`}
+                    ? t('delegation.confirmSaveDomain', { domain: t(DOMAIN_LABEL_KEYS[confirmDomain]) })
+                    : t('delegation.confirmRevokeDomain', { domain: t(DOMAIN_LABEL_KEYS[confirmDomain]) })}
                 </p>
                 <div className="flex gap-2">
                   <Button
@@ -438,7 +459,7 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
                     }
                   >
                     <Check className="size-3.5" />
-                    确认
+                    {t('common.confirm')}
                   </Button>
                   <Button
                     size="sm"
@@ -446,7 +467,7 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
                     className="text-slate-400 hover:text-slate-200"
                     onClick={cancelConfirm}
                   >
-                    取消
+                    {t('common.cancel')}
                   </Button>
                 </div>
               </motion.div>

@@ -70,13 +70,21 @@ const MOCK_LP_TRANSACTIONS = [
 // ── GET Handler ────────────────────────────────────────────────
 
 export async function GET() {
-  const response = {
-    pool: MOCK_LIQUIDITY_POOL,
-    tokenEconomics: MOCK_TOKEN_ECONOMICS,
-    staking: MOCK_STAKING,
-    depthData: MOCK_DEPTH_DATA,
-    transactions: MOCK_LP_TRANSACTIONS,
-  };
+  try {
+    const response = {
+      pool: MOCK_LIQUIDITY_POOL,
+      tokenEconomics: MOCK_TOKEN_ECONOMICS,
+      staking: MOCK_STAKING,
+      depthData: MOCK_DEPTH_DATA,
+      transactions: MOCK_LP_TRANSACTIONS,
+    };
 
-  return NextResponse.json(response);
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error('[API] Error in GET /api/liquidity:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }

@@ -490,37 +490,45 @@ export async function POST(request: Request) {
 
 // ── GET Handler (Split Verification) ───────────────────
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const mode = searchParams.get('mode');
+  try {
+    const { searchParams } = new URL(request.url);
+    const mode = searchParams.get('mode');
 
-  if (mode === 'verify') {
-    const params: Record<string, number | string | boolean> = {
-      totalAmount: Number(searchParams.get('totalAmount')) || 0,
-      humanBps: Number(searchParams.get('humanBps')) || 0,
-      avatarBps: Number(searchParams.get('avatarBps')) || 0,
-      protocolBps: Number(searchParams.get('protocolBps')) || 0,
-    };
+    if (mode === 'verify') {
+      const params: Record<string, number | string | boolean> = {
+        totalAmount: Number(searchParams.get('totalAmount')) || 0,
+        humanBps: Number(searchParams.get('humanBps')) || 0,
+        avatarBps: Number(searchParams.get('avatarBps')) || 0,
+        protocolBps: Number(searchParams.get('protocolBps')) || 0,
+      };
 
-    const verification = verifySplitConservation(params);
+      const verification = verifySplitConservation(params);
 
+      return NextResponse.json({
+        success: true,
+        verification,
+        formula: {
+          expression: `totalAmount × (humanBps + avatarBps + protocolBps) / 10000 = totalAmount`,
+          substitution: `${params.totalAmount} × (${params.humanBps} + ${params.avatarBps} + ${params.protocolBps}) / 10000 = ${verification.calculated.totalCalculated}`,
+          constraint: 'humanBps + avatarBps + protocolBps === 10000',
+        },
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Default: return contract info
     return NextResponse.json({
       success: true,
-      verification,
-      formula: {
-        expression: `totalAmount × (humanBps + avatarBps + protocolBps) / 10000 = totalAmount`,
-        substitution: `${params.totalAmount} × (${params.humanBps} + ${params.avatarBps} + ${params.protocolBps}) / 10000 = ${verification.calculated.totalCalculated}`,
-        constraint: 'humanBps + avatarBps + protocolBps === 10000',
-      },
+      contracts: Object.keys(CONTRACT_GAS_MAP),
+      gasPrice: GAS_PRICE_USD,
+      network: 'Base L2',
       timestamp: new Date().toISOString(),
     });
+  } catch (error) {
+    console.error('[API] Error in GET /api/contracts/simulate:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
-
-  // Default: return contract info
-  return NextResponse.json({
-    success: true,
-    contracts: Object.keys(CONTRACT_GAS_MAP),
-    gasPrice: GAS_PRICE_USD,
-    network: 'Base L2',
-    timestamp: new Date().toISOString(),
-  });
 }

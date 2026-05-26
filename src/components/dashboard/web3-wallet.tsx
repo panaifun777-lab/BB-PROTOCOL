@@ -61,6 +61,8 @@ import {
   getBlockExplorerUrl,
 } from '@/lib/web3-config';
 import type { ContractName } from '@/lib/web3-config';
+import { useI18n } from '@/hooks/use-i18n';
+import type { TranslateFn } from '@/hooks/use-i18n';
 
 // ── Types ──────────────────────────────────────────────
 
@@ -167,28 +169,28 @@ const GAS_TIER_COLORS: Record<string, { bg: string; text: string; border: string
 
 // ── Contract Selector Config ───────────────────────────
 const CONTRACTS_LIST = [
-  { key: 'avatarCore' as ContractName, name: 'AvatarCore', color: 'violet', desc: '分身NFT核心合约' },
-  { key: 'dynamicSplitter' as ContractName, name: 'DynamicSplitter', color: 'emerald', desc: '动态分账合约' },
-  { key: 'circuitGuard' as ContractName, name: 'CircuitGuard', color: 'amber', desc: '认知熔断合约' },
-  { key: 'tokenVault' as ContractName, name: 'TokenVault', color: 'blue', desc: '代币金库合约' },
-  { key: 'skillVault' as ContractName, name: 'SkillVault', color: 'cyan', desc: '技能库合约' },
-  { key: 'ifdRouter' as ContractName, name: 'IFDRouter', color: 'rose', desc: '流体民主路由' },
-  { key: 'governance' as ContractName, name: 'Governance', color: 'orange', desc: '治理合约' },
-  { key: 'afcToken' as ContractName, name: 'AFCToken', color: 'teal', desc: 'AFC代币合约' },
+  { key: 'avatarCore' as ContractName, name: 'AvatarCore', color: 'violet', descKey: 'descAvatarCore' },
+  { key: 'dynamicSplitter' as ContractName, name: 'DynamicSplitter', color: 'emerald', descKey: 'descDynamicSplitter' },
+  { key: 'circuitGuard' as ContractName, name: 'CircuitGuard', color: 'amber', descKey: 'descCircuitGuard' },
+  { key: 'tokenVault' as ContractName, name: 'TokenVault', color: 'blue', descKey: 'descTokenVault' },
+  { key: 'skillVault' as ContractName, name: 'SkillVault', color: 'cyan', descKey: 'descSkillVault' },
+  { key: 'ifdRouter' as ContractName, name: 'IFDRouter', color: 'rose', descKey: 'descIfdRouter' },
+  { key: 'governance' as ContractName, name: 'Governance', color: 'orange', descKey: 'descGovernance' },
+  { key: 'afcToken' as ContractName, name: 'AFCToken', color: 'teal', descKey: 'descAfcToken' },
 ];
 
 // ── Helpers ────────────────────────────────────────────
-function getRelativeTime(iso: string): string {
+function getRelativeTime(iso: string, t: TranslateFn): string {
   if (!iso) return '--';
   const now = new Date('2026-03-10T15:00:00Z');
   const then = new Date(iso);
   const diffMs = now.getTime() - then.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 60) return `${diffMin}分钟前`;
+  if (diffMin < 60) return t('web3.minutesAgo', { count: diffMin });
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}小时前`;
+  if (diffHr < 24) return t('web3.hoursAgo', { count: diffHr });
   const diffDay = Math.floor(diffHr / 24);
-  return `${diffDay}天前`;
+  return t('web3.daysAgo', { count: diffDay });
 }
 
 function truncateAddr(addr: string): string {
@@ -199,6 +201,7 @@ function truncateAddr(addr: string): string {
 // ── Copy Button ────────────────────────────────────────
 function CopyBtn({ text, className }: { text: string; className?: string }) {
   const [copied, setCopied] = useState(false);
+  const { t } = useI18n();
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
@@ -214,7 +217,7 @@ function CopyBtn({ text, className }: { text: string; className?: string }) {
         copied ? 'bg-emerald-500/20' : 'bg-slate-700/50 hover:bg-slate-600/50',
         className,
       )}
-      aria-label="复制"
+      aria-label={t('web3.copy')}
     >
       {copied ? (
         <CheckCircle className="size-3.5 text-emerald-400" />
@@ -242,6 +245,7 @@ function GasHistoryTooltip({ active, payload, label }: { active?: boolean; paylo
 
 // ── Tab 1: Wallet ─────────────────────────────────────
 function WalletTab({ data }: { data: Web3IntegrationData }) {
+  const { t } = useI18n();
   const walletState = useWallet();
   const networkInfo = useNetworkInfo();
   const connected = data.walletConnections.filter((w) => w.status === 'connected');
@@ -252,7 +256,7 @@ function WalletTab({ data }: { data: Web3IntegrationData }) {
       {/* Live Wallet State from Hooks */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-3">
-          <p className="text-[10px] text-slate-500 mb-1">连接状态</p>
+          <p className="text-[10px] text-slate-500 mb-1">{t('web3.connectionStatus')}</p>
           <div className="flex items-center gap-1.5">
             <div className={cn(
               'w-2 h-2 rounded-full',
@@ -262,24 +266,24 @@ function WalletTab({ data }: { data: Web3IntegrationData }) {
               'text-xs font-medium',
               walletState.isConnected ? 'text-emerald-300' : 'text-slate-400',
             )}>
-              {walletState.isConnected ? '已连接' : '未连接'}
+              {walletState.isConnected ? t('web3.connected') : t('web3.notConnected')}
             </span>
           </div>
         </div>
         <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-3">
-          <p className="text-[10px] text-slate-500 mb-1">网络</p>
+          <p className="text-[10px] text-slate-500 mb-1">{t('web3.network')}</p>
           <span className="text-xs font-medium text-slate-200">{walletState.chainName || networkInfo.chainName}</span>
           <p className="text-[10px] text-slate-500 font-mono">ID: {walletState.chainId || networkInfo.chainId}</p>
         </div>
         <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-3">
-          <p className="text-[10px] text-slate-500 mb-1">余额</p>
+          <p className="text-[10px] text-slate-500 mb-1">{t('web3.balance')}</p>
           <span className="text-xs font-medium text-emerald-300 font-mono">
             {walletState.balance || '--'}
           </span>
           <p className="text-[10px] text-slate-500">{walletState.balanceUsd || '--'}</p>
         </div>
         <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-3">
-          <p className="text-[10px] text-slate-500 mb-1">区块高度</p>
+          <p className="text-[10px] text-slate-500 mb-1">{t('web3.blockHeight')}</p>
           <span className="text-xs font-medium text-violet-300 font-mono tabular-nums">
             #{networkInfo.blockNumber > 0 ? networkInfo.blockNumber.toLocaleString() : '--'}
           </span>
@@ -305,7 +309,7 @@ function WalletTab({ data }: { data: Web3IntegrationData }) {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-slate-100">{wallet.wallet}</span>
                   <Badge variant="outline" className={cn('text-[9px]', STATUS_COLORS.connected.bg, STATUS_COLORS.connected.text, STATUS_COLORS.connected.border)}>
-                    已连接
+                    {t('web3.connected')}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
@@ -319,30 +323,30 @@ function WalletTab({ data }: { data: Web3IntegrationData }) {
               size="sm"
               className="h-7 text-[10px] border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20 hover:text-red-200"
             >
-              <Unplug className="mr-1 size-3" /> 断开
+              <Unplug className="mr-1 size-3" /> {t('web3.disconnectBtn')}
             </Button>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="rounded-lg bg-slate-800/60 p-3">
-              <p className="text-[10px] text-slate-500 mb-0.5">链</p>
+              <p className="text-[10px] text-slate-500 mb-0.5">{t('web3.chain')}</p>
               <p className="text-xs font-medium text-slate-200">{wallet.chainName}</p>
               <p className="text-[10px] text-slate-500 font-mono">Chain ID: {wallet.chainId}</p>
             </div>
             <div className="rounded-lg bg-slate-800/60 p-3">
-              <p className="text-[10px] text-slate-500 mb-0.5">余额</p>
+              <p className="text-[10px] text-slate-500 mb-0.5">{t('web3.balance')}</p>
               <p className="text-xs font-medium text-emerald-300">{wallet.balance}</p>
               <p className="text-[10px] text-slate-500">{wallet.balanceUsd}</p>
             </div>
             <div className="rounded-lg bg-slate-800/60 p-3">
-              <p className="text-[10px] text-slate-500 mb-0.5">最后连接</p>
-              <p className="text-xs font-medium text-slate-200">{getRelativeTime(wallet.lastConnected)}</p>
+              <p className="text-[10px] text-slate-500 mb-0.5">{t('web3.lastConnected')}</p>
+              <p className="text-xs font-medium text-slate-200">{getRelativeTime(wallet.lastConnected, t)}</p>
             </div>
             <div className="rounded-lg bg-slate-800/60 p-3">
-              <p className="text-[10px] text-slate-500 mb-0.5">状态</p>
+              <p className="text-[10px] text-slate-500 mb-0.5">{t('web3.status')}</p>
               <div className="flex items-center gap-1.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <p className="text-xs font-medium text-emerald-300">在线</p>
+                <p className="text-xs font-medium text-emerald-300">{t('web3.online')}</p>
               </div>
             </div>
           </div>
@@ -353,7 +357,7 @@ function WalletTab({ data }: { data: Web3IntegrationData }) {
       <div>
         <h4 className="text-xs font-semibold text-slate-300 mb-3 flex items-center gap-2">
           <Link2 className="w-3.5 h-3.5 text-slate-500" />
-          可用钱包
+          {t('web3.availableWallets')}
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {available.map((wallet, idx) => (
@@ -371,7 +375,7 @@ function WalletTab({ data }: { data: Web3IntegrationData }) {
                 <div>
                   <span className="text-sm text-slate-200">{wallet.wallet}</span>
                   <Badge variant="outline" className={cn('ml-2 text-[9px]', STATUS_COLORS.available.bg, STATUS_COLORS.available.text, STATUS_COLORS.available.border)}>
-                    可用
+                    {t('web3.available')}
                   </Badge>
                 </div>
               </div>
@@ -380,7 +384,7 @@ function WalletTab({ data }: { data: Web3IntegrationData }) {
                 size="sm"
                 className="h-7 text-[10px] border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 hover:text-emerald-200"
               >
-                <Link2 className="mr-1 size-3" /> 连接
+                <Link2 className="mr-1 size-3" /> {t('web3.connect')}
               </Button>
             </motion.div>
           ))}
@@ -391,11 +395,11 @@ function WalletTab({ data }: { data: Web3IntegrationData }) {
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-3">
           <Shield className="w-4 h-4 text-violet-400" />
-          <h4 className="text-xs font-semibold text-slate-200">Wagmi 配置</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('web3.wagmiConfig')}</h4>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <p className="text-[10px] text-slate-500 mb-2">支持链</p>
+            <p className="text-[10px] text-slate-500 mb-2">{t('web3.supportedChains')}</p>
             <div className="flex flex-wrap gap-1.5">
               {data.wagmiConfig.chains.map((chain) => (
                 <Badge
@@ -417,17 +421,17 @@ function WalletTab({ data }: { data: Web3IntegrationData }) {
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-400">连接器</span>
+              <span className="text-slate-400">{t('web3.connectors')}</span>
               <span className="text-slate-200 font-mono text-[10px]">{data.wagmiConfig.connectors.join(', ')}</span>
             </div>
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-400">自动连接</span>
+              <span className="text-slate-400">{t('web3.autoConnect')}</span>
               <Badge variant="outline" className={cn('text-[9px]', data.wagmiConfig.autoConnect ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' : 'bg-slate-600/20 text-slate-400 border-slate-600/30')}>
-                {data.wagmiConfig.autoConnect ? '已启用' : '未启用'}
+                {data.wagmiConfig.autoConnect ? t('web3.enabled') : t('web3.notEnabled')}
               </Badge>
             </div>
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-400">轮询间隔</span>
+              <span className="text-slate-400">{t('web3.pollingInterval')}</span>
               <span className="text-slate-200 font-mono">{(data.wagmiConfig.pollingInterval / 1000).toFixed(1)}s</span>
             </div>
           </div>
@@ -439,6 +443,7 @@ function WalletTab({ data }: { data: Web3IntegrationData }) {
 
 // ── Tab 2: Contracts ──────────────────────────────────
 function ContractsTab({ data }: { data: Web3IntegrationData }) {
+  const { t } = useI18n();
   const [selectedContract, setSelectedContract] = useState<ContractName>('avatarCore');
   const [simulating, setSimulating] = useState(false);
   const [simResult, setSimResult] = useState<Record<string, unknown> | null>(null);
@@ -515,7 +520,7 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
                 contractInfo.color === 'amber' && 'bg-amber-500/10 text-amber-300 border-amber-500/20',
                 contractInfo.color === 'blue' && 'bg-blue-500/10 text-blue-300 border-blue-500/20',
               )}>
-                {contractInfo.desc}
+                {t(`web3.${contractInfo.descKey}`)}
               </Badge>
             </div>
             <div className="flex items-center gap-2 mt-1">
@@ -524,7 +529,7 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
               <button
                 onClick={() => window.open(getBlockExplorerUrl(8453, 'address', address), '_blank')}
                 className="p-1 rounded hover:bg-slate-700 transition-colors"
-                aria-label="在浏览器中查看"
+                aria-label={t('web3.viewInExplorer')}
               >
                 <ExternalLink className="w-3 h-3 text-slate-500" />
               </button>
@@ -538,7 +543,7 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
         {readFunctions.length > 0 && (
           <div className="mb-4">
             <h5 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Eye className="w-3 h-3" /> 读取函数 (View)
+              <Eye className="w-3 h-3" /> {t('web3.readFunctions')}
             </h5>
             <div className="space-y-1.5">
               {readFunctions.map((fn, idx) => (
@@ -560,7 +565,7 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
         {writeFunctions.length > 0 && (
           <div className="mb-4">
             <h5 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Zap className="w-3 h-3" /> 写入函数 (Write)
+              <Zap className="w-3 h-3" /> {t('web3.writeFunctions')}
             </h5>
             <div className="space-y-1.5">
               {writeFunctions.map((fn, idx) => (
@@ -594,7 +599,7 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
             ) : (
               <Play className="w-3.5 h-3.5" />
             )}
-            {simulating ? '模拟中...' : '执行模拟读取'}
+            {simulating ? t('web3.simulating') : t('web3.executeSimRead')}
           </Button>
 
           <AnimatePresence>
@@ -608,7 +613,7 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
                 <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
                   <div className="flex items-center gap-2 mb-2">
                     <CheckCircle className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs font-medium text-emerald-300">模拟结果</span>
+                    <span className="text-xs font-medium text-emerald-300">{t('web3.simResult')}</span>
                   </div>
                   <pre className="text-[11px] font-mono text-slate-300 whitespace-pre-wrap overflow-x-auto">
                     {JSON.stringify(simResult, null, 2)}
@@ -623,19 +628,19 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
         <div className="mt-4 rounded-lg border border-slate-700/50 bg-slate-900/40 p-3">
           <div className="flex items-center gap-2 mb-2">
             <GasPump className="w-3.5 h-3.5 text-amber-400" />
-            <span className="text-[11px] font-medium text-slate-300">Gas 估算</span>
+            <span className="text-[11px] font-medium text-slate-300">{t('web3.gasEstimateLabel')}</span>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <p className="text-[9px] text-slate-500">Gas 单位</p>
+              <p className="text-[9px] text-slate-500">{t('web3.gasUnits')}</p>
               <p className="text-xs font-mono text-slate-200 tabular-nums">{gasEst.gasUnits > 0 ? gasEst.gasUnits.toLocaleString() : '--'}</p>
             </div>
             <div>
-              <p className="text-[9px] text-slate-500">ETH 成本</p>
+              <p className="text-[9px] text-slate-500">{t('web3.ethCost')}</p>
               <p className="text-xs font-mono text-slate-200">{gasEst.costEth || '--'}</p>
             </div>
             <div>
-              <p className="text-[9px] text-slate-500">USD 成本</p>
+              <p className="text-[9px] text-slate-500">{t('web3.usdCost')}</p>
               <p className="text-xs font-mono text-emerald-300">{gasEst.costUsd || '--'}</p>
             </div>
           </div>
@@ -646,15 +651,15 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-3 text-center">
           <p className="text-xl font-bold text-slate-200 tabular-nums">{data.contractInteractions.length}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">总函数</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">{t('web3.totalFunctions')}</p>
         </div>
         <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-center">
           <p className="text-xl font-bold text-emerald-400 tabular-nums">{data.contractInteractions.filter((i) => i.status === 'available').length}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">可用</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">{t('web3.available')}</p>
         </div>
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-center">
           <p className="text-xl font-bold text-amber-400 tabular-nums">{data.contractInteractions.filter((i) => i.status === 'restricted').length}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">受限</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">{t('web3.restricted')}</p>
         </div>
       </div>
     </div>
@@ -663,6 +668,7 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
 
 // ── Tab 3: Transactions ────────────────────────────────
 function TransactionsTab({ data }: { data: Web3IntegrationData }) {
+  const { t } = useI18n();
   const txHistory = data.transactionHistory;
   const confirmed = txHistory.filter((tx) => tx.status === 'confirmed').length;
   const pending = txHistory.filter((tx) => tx.status === 'pending').length;
@@ -674,19 +680,19 @@ function TransactionsTab({ data }: { data: Web3IntegrationData }) {
       <div className="grid grid-cols-4 gap-3">
         <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-3 text-center">
           <p className="text-xl font-bold text-slate-200 tabular-nums">{txHistory.length}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">总交易</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">{t('web3.totalTx')}</p>
         </div>
         <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-center">
           <p className="text-xl font-bold text-emerald-400 tabular-nums">{confirmed}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">已确认</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">{t('web3.confirmed')}</p>
         </div>
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-center">
           <p className="text-xl font-bold text-amber-400 tabular-nums">{pending}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">待确认</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">{t('web3.pending')}</p>
         </div>
         <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-3 text-center">
           <p className="text-xl font-bold text-violet-400 tabular-nums">{totalGas > 0 ? (totalGas / 1000).toFixed(1) + 'K' : '--'}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">总Gas</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">{t('web3.totalGas')}</p>
         </div>
       </div>
 
@@ -707,14 +713,14 @@ function TransactionsTab({ data }: { data: Web3IntegrationData }) {
                 <div className="flex items-center justify-between gap-3 mb-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <Badge variant="outline" className={cn('shrink-0 text-[9px] font-mono', typeConf.bg, typeConf.text, typeConf.border)}>
-                      {tx.type === 'contract_call' ? '合约调用' : '代币转账'}
+                      {tx.type === 'contract_call' ? t('web3.contractCall') : t('web3.tokenTransfer')}
                     </Badge>
                     <span className="text-xs text-slate-300 font-mono">{tx.contract}</span>
                     <ArrowRight className="size-3 text-slate-600 shrink-0" />
                     <code className="text-xs font-mono text-slate-200">{tx.function}</code>
                   </div>
                   <Badge variant="outline" className={cn('shrink-0 text-[9px]', statusConf.bg, statusConf.text, statusConf.border)}>
-                    {tx.status === 'confirmed' ? '已确认' : tx.status === 'pending' ? '待确认' : '失败'}
+                    {tx.status === 'confirmed' ? t('web3.confirmed') : tx.status === 'pending' ? t('web3.pending') : t('web3.failed')}
                   </Badge>
                 </div>
 
@@ -731,18 +737,18 @@ function TransactionsTab({ data }: { data: Web3IntegrationData }) {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Coins className="size-3 text-emerald-400" />
-                    <span className="text-slate-500">费用:</span>
+                    <span className="text-slate-500">{t('web3.cost')}:</span>
                     <span className="text-emerald-300 font-mono">{tx.gasCost}</span>
                   </div>
                   {tx.blockNumber > 0 && (
                     <div className="flex items-center gap-1.5">
-                      <span className="text-slate-500">区块:</span>
+                      <span className="text-slate-500">{t('web3.block')}:</span>
                       <span className="text-slate-300 font-mono tabular-nums">{tx.blockNumber.toLocaleString()}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-1.5">
                     <Clock className="size-3 text-slate-400" />
-                    <span className="text-slate-300">{getRelativeTime(tx.timestamp)}</span>
+                    <span className="text-slate-300">{getRelativeTime(tx.timestamp, t)}</span>
                   </div>
                 </div>
               </motion.div>
@@ -755,16 +761,16 @@ function TransactionsTab({ data }: { data: Web3IntegrationData }) {
       <div>
         <h4 className="text-xs font-semibold text-slate-300 mb-3 flex items-center gap-2">
           <Radio className="w-3.5 h-3.5 text-emerald-400" />
-          事件订阅
+          {t('web3.eventSubscription')}
         </h4>
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-center">
             <p className="text-xl font-bold text-emerald-400 tabular-nums">{data.eventSubscriptions.filter((s) => s.status === 'subscribed').length}</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">活跃订阅</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">{t('web3.activeSubs')}</p>
           </div>
           <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-3 text-center">
             <p className="text-xl font-bold text-violet-400 tabular-nums">{data.eventSubscriptions.reduce((sum, s) => sum + s.events24h, 0).toLocaleString()}</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">24h 事件数</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">{t('web3.events24h')}</p>
           </div>
         </div>
       </div>
@@ -774,6 +780,7 @@ function TransactionsTab({ data }: { data: Web3IntegrationData }) {
 
 // ── Tab 4: Gas Tracker ────────────────────────────────
 function GasTrackerTab({ data }: { data: Web3IntegrationData }) {
+  const { t } = useI18n();
   const gasData = data.gasTracker;
   const networkInfo = useNetworkInfo();
   const [estimateFn, setEstimateFn] = useState('executeSplit');
@@ -819,10 +826,11 @@ function GasTrackerTab({ data }: { data: Web3IntegrationData }) {
               {(['slow', 'standard', 'fast', 'instant'] as const).map((tier) => {
                 const tierConf = GAS_TIER_COLORS[tier];
                 const value = chain.data[tier];
+                const tierLabelKey = tier === 'slow' ? 'gasSlow' : tier === 'standard' ? 'gasStandard' : tier === 'fast' ? 'gasFast' : 'gasInstant';
                 return (
                   <div key={tier} className="rounded-md p-2 text-center" style={{ background: 'rgba(30,41,59,0.6)' }}>
                     <p className={cn('text-[9px] font-medium mb-0.5', tierConf.text)}>
-                      {tier === 'slow' ? '慢' : tier === 'standard' ? '标准' : tier === 'fast' ? '快' : '极速'}
+                      {t(`web3.${tierLabelKey}`)}
                     </p>
                     <p className="text-xs font-mono font-bold text-slate-200">{value} <span className="text-[9px] text-slate-500">Gwei</span></p>
                   </div>
@@ -837,7 +845,7 @@ function GasTrackerTab({ data }: { data: Web3IntegrationData }) {
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-3">
           <Fuel className="w-4 h-4 text-amber-400" />
-          <h4 className="text-xs font-semibold text-slate-200">7天 Gas 趋势</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('web3.gas7dTrend')}</h4>
         </div>
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
@@ -865,12 +873,12 @@ function GasTrackerTab({ data }: { data: Web3IntegrationData }) {
       <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-4">
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle className="w-4 h-4 text-violet-400" />
-          <h4 className="text-xs font-semibold text-slate-200">Gas 估算工具</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('web3.gasEstTool')}</h4>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="text-[10px] text-slate-500 mb-1 block">选择函数</label>
+            <label className="text-[10px] text-slate-500 mb-1 block">{t('web3.selectFunction')}</label>
             <select
               value={estimateFn}
               onChange={(e) => setEstimateFn(e.target.value)}
@@ -887,7 +895,7 @@ function GasTrackerTab({ data }: { data: Web3IntegrationData }) {
             </select>
           </div>
           <div>
-            <label className="text-[10px] text-slate-500 mb-1 block">金额 (AFC)</label>
+            <label className="text-[10px] text-slate-500 mb-1 block">{t('web3.amountAfc')}</label>
             <Input
               value={estimateAmount}
               onChange={(e) => setEstimateAmount(e.target.value)}
@@ -899,17 +907,17 @@ function GasTrackerTab({ data }: { data: Web3IntegrationData }) {
 
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-lg bg-slate-800/80 p-3 text-center">
-            <p className="text-[9px] text-slate-500 mb-1">预估Gas</p>
+            <p className="text-[9px] text-slate-500 mb-1">{t('web3.estimatedGas')}</p>
             <p className="text-sm font-bold text-amber-300 font-mono tabular-nums">{estimatedGas.toLocaleString()}</p>
             <p className="text-[9px] text-slate-500">gas units</p>
           </div>
           <div className="rounded-lg bg-slate-800/80 p-3 text-center">
-            <p className="text-[9px] text-slate-500 mb-1">ETH成本</p>
+            <p className="text-[9px] text-slate-500 mb-1">{t('web3.ethCostShort')}</p>
             <p className="text-sm font-bold text-slate-200 font-mono">{estimatedCostEth}</p>
             <p className="text-[9px] text-slate-500">ETH</p>
           </div>
           <div className="rounded-lg bg-slate-800/80 p-3 text-center">
-            <p className="text-[9px] text-slate-500 mb-1">USD成本</p>
+            <p className="text-[9px] text-slate-500 mb-1">{t('web3.usdCostShort')}</p>
             <p className="text-sm font-bold text-emerald-300 font-mono">{estimatedCostUsd}</p>
             <p className="text-[9px] text-slate-500">≈ Base L2</p>
           </div>
@@ -919,10 +927,10 @@ function GasTrackerTab({ data }: { data: Web3IntegrationData }) {
         <div className="mt-3 flex items-center gap-4 text-[10px] text-slate-400">
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            <span>当前Gas: {networkInfo.gasPrice} Gwei</span>
+            <span>{t('web3.currentGas')}: {networkInfo.gasPrice} Gwei</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span>区块: #{networkInfo.blockNumber > 0 ? networkInfo.blockNumber.toLocaleString() : '--'}</span>
+            <span>{t('web3.blockLabel')}: #{networkInfo.blockNumber > 0 ? networkInfo.blockNumber.toLocaleString() : '--'}</span>
           </div>
         </div>
       </div>
@@ -932,6 +940,7 @@ function GasTrackerTab({ data }: { data: Web3IntegrationData }) {
 
 // ── Main Component ─────────────────────────────────────
 export default function Web3Wallet() {
+  const { t } = useI18n();
   const [data, setData] = useState<Web3IntegrationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('wallet');
@@ -957,7 +966,7 @@ export default function Web3Wallet() {
             className="flex flex-col items-center gap-3"
           >
             <Wallet className="size-8 text-violet-400 animate-pulse" />
-            <p className="text-slate-400 text-sm">加载 Web3 钱包数据...</p>
+            <p className="text-slate-400 text-sm">{t('web3.walletLoading')}</p>
           </motion.div>
         </CardContent>
       </Card>
@@ -978,8 +987,8 @@ export default function Web3Wallet() {
                 <Wallet className="w-4.5 h-4.5 text-white" />
               </div>
               <div>
-                <CardTitle className="text-base font-semibold text-slate-100">Web3 钱包</CardTitle>
-                <p className="text-[11px] text-slate-500 mt-0.5">钱包 · 合约 · 交易 · Gas</p>
+                <CardTitle className="text-base font-semibold text-slate-100">{t('web3.walletTitle')}</CardTitle>
+                <p className="text-[11px] text-slate-500 mt-0.5">{t('web3.walletSubtitle')}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -998,28 +1007,28 @@ export default function Web3Wallet() {
                 className="text-[11px] data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300 px-3 h-8"
               >
                 <Wallet className="mr-1.5 size-3.5" />
-                钱包
+                {t('web3.walletTab')}
               </TabsTrigger>
               <TabsTrigger
                 value="contracts"
                 className="text-[11px] data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300 px-3 h-8"
               >
                 <FileCode className="mr-1.5 size-3.5" />
-                合约
+                {t('web3.contractsTab')}
               </TabsTrigger>
               <TabsTrigger
                 value="transactions"
                 className="text-[11px] data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300 px-3 h-8"
               >
                 <Clock className="mr-1.5 size-3.5" />
-                交易
+                {t('web3.txTab')}
               </TabsTrigger>
               <TabsTrigger
                 value="gas"
                 className="text-[11px] data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300 px-3 h-8"
               >
                 <Fuel className="mr-1.5 size-3.5" />
-                Gas
+                {t('web3.gasTab')}
               </TabsTrigger>
             </TabsList>
 

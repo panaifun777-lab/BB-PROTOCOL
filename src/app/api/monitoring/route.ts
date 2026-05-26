@@ -285,12 +285,20 @@ const grafanaDashboards: GrafanaDashboard[] = [
 // ── Handler ──────────────────────────────────────────────────
 
 export async function GET() {
-  return NextResponse.json({
-    systemMetrics,
-    prometheusMetrics,
-    chainEvents,
-    alertRules,
-    anomalyDetection,
-    grafanaDashboards,
-  });
+  try {
+    return NextResponse.json({
+      systemMetrics,
+      prometheusMetrics,
+      chainEvents,
+      alertRules,
+      anomalyDetection,
+      grafanaDashboards,
+    });
+  } catch (error) {
+    console.error('[API] Error in GET /api/monitoring:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }

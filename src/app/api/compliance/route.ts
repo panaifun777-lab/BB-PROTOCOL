@@ -96,13 +96,21 @@ let pluginsState = [...compliancePlugins];
 
 // ── GET handler ────────────────────────────────────────────
 export async function GET() {
-  return NextResponse.json({
-    plugins: pluginsState,
-    jurisdictions,
-    legalStatus,
-    riskConfig,
-    accessibility,
-  });
+  try {
+    return NextResponse.json({
+      plugins: pluginsState,
+      jurisdictions,
+      legalStatus,
+      riskConfig,
+      accessibility,
+    });
+  } catch (error) {
+    console.error('[API] Error in GET /api/compliance:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }
 
 // ── POST handler — toggle plugin ───────────────────────────
@@ -136,9 +144,10 @@ export async function POST(request: Request) {
       success: true,
       plugin: pluginsState.find((p) => p.id === pluginId),
     });
-  } catch {
+  } catch (error) {
+    console.error('[API] Error in POST /api/compliance:', error);
     return NextResponse.json(
-      { error: 'Invalid JSON body' },
+      { error: 'Invalid JSON body', message: error instanceof Error ? error.message : 'Unknown error' },
       { status: 400 },
     );
   }

@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/hooks/use-i18n';
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -35,9 +36,9 @@ type AccessibilityResult = 'pass' | 'partial' | 'fail';
 interface CompliancePlugin {
   id: string;
   name: string;
-  label: string;
+  labelKey: string;
   icon: string;
-  description: string;
+  descriptionKey: string;
   isActive: boolean;
   activationCondition: string;
   futureIntegration: string;
@@ -50,12 +51,12 @@ interface Jurisdiction {
   flag: string;
   entityName: string;
   status: JurisdictionStatus;
-  statusLabel: string;
+  statusLabelKey: string;
   lawFramework: string;
 }
 
 interface LegalStatus {
-  tokenClassification: string;
+  tokenClassificationKey: string;
   classificationStatus: 'confirmed' | 'pending' | 'disputed';
   legalOpinion: string;
   opinionDate: string;
@@ -64,7 +65,7 @@ interface LegalStatus {
 
 interface RiskLevel {
   threshold: number;
-  confirmation: string;
+  confirmationKey: string;
   timeout: number;
 }
 
@@ -89,9 +90,9 @@ const INITIAL_PLUGINS: CompliancePlugin[] = [
   {
     id: 'kyc',
     name: 'KYCPlugin',
-    label: '身份验证',
+    labelKey: 'compliance.pluginKycLabel',
     icon: '🪪',
-    description: '企业客户或监管要求时激活，对接eID/数字护照',
+    descriptionKey: 'compliance.pluginKycDesc',
     isActive: false,
     activationCondition: 'Enterprise tier or regulatory requirement',
     futureIntegration: 'eID / Digital Passport',
@@ -100,9 +101,9 @@ const INITIAL_PLUGINS: CompliancePlugin[] = [
   {
     id: 'tax',
     name: 'TaxLabelPlugin',
-    label: '收益申报',
+    labelKey: 'compliance.pluginTaxLabel',
     icon: '📋',
-    description: '特定司法辖区收益自动标记，生成税务报告',
+    descriptionKey: 'compliance.pluginTaxDesc',
     isActive: false,
     activationCondition: 'Specific jurisdiction requirement',
     futureIntegration: 'Auto tax report generation',
@@ -111,9 +112,9 @@ const INITIAL_PLUGINS: CompliancePlugin[] = [
   {
     id: 'zk_privacy',
     name: 'ZKPrivacyPlugin',
-    label: '数据隐私',
+    labelKey: 'compliance.pluginZkLabel',
     icon: '🔐',
-    description: 'GDPR/个人信息保护法合规，Halo2/Noir ZK电路',
+    descriptionKey: 'compliance.pluginZkDesc',
     isActive: true,
     activationCondition: 'Default ON for privacy compliance',
     futureIntegration: 'Halo2/Noir ZK circuits',
@@ -122,9 +123,9 @@ const INITIAL_PLUGINS: CompliancePlugin[] = [
   {
     id: 'geo',
     name: 'GeoCompliancePlugin',
-    label: '地理围栏',
+    labelKey: 'compliance.pluginGeoLabel',
     icon: '🌍',
-    description: '区域限制要求，IP+GPS双重验证',
+    descriptionKey: 'compliance.pluginGeoDesc',
     isActive: false,
     activationCondition: 'Regional regulatory requirement',
     futureIntegration: 'IP+GPS dual verification',
@@ -133,9 +134,9 @@ const INITIAL_PLUGINS: CompliancePlugin[] = [
   {
     id: 'arbitration',
     name: 'ArbitrationPlugin',
-    label: '争议解决',
+    labelKey: 'compliance.pluginArbLabel',
     icon: '⚖️',
-    description: '高价值合约纠纷，对接在线仲裁平台',
+    descriptionKey: 'compliance.pluginArbDesc',
     isActive: false,
     activationCondition: 'High-value contract disputes',
     futureIntegration: 'Online arbitration platform',
@@ -144,15 +145,15 @@ const INITIAL_PLUGINS: CompliancePlugin[] = [
 ];
 
 const JURISDICTIONS: Jurisdiction[] = [
-  { id: 'ch', name: '瑞士', flag: '🇨🇭', entityName: 'Cognitive Avatar Foundation', status: 'in_progress', statusLabel: '备案中', lawFramework: 'FINMA / DLT法案' },
-  { id: 'sg', name: '新加坡', flag: '🇸🇬', entityName: 'Cognitive Avatar Pte. Ltd.', status: 'pending', statusLabel: '待设立', lawFramework: 'MAS / PSA法案' },
-  { id: 'us', name: '美国', flag: '🇺🇸', entityName: '—', status: 'not_required', statusLabel: '暂不需要', lawFramework: 'SEC / CFTC' },
-  { id: 'eu', name: '欧盟', flag: '🇪🇺', entityName: '—', status: 'not_required', statusLabel: '暂不需要', lawFramework: 'MiCA法规' },
-  { id: 'jp', name: '日本', flag: '🇯🇵', entityName: '—', status: 'not_required', statusLabel: '暂不需要', lawFramework: 'FSA / 支付服务法' },
+  { id: 'ch', name: 'compliance.switzerland', flag: '🇨🇭', entityName: 'Cognitive Avatar Foundation', status: 'in_progress', statusLabelKey: 'compliance.statusInProgress', lawFramework: 'FINMA / DLT法案' },
+  { id: 'sg', name: 'compliance.singapore', flag: '🇸🇬', entityName: 'Cognitive Avatar Pte. Ltd.', status: 'pending', statusLabelKey: 'compliance.statusPendingSetup', lawFramework: 'MAS / PSA法案' },
+  { id: 'us', name: 'compliance.usa', flag: '🇺🇸', entityName: '—', status: 'not_required', statusLabelKey: 'compliance.statusNotRequired', lawFramework: 'SEC / CFTC' },
+  { id: 'eu', name: 'compliance.eu', flag: '🇪🇺', entityName: '—', status: 'not_required', statusLabelKey: 'compliance.statusNotRequired', lawFramework: 'MiCA法规' },
+  { id: 'jp', name: 'compliance.japan', flag: '🇯🇵', entityName: '—', status: 'not_required', statusLabelKey: 'compliance.statusNotRequired', lawFramework: 'FSA / 支付服务法' },
 ];
 
 const LEGAL_STATUS: LegalStatus = {
-  tokenClassification: 'Utility Token (效用代币)',
+  tokenClassificationKey: 'compliance.utilityTokenLabel',
   classificationStatus: 'confirmed',
   legalOpinion: 'Legal opinion issued by Swiss counsel — AFC qualifies as utility token under FINMA guidance',
   opinionDate: '2026-02-15',
@@ -160,9 +161,9 @@ const LEGAL_STATUS: LegalStatus = {
 };
 
 const RISK_CONFIG: RiskConfig = {
-  low: { threshold: 0.05, confirmation: '生物识别/密码', timeout: 60 },
-  medium: { threshold: 0.50, confirmation: '2FA TOTP/邮箱验证码', timeout: 300 },
-  high: { threshold: Infinity, confirmation: '多签+24h时锁', timeout: 86400 },
+  low: { threshold: 0.05, confirmationKey: 'compliance.riskLowConfirm', timeout: 60 },
+  medium: { threshold: 0.50, confirmationKey: 'compliance.riskMediumConfirm', timeout: 300 },
+  high: { threshold: Infinity, confirmationKey: 'compliance.riskHighConfirm', timeout: 86400 },
 };
 
 const ACCESSIBILITY: AccessibilityReport = {
@@ -184,37 +185,6 @@ const PLUGIN_ICONS: Record<string, typeof ShieldCheck> = {
   arbitration: Gavel,
 };
 
-// ── Jurisdiction Status Config ─────────────────────────────
-
-const JURISDICTION_STATUS_CONFIG: Record<
-  JurisdictionStatus,
-  { label: string; badgeClass: string; dotClass: string }
-> = {
-  in_progress: {
-    label: '进行中',
-    badgeClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    dotClass: 'bg-amber-400',
-  },
-  pending: {
-    label: '待处理',
-    badgeClass: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-    dotClass: 'bg-slate-400',
-  },
-  not_required: {
-    label: '不需要',
-    badgeClass: 'bg-slate-700/50 text-slate-500 border-slate-600/50',
-    dotClass: 'bg-slate-600',
-  },
-};
-
-// ── Accessibility Result Config ────────────────────────────
-
-const A11Y_RESULT_CONFIG: Record<AccessibilityResult, { label: string; icon: typeof CheckCircle; colorClass: string }> = {
-  pass: { label: 'Pass', icon: CheckCircle, colorClass: 'text-emerald-400' },
-  partial: { label: 'Partial', icon: AlertCircle, colorClass: 'text-amber-400' },
-  fail: { label: 'Fail', icon: AlertCircle, colorClass: 'text-red-400' },
-};
-
 // ── Component ──────────────────────────────────────────────
 
 export default function CompliancePanel() {
@@ -222,6 +192,7 @@ export default function CompliancePanel() {
   const [activeJurisdiction, setActiveJurisdiction] = useState('ch');
   const [expandedPlugin, setExpandedPlugin] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('plugins');
+  const { t } = useI18n();
 
   // ── Plugin Toggle Handler ───────────────────────────────
   const handleTogglePlugin = useCallback((pluginId: string) => {
@@ -244,15 +215,39 @@ export default function CompliancePanel() {
 
   // ── Risk Level Visual ───────────────────────────────────
   const riskLevels = [
-    { key: 'low' as const, label: '低风险', color: 'emerald', amount: '≤ $0.05' },
-    { key: 'medium' as const, label: '中风险', color: 'amber', amount: '≤ $0.50' },
-    { key: 'high' as const, label: '高风险', color: 'red', amount: '> $0.50' },
+    { key: 'low' as const, labelKey: 'compliance.lowRisk', color: 'emerald', amount: '≤ $0.05' },
+    { key: 'medium' as const, labelKey: 'compliance.mediumRisk', color: 'amber', amount: '≤ $0.50' },
+    { key: 'high' as const, labelKey: 'compliance.highRisk', color: 'red', amount: '> $0.50' },
   ];
 
   const riskColorMap: Record<string, { bg: string; border: string; text: string; bar: string }> = {
     emerald: { bg: 'bg-emerald-500/5', border: 'border-emerald-500/30', text: 'text-emerald-400', bar: 'bg-emerald-500' },
     amber: { bg: 'bg-amber-500/5', border: 'border-amber-500/30', text: 'text-amber-400', bar: 'bg-amber-500' },
     red: { bg: 'bg-red-500/5', border: 'border-red-500/30', text: 'text-red-400', bar: 'bg-red-500' },
+  };
+
+  const jurisdictionStatusConfig: Record<
+    JurisdictionStatus,
+    { badgeClass: string; dotClass: string }
+  > = {
+    in_progress: {
+      badgeClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+      dotClass: 'bg-amber-400',
+    },
+    pending: {
+      badgeClass: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+      dotClass: 'bg-slate-400',
+    },
+    not_required: {
+      badgeClass: 'bg-slate-700/50 text-slate-500 border-slate-600/50',
+      dotClass: 'bg-slate-600',
+    },
+  };
+
+  const a11yResultConfig: Record<AccessibilityResult, { label: string; icon: typeof CheckCircle; colorClass: string }> = {
+    pass: { label: 'Pass', icon: CheckCircle, colorClass: 'text-emerald-400' },
+    partial: { label: 'Partial', icon: AlertCircle, colorClass: 'text-amber-400' },
+    fail: { label: 'Fail', icon: AlertCircle, colorClass: 'text-red-400' },
   };
 
   return (
@@ -269,13 +264,13 @@ export default function CompliancePanel() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-base text-slate-100">
               <Scale className="size-5 text-violet-400" />
-              合规接口
+              {t('compliance.title')}
             </CardTitle>
             <Badge
               variant="outline"
               className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-[10px]"
             >
-              {activePluginCount}/{plugins.length} 已激活
+              {activePluginCount}/{plugins.length} {t('compliance.activated')}
             </Badge>
           </div>
         </CardHeader>
@@ -288,21 +283,21 @@ export default function CompliancePanel() {
                 className="h-7 flex-1 text-xs data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100"
               >
                 <ShieldCheck className="size-3.5 mr-1" />
-                合规插件
+                {t('compliance.pluginsTab')}
               </TabsTrigger>
               <TabsTrigger
                 value="jurisdiction"
                 className="h-7 flex-1 text-xs data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100"
               >
                 <Globe className="size-3.5 mr-1" />
-                司法辖区
+                {t('compliance.jurisdictionTab')}
               </TabsTrigger>
               <TabsTrigger
                 value="risk"
                 className="h-7 flex-1 text-xs data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100"
               >
                 <Eye className="size-3.5 mr-1" />
-                风险配置
+                {t('compliance.riskTab')}
               </TabsTrigger>
             </TabsList>
 
@@ -336,7 +331,7 @@ export default function CompliancePanel() {
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
                               <span className="text-sm font-medium text-slate-100 truncate">
-                                {plugin.label}
+                                {t(plugin.labelKey)}
                               </span>
                               {plugin.isActive ? (
                                 <Badge
@@ -371,7 +366,7 @@ export default function CompliancePanel() {
 
                       {/* Description */}
                       <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                        {plugin.description}
+                        {t(plugin.descriptionKey)}
                       </p>
 
                       {/* Expand/Collapse Button */}
@@ -382,12 +377,12 @@ export default function CompliancePanel() {
                         {isExpanded ? (
                           <>
                             <ChevronUp className="size-3" />
-                            收起详情
+                            {t('compliance.collapseDetails')}
                           </>
                         ) : (
                           <>
                             <ChevronDown className="size-3" />
-                            查看详情
+                            {t('compliance.viewDetails')}
                           </>
                         )}
                       </button>
@@ -406,41 +401,41 @@ export default function CompliancePanel() {
                               <div className="flex items-start gap-2 text-xs">
                                 <PluginIcon className="size-3.5 text-slate-500 mt-0.5 shrink-0" />
                                 <div>
-                                  <span className="text-slate-500">激活条件: </span>
+                                  <span className="text-slate-500">{t('compliance.activationCondition')}: </span>
                                   <span className="text-slate-300">{plugin.activationCondition}</span>
                                 </div>
                               </div>
                               <div className="flex items-start gap-2 text-xs">
                                 <Lock className="size-3.5 text-slate-500 mt-0.5 shrink-0" />
                                 <div>
-                                  <span className="text-slate-500">未来集成: </span>
+                                  <span className="text-slate-500">{t('compliance.futureIntegration')}: </span>
                                   <span className="text-slate-300">{plugin.futureIntegration}</span>
                                 </div>
                               </div>
                               {plugin.id === 'kyc' && (
                                 <div className="mt-2 rounded-md bg-slate-800/60 border border-slate-700/50 p-2 space-y-1.5">
-                                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">KYC 字段预览</p>
+                                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">{t('compliance.kycFieldPreview')}</p>
                                   <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-                                    <div className="flex items-center gap-1"><span className="text-slate-500">姓名</span><span className="text-slate-400">—</span></div>
-                                    <div className="flex items-center gap-1"><span className="text-slate-500">证件号</span><span className="text-slate-400">—</span></div>
-                                    <div className="flex items-center gap-1"><span className="text-slate-500">证件类型</span><span className="text-slate-400">Passport</span></div>
-                                    <div className="flex items-center gap-1"><span className="text-slate-500">验证状态</span><Badge variant="outline" className="text-[8px] px-1 py-0 border-slate-600 text-slate-400">未验证</Badge></div>
+                                    <div className="flex items-center gap-1"><span className="text-slate-500">{t('compliance.kycName')}</span><span className="text-slate-400">—</span></div>
+                                    <div className="flex items-center gap-1"><span className="text-slate-500">{t('compliance.kycIdNumber')}</span><span className="text-slate-400">—</span></div>
+                                    <div className="flex items-center gap-1"><span className="text-slate-500">{t('compliance.kycIdType')}</span><span className="text-slate-400">Passport</span></div>
+                                    <div className="flex items-center gap-1"><span className="text-slate-500">{t('compliance.kycVerifyStatus')}</span><Badge variant="outline" className="text-[8px] px-1 py-0 border-slate-600 text-slate-400">{t('compliance.kycNotVerified')}</Badge></div>
                                   </div>
                                 </div>
                               )}
                               {plugin.id === 'tax' && (
                                 <div className="mt-2 rounded-md bg-slate-800/60 border border-slate-700/50 p-2 space-y-1.5">
-                                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">税务报告预览</p>
+                                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">{t('compliance.taxReportPreview')}</p>
                                   <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-                                    <div className="flex items-center gap-1"><span className="text-slate-500">税务年度</span><span className="text-slate-400">2026</span></div>
-                                    <div className="flex items-center gap-1"><span className="text-slate-500">辖区</span><span className="text-slate-400">CH</span></div>
-                                    <div className="flex items-center gap-1 col-span-2"><span className="text-slate-500">报告状态</span><Badge variant="outline" className="text-[8px] px-1 py-0 border-slate-600 text-slate-400">未生成</Badge></div>
+                                    <div className="flex items-center gap-1"><span className="text-slate-500">{t('compliance.taxYear')}</span><span className="text-slate-400">2026</span></div>
+                                    <div className="flex items-center gap-1"><span className="text-slate-500">{t('compliance.taxJurisdiction')}</span><span className="text-slate-400">CH</span></div>
+                                    <div className="flex items-center gap-1 col-span-2"><span className="text-slate-500">{t('compliance.taxReportStatus')}</span><Badge variant="outline" className="text-[8px] px-1 py-0 border-slate-600 text-slate-400">{t('compliance.taxNotGenerated')}</Badge></div>
                                   </div>
                                 </div>
                               )}
                               {plugin.id === 'zk_privacy' && (
                                 <div className="mt-2 rounded-md bg-slate-800/60 border border-slate-700/50 p-2 space-y-1.5">
-                                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">隐私等级</p>
+                                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">{t('compliance.privacyLevel')}</p>
                                   <div className="flex gap-1.5">
                                     {(['Public', 'Private', 'Hybrid'] as const).map((level) => (
                                       <Badge
@@ -463,19 +458,19 @@ export default function CompliancePanel() {
                               )}
                               {plugin.id === 'geo' && (
                                 <div className="mt-2 rounded-md bg-slate-800/60 border border-slate-700/50 p-2 space-y-1.5">
-                                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">区域配置</p>
+                                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">{t('compliance.geoConfig')}</p>
                                   <div className="text-[10px] space-y-1">
-                                    <div className="flex items-center gap-1"><MapPin className="size-3 text-emerald-400" /><span className="text-slate-300">允许区域:</span><span className="text-slate-400">CH, SG, EU</span></div>
-                                    <div className="flex items-center gap-1"><AlertCircle className="size-3 text-red-400" /><span className="text-slate-300">限制操作:</span><span className="text-slate-400">高价值合约签署</span></div>
+                                    <div className="flex items-center gap-1"><MapPin className="size-3 text-emerald-400" /><span className="text-slate-300">{t('compliance.geoAllowed')}:</span><span className="text-slate-400">CH, SG, EU</span></div>
+                                    <div className="flex items-center gap-1"><AlertCircle className="size-3 text-red-400" /><span className="text-slate-300">{t('compliance.geoRestricted')}:</span><span className="text-slate-400">{t('compliance.geoRestrictedOps')}</span></div>
                                   </div>
                                 </div>
                               )}
                               {plugin.id === 'arbitration' && (
                                 <div className="mt-2 rounded-md bg-slate-800/60 border border-slate-700/50 p-2 space-y-1.5">
-                                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">争议追踪</p>
+                                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">{t('compliance.arbTracking')}</p>
                                   <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-                                    <div className="flex items-center gap-1"><span className="text-slate-500">活跃争议</span><span className="text-slate-300">0</span></div>
-                                    <div className="flex items-center gap-1"><span className="text-slate-500">解决率</span><span className="text-emerald-400">—</span></div>
+                                    <div className="flex items-center gap-1"><span className="text-slate-500">{t('compliance.arbActiveDisputes')}</span><span className="text-slate-300">0</span></div>
+                                    <div className="flex items-center gap-1"><span className="text-slate-500">{t('compliance.arbResolutionRate')}</span><span className="text-emerald-400">—</span></div>
                                   </div>
                                 </div>
                               )}
@@ -492,10 +487,9 @@ export default function CompliancePanel() {
               {activePluginCount > 0 && (
                 <Alert className="border-emerald-500/20 bg-emerald-500/5">
                   <ShieldCheck className="size-4 text-emerald-400" />
-                  <AlertTitle className="text-emerald-400 text-xs">合规保障已激活</AlertTitle>
+                  <AlertTitle className="text-emerald-400 text-xs">{t('compliance.complianceActive')}</AlertTitle>
                   <AlertDescription className="text-emerald-300/80 text-[11px]">
-                    当前 {activePluginCount} 个合规插件运行中 —
-                    {plugins.filter((p) => p.isActive).map((p) => p.label).join('、')}
+                    {t('compliance.complianceActiveDesc', { count: activePluginCount, plugins: plugins.filter((p) => p.isActive).map((p) => t(p.labelKey)).join('、') })}
                   </AlertDescription>
                 </Alert>
               )}
@@ -508,7 +502,7 @@ export default function CompliancePanel() {
               {/* Jurisdiction Selector */}
               <div className="space-y-2">
                 <p className="text-xs font-medium text-slate-400">
-                  活跃司法辖区
+                  {t('compliance.activeJurisdictions')}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {JURISDICTIONS.map((j) => (
@@ -523,7 +517,7 @@ export default function CompliancePanel() {
                       )}
                     >
                       <span className="text-sm">{j.flag}</span>
-                      {j.name}
+                      {t(j.name)}
                     </button>
                   ))}
                 </div>
@@ -534,11 +528,11 @@ export default function CompliancePanel() {
               {/* Jurisdiction Detail Cards */}
               <div className="space-y-2">
                 <p className="text-xs font-medium text-slate-400">
-                  法律实体状态
+                  {t('compliance.legalEntityStatus')}
                 </p>
                 <div className="space-y-2">
                   {JURISDICTIONS.map((j) => {
-                    const statusCfg = JURISDICTION_STATUS_CONFIG[j.status];
+                    const statusCfg = jurisdictionStatusConfig[j.status];
                     const isActive = activeJurisdiction === j.id;
 
                     return (
@@ -558,23 +552,23 @@ export default function CompliancePanel() {
                             <div>
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium text-slate-100">
-                                  {j.name}
+                                  {t(j.name)}
                                 </span>
                                 <Badge
                                   variant="outline"
                                   className={cn('text-[9px] px-1.5 py-0', statusCfg.badgeClass)}
                                 >
                                   <span className={cn('inline-block size-1.5 rounded-full mr-1', statusCfg.dotClass)} />
-                                  {j.statusLabel}
+                                  {t(j.statusLabelKey)}
                                 </Badge>
                               </div>
                               <p className="text-[10px] text-slate-500 mt-0.5">
-                                {j.entityName !== '—' ? j.entityName : '未设立实体'}
+                                {j.entityName !== '—' ? j.entityName : t('compliance.noEntity')}
                               </p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-[10px] text-slate-500">法律框架</p>
+                            <p className="text-[10px] text-slate-500">{t('compliance.legalFramework')}</p>
                             <p className="text-[10px] text-slate-400 font-mono">{j.lawFramework}</p>
                           </div>
                         </div>
@@ -589,21 +583,21 @@ export default function CompliancePanel() {
               {/* Legal Opinion Section */}
               <div className="space-y-2">
                 <p className="text-xs font-medium text-slate-400">
-                  法律意见书
+                  {t('compliance.legalOpinion')}
                 </p>
                 <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="size-4 text-emerald-400" />
                       <span className="text-sm font-medium text-emerald-300">
-                        {LEGAL_STATUS.tokenClassification}
+                        {t(LEGAL_STATUS.tokenClassificationKey)}
                       </span>
                     </div>
                     <Badge
                       variant="outline"
                       className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[9px]"
                     >
-                      已确认
+                      {t('compliance.confirmed')}
                     </Badge>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed">
@@ -611,11 +605,11 @@ export default function CompliancePanel() {
                   </p>
                   <div className="flex items-center gap-4 mt-2 pt-2 border-t border-emerald-500/10">
                     <div className="text-[10px]">
-                      <span className="text-slate-500">意见日期: </span>
+                      <span className="text-slate-500">{t('compliance.opinionDate')}: </span>
                       <span className="text-slate-300">{LEGAL_STATUS.opinionDate}</span>
                     </div>
                     <div className="text-[10px]">
-                      <span className="text-slate-500">合规官: </span>
+                      <span className="text-slate-500">{t('compliance.complianceOfficer')}: </span>
                       <span className="text-slate-300">{LEGAL_STATUS.complianceOfficer}</span>
                     </div>
                   </div>
@@ -630,7 +624,7 @@ export default function CompliancePanel() {
               {/* Risk Level Configuration */}
               <div className="space-y-2">
                 <p className="text-xs font-medium text-slate-400">
-                  操作风险阈值配置
+                  {t('compliance.riskThresholdConfig')}
                 </p>
                 <div className="space-y-2">
                   {riskLevels.map((level) => {
@@ -656,7 +650,7 @@ export default function CompliancePanel() {
                           <div className="flex items-center gap-2">
                             <div className={cn('size-2 rounded-full', colors.bar)} />
                             <span className={cn('text-sm font-medium', colors.text)}>
-                              {level.label}
+                              {t(level.labelKey)}
                             </span>
                           </div>
                           <span className={cn('text-xs font-mono', colors.text)}>
@@ -666,11 +660,11 @@ export default function CompliancePanel() {
                         <div className="flex items-center gap-3 text-[10px] text-slate-400">
                           <div className="flex items-center gap-1">
                             <ShieldCheck className="size-3" />
-                            <span>{cfg.confirmation}</span>
+                            <span>{t(cfg.confirmationKey)}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <AlertCircle className="size-3" />
-                            <span>超时: {timeoutLabel}</span>
+                            <span>{t('compliance.timeout')}: {timeoutLabel}</span>
                           </div>
                         </div>
                         {/* Visual risk bar */}
@@ -701,7 +695,7 @@ export default function CompliancePanel() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-medium text-slate-400">
-                    WCAG 无障碍审计
+                    {t('compliance.wcagAudit')}
                   </p>
                   <Badge
                     variant="outline"
@@ -751,16 +745,16 @@ export default function CompliancePanel() {
                   <div className="flex-1 space-y-2">
                     {/* Audit Items */}
                     {([
-                      { key: 'colorContrast' as const, label: '色彩对比度' },
-                      { key: 'keyboardNav' as const, label: '键盘导航' },
-                      { key: 'screenReader' as const, label: '屏幕阅读器' },
+                      { key: 'colorContrast' as const, labelKey: 'compliance.a11yColorContrast' },
+                      { key: 'keyboardNav' as const, labelKey: 'compliance.a11yKeyboardNav' },
+                      { key: 'screenReader' as const, labelKey: 'compliance.a11yScreenReader' },
                     ] as const).map((item) => {
                       const result = ACCESSIBILITY[item.key];
-                      const cfg = A11Y_RESULT_CONFIG[result];
+                      const cfg = a11yResultConfig[result];
                       const ItemIcon = cfg.icon;
                       return (
                         <div key={item.key} className="flex items-center justify-between text-xs">
-                          <span className="text-slate-400">{item.label}</span>
+                          <span className="text-slate-400">{t(item.labelKey)}</span>
                           <div className="flex items-center gap-1">
                             <ItemIcon className={cn('size-3', cfg.colorClass)} />
                             <span className={cn('font-medium text-[10px]', cfg.colorClass)}>
@@ -778,12 +772,12 @@ export default function CompliancePanel() {
                   <div className="flex items-center justify-between text-[10px]">
                     <div className="flex items-center gap-1">
                       <Eye className="size-3 text-slate-500" />
-                      <span className="text-slate-400">ARIA 标签覆盖</span>
+                      <span className="text-slate-400">{t('compliance.ariaLabelCoverage')}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-400">{ACCESSIBILITY.ariaLabels} 已标注</span>
+                      <span className="text-emerald-400">{ACCESSIBILITY.ariaLabels} {t('compliance.ariaLabeled')}</span>
                       <span className="text-slate-600">·</span>
-                      <span className="text-amber-400">{ACCESSIBILITY.ariaMissing} 缺失</span>
+                      <span className="text-amber-400">{ACCESSIBILITY.ariaMissing} {t('compliance.ariaMissing')}</span>
                     </div>
                   </div>
                   <div className="mt-1.5 h-1.5 rounded-full bg-slate-700 overflow-hidden">

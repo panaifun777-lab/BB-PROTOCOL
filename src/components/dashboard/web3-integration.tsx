@@ -39,6 +39,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/hooks/use-i18n';
 
 // ── Types ──────────────────────────────────────────────
 interface WalletConnection {
@@ -176,15 +177,17 @@ function getRelativeTime(iso: string): string {
   const then = new Date(iso);
   const diffMs = now.getTime() - then.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 60) return `${diffMin}分钟前`;
+  // NOTE: relative time units handled by caller via t() for i18n
+  if (diffMin < 60) return `${diffMin}`;
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}小时前`;
+  if (diffHr < 24) return `${diffHr}`;
   const diffDay = Math.floor(diffHr / 24);
-  return `${diffDay}天前`;
+  return `${diffDay}`;
 }
 
 // ── Copy Button ────────────────────────────────────────
 function CopyButton({ text, className }: { text: string; className?: string }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
@@ -202,7 +205,7 @@ function CopyButton({ text, className }: { text: string; className?: string }) {
         copied ? 'bg-emerald-500/20' : 'bg-slate-700/50 hover:bg-slate-600/50',
         className,
       )}
-      aria-label="复制"
+      aria-label={t('web3.copy')}
     >
       {copied ? (
         <CheckCircle className="size-3.5 text-emerald-400" />
@@ -239,11 +242,11 @@ function WalletConnectionTab({ data }: { data: Web3IntegrationData }) {
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
           <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs text-emerald-300 font-medium">已连接 ({connected.length})</span>
+          <span className="text-xs text-emerald-300 font-medium">{t('web3.connectedCount')} ({connected.length})</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-700/30 border border-slate-700/50">
           <Wallet className="w-3.5 h-3.5 text-slate-400" />
-          <span className="text-xs text-slate-400">可用钱包 ({available.length})</span>
+          <span className="text-xs text-slate-400">{t('web3.availableWallets')} ({available.length})</span>
         </div>
       </div>
 
@@ -265,7 +268,7 @@ function WalletConnectionTab({ data }: { data: Web3IntegrationData }) {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-slate-100">{wallet.wallet}</span>
                   <Badge variant="outline" className={cn('text-[9px]', STATUS_COLORS.connected.bg, STATUS_COLORS.connected.text, STATUS_COLORS.connected.border)}>
-                    已连接
+                    {t('web3.connected')}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
@@ -279,30 +282,30 @@ function WalletConnectionTab({ data }: { data: Web3IntegrationData }) {
               size="sm"
               className="h-7 text-[10px] border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20 hover:text-red-200"
             >
-              <Unplug className="mr-1 size-3" /> 断开连接
+              <Unplug className="mr-1 size-3" /> {t('web3.disconnectBtn')}
             </Button>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="rounded-lg bg-slate-800/60 p-3">
-              <p className="text-[10px] text-slate-500 mb-0.5">链</p>
+              <p className="text-[10px] text-slate-500 mb-0.5">{t('web3.chain')}</p>
               <p className="text-xs font-medium text-slate-200">{wallet.chainName}</p>
               <p className="text-[10px] text-slate-500 font-mono">Chain ID: {wallet.chainId}</p>
             </div>
             <div className="rounded-lg bg-slate-800/60 p-3">
-              <p className="text-[10px] text-slate-500 mb-0.5">余额</p>
+              <p className="text-[10px] text-slate-500 mb-0.5">{t('web3.balance')}</p>
               <p className="text-xs font-medium text-emerald-300">{wallet.balance}</p>
               <p className="text-[10px] text-slate-500">{wallet.balanceUsd}</p>
             </div>
             <div className="rounded-lg bg-slate-800/60 p-3">
-              <p className="text-[10px] text-slate-500 mb-0.5">最后连接</p>
+              <p className="text-[10px] text-slate-500 mb-0.5">{t('web3.lastConnected')}</p>
               <p className="text-xs font-medium text-slate-200">{getRelativeTime(wallet.lastConnected)}</p>
             </div>
             <div className="rounded-lg bg-slate-800/60 p-3">
-              <p className="text-[10px] text-slate-500 mb-0.5">状态</p>
+              <p className="text-[10px] text-slate-500 mb-0.5">{t('web3.status')}</p>
               <div className="flex items-center gap-1.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <p className="text-xs font-medium text-emerald-300">在线</p>
+                <p className="text-xs font-medium text-emerald-300">{t('web3.online')}</p>
               </div>
             </div>
           </div>
@@ -313,7 +316,7 @@ function WalletConnectionTab({ data }: { data: Web3IntegrationData }) {
       <div>
         <h4 className="text-xs font-semibold text-slate-300 mb-3 flex items-center gap-2">
           <Wallet className="w-3.5 h-3.5 text-slate-500" />
-          可用钱包
+          {t('web3.availableWallets')}
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {available.map((wallet, idx) => (
@@ -331,7 +334,7 @@ function WalletConnectionTab({ data }: { data: Web3IntegrationData }) {
                 <div>
                   <span className="text-sm text-slate-200">{wallet.wallet}</span>
                   <Badge variant="outline" className={cn('ml-2 text-[9px]', STATUS_COLORS.available.bg, STATUS_COLORS.available.text, STATUS_COLORS.available.border)}>
-                    可用
+                    {t('web3.available')}
                   </Badge>
                 </div>
               </div>
@@ -340,7 +343,7 @@ function WalletConnectionTab({ data }: { data: Web3IntegrationData }) {
                 size="sm"
                 className="h-7 text-[10px] border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 hover:text-emerald-200"
               >
-                <Link className="mr-1 size-3" /> 连接
+                <Link className="mr-1 size-3" /> {t('web3.connect')}
               </Button>
             </motion.div>
           ))}
@@ -351,11 +354,11 @@ function WalletConnectionTab({ data }: { data: Web3IntegrationData }) {
       <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-4">
         <div className="flex items-center gap-2 mb-3">
           <Shield className="w-4 h-4 text-violet-400" />
-          <h4 className="text-xs font-semibold text-slate-200">Wagmi 配置</h4>
+          <h4 className="text-xs font-semibold text-slate-200">{t('web3.wagmiConfig')}</h4>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <p className="text-[10px] text-slate-500 mb-2">支持链</p>
+            <p className="text-[10px] text-slate-500 mb-2">{t('web3.supportedChains')}</p>
             <div className="flex flex-wrap gap-1.5">
               {data.wagmiConfig.chains.map((chain) => (
                 <Badge
@@ -377,17 +380,17 @@ function WalletConnectionTab({ data }: { data: Web3IntegrationData }) {
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-400">连接器</span>
+              <span className="text-slate-400">{t('web3.connectors')}</span>
               <span className="text-slate-200 font-mono text-[10px]">{data.wagmiConfig.connectors.join(', ')}</span>
             </div>
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-400">自动连接</span>
+              <span className="text-slate-400">{t('web3.autoConnect')}</span>
               <Badge variant="outline" className={cn('text-[9px]', data.wagmiConfig.autoConnect ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' : 'bg-slate-600/20 text-slate-400 border-slate-600/30')}>
-                {data.wagmiConfig.autoConnect ? '已启用' : '未启用'}
+                {data.wagmiConfig.autoConnect ? t('web3.enabled') : t('web3.notEnabled')}
               </Badge>
             </div>
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-400">轮询间隔</span>
+              <span className="text-slate-400">{t('web3.pollingInterval')}</span>
               <span className="text-slate-200 font-mono">{(data.wagmiConfig.pollingInterval / 1000).toFixed(1)}s</span>
             </div>
           </div>
@@ -410,15 +413,15 @@ function ContractInteractionTab({ data }: { data: Web3IntegrationData }) {
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-lg border border-slate-700 bg-slate-800/60 p-3 text-center">
           <p className="text-xl font-bold text-slate-200 tabular-nums">{totalFunctions}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">总函数</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">{t('web3.totalFunctions')}</p>
         </div>
         <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-center">
           <p className="text-xl font-bold text-emerald-400 tabular-nums">{availableCount}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">可用</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">{t('web3.available')}</p>
         </div>
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-center">
           <p className="text-xl font-bold text-amber-400 tabular-nums">{restrictedCount}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">受限</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">{t('web3.restricted')}</p>
         </div>
       </div>
 
@@ -449,7 +452,7 @@ function ContractInteractionTab({ data }: { data: Web3IntegrationData }) {
                       : `${STATUS_COLORS.restricted.bg} ${STATUS_COLORS.restricted.text} ${STATUS_COLORS.restricted.border}`,
                   )}
                 >
-                  {item.status === 'available' ? '可用' : '受限'}
+                  {item.status === 'available' ? t('web3.available') : t('web3.restricted')}
                 </Badge>
               </div>
 
@@ -461,7 +464,7 @@ function ContractInteractionTab({ data }: { data: Web3IntegrationData }) {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Coins className="size-3 text-emerald-400 shrink-0" />
-                  <span className="text-slate-400">费用:</span>
+                  <span className="text-slate-400">{t('web3.cost')}:</span>
                   <span className="text-emerald-300 font-mono">{item.gasCost}</span>
                 </div>
                 <div className="flex items-center gap-1.5">

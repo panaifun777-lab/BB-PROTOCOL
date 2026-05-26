@@ -334,22 +334,30 @@ let releasePipeline: ReleasePipeline = JSON.parse(JSON.stringify(INITIAL_RELEASE
 
 // ── GET Handler ────────────────────────────────────────
 export async function GET() {
-  const activeCount = flags.filter((f) => f.status === 'active').length;
-  const inactiveCount = flags.filter((f) => f.status === 'inactive').length;
-  const scheduledCount = flags.filter((f) => f.status === 'scheduled').length;
+  try {
+    const activeCount = flags.filter((f) => f.status === 'active').length;
+    const inactiveCount = flags.filter((f) => f.status === 'inactive').length;
+    const scheduledCount = flags.filter((f) => f.status === 'scheduled').length;
 
-  return NextResponse.json({
-    featureFlags: flags,
-    abTests,
-    rollbackHistory,
-    releasePipeline,
-    stats: {
-      active: activeCount,
-      inactive: inactiveCount,
-      scheduled: scheduledCount,
-      total: flags.length,
-    },
-  });
+    return NextResponse.json({
+      featureFlags: flags,
+      abTests,
+      rollbackHistory,
+      releasePipeline,
+      stats: {
+        active: activeCount,
+        inactive: inactiveCount,
+        scheduled: scheduledCount,
+        total: flags.length,
+      },
+    });
+  } catch (error) {
+    console.error('[API] Error in GET /api/feature-flags:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }
 
 // ── POST Handler ───────────────────────────────────────
@@ -456,7 +464,8 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({ success: false, error: 'Unknown action' }, { status: 400 });
     }
-  } catch {
-    return NextResponse.json({ success: false, error: 'Invalid request body' }, { status: 400 });
+  } catch (error) {
+    console.error('[API] Error in POST /api/feature-flags:', error);
+    return NextResponse.json({ success: false, error: 'Invalid request body', message: error instanceof Error ? error.message : 'Unknown error' }, { status: 400 });
   }
 }

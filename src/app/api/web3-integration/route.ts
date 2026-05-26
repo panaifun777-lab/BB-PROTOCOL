@@ -68,12 +68,20 @@ const gasTracker = {
 };
 
 export async function GET() {
-  return NextResponse.json({
-    walletConnections,
-    contractInteractions,
-    eventSubscriptions,
-    transactionHistory,
-    wagmiConfig,
-    gasTracker,
-  });
+  try {
+    return NextResponse.json({
+      walletConnections,
+      contractInteractions,
+      eventSubscriptions,
+      transactionHistory,
+      wagmiConfig,
+      gasTracker,
+    });
+  } catch (error) {
+    console.error('[API] Error in GET /api/web3-integration:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }

@@ -259,5 +259,13 @@ const DEPLOYMENT_DATA: DeploymentData = {
 };
 
 export async function GET() {
-  return NextResponse.json(DEPLOYMENT_DATA);
+  try {
+    return NextResponse.json(DEPLOYMENT_DATA);
+  } catch (error) {
+    console.error('[API] Error in GET /api/deployment:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }

@@ -327,5 +327,13 @@ const MULTI_CHAIN_DATA: MultiChainData = {
 };
 
 export async function GET() {
-  return NextResponse.json(MULTI_CHAIN_DATA);
+  try {
+    return NextResponse.json(MULTI_CHAIN_DATA);
+  } catch (error) {
+    console.error('[API] Error in GET /api/multichain:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }
