@@ -1,173 +1,2865 @@
-# BB Protocol 认知分身协议 — 全环境部署指南
+# BB Protocol 认知分身协议 — 全环境专业部署指南
 
-> **版本**: v5.0.0  
-> **最后更新**: 2025-01-15  
+---
+
+> **文档版本**: v5.0.0  
+> **最后更新**: 2026-03-05  
 > **维护团队**: BB Protocol Core Team  
-> **适用范围**: 开发环境 / 预发布 / 生产环境
+> **适用范围**: 开发环境 / 预发布 / 生产环境  
+> **技术栈**: Next.js 16.1.3 + React 19 + Bun + Prisma + SQLite  
+> **区块链**: Base L2 (Chain ID: 8453) — 10 Solidity Contracts  
+> **微服务**: 6 services — Resonance-Sim / Monitoring-Sim / IFD-Calculator / ECE-Oracle / POUE-Prover / MCP-Router  
+> **国际化**: 8 languages (zh, en, ja, ko, es, fr, de, ar)  
+> **支付**: Stripe + x402 双轨支付  
+
+---
+
+**⚠️ 安全警告**: 本文档包含生产环境密钥配置说明。请务必将所有 `CHANGE_ME` 占位符替换为安全随机值，且绝不要将 `.env` 文件提交到版本控制系统。
 
 ---
 
 ## 目录
 
-1. [部署概述](#1-部署概述)
-2. [环境要求](#2-环境要求)
-3. [环境变量配置](#3-环境变量配置)
-4. [本地开发部署](#4-本地开发部署)
-5. [Docker 部署](#5-docker-部署)
-6. [Vercel 部署](#6-vercel-部署)
-7. [VPS/云服务器部署](#7-vps云服务器部署)
-8. [微服务部署](#8-微服务部署)
-9. [数据库管理](#9-数据库管理)
-10. [Stripe 配置](#10-stripe-配置)
-11. [Web3 配置](#11-web3-配置)
-12. [监控与日志](#12-监控与日志)
-13. [安全加固](#13-安全加固)
-14. [备份与灾难恢复](#14-备份与灾难恢复)
-15. [更新与维护](#15-更新与维护)
-16. [常见问题 (FAQ)](#16-常见问题-faq)
+1. [专业封面与文档元数据](#1-专业封面与文档元数据)
+2. [Quick Start 快速开始 — 5分钟评估部署](#2-quick-start-快速开始)
+3. [本地开发环境部署](#3-本地开发环境部署)
+4. [Docker Compose 单机部署](#4-docker-compose-单机部署)
+5. [Vercel Serverless 部署](#5-vercel-serverless-部署)
+6. [VPS/云服务器部署 — Nginx + PM2 + SSL](#6-vps云服务器部署)
+7. [AWS (ECS/Fargate) 部署](#7-aws-ecsfargate-部署)
+8. [Google Cloud Platform (Cloud Run) 部署](#8-google-cloud-platform-cloud-run-部署)
+9. [Microsoft Azure (App Service) 部署](#9-microsoft-azure-app-service-部署)
+10. [Kubernetes (K8s) 生产级编排](#10-kubernetes-k8s-生产级编排)
+11. [Terraform IaC 基础设施编排](#11-terraform-iac-基础设施编排)
+12. [GitHub Actions CI/CD 流水线](#12-github-actions-cicd-流水线)
+13. [数据库管理](#13-数据库管理)
+14. [Stripe 支付配置](#14-stripe-支付配置)
+15. [Web3 配置](#15-web3-配置)
+16. [微服务部署与健康监控](#16-微服务部署与健康监控)
+17. [监控与可观测性](#17-监控与可观测性)
+18. [安全加固](#18-安全加固)
+19. [备份与灾难恢复](#19-备份与灾难恢复)
+20. [扩缩容策略](#20-扩缩容策略)
+21. [故障排查指南](#21-故障排查指南)
+22. [常见问题 (FAQ)](#22-常见问题-faq)
 
 ---
 
-## 1. 部署概述
+## 1. 专业封面与文档元数据
 
-### 1.1 系统架构概述
+### 1.1 项目概览
 
-BB Protocol 认知分身协议是一个基于 Next.js 16 的全栈 Web3 应用，采用微服务架构，包含主应用和多个独立计算引擎服务。系统整体架构如下：
+| 项目属性 | 值 |
+|---------|---|
+| **项目名称** | BB Protocol 认知分身协议 |
+| **代码仓库** | `github.com/your-org/bb-protocol` |
+| **主框架** | Next.js 16.1.3 + Turbopack |
+| **前端** | React 19 + Zustand 5 + TanStack Query 5 |
+| **运行时** | Bun 1.1.38 (primary) / Node.js 20+ (fallback) |
+| **ORM** | Prisma 6.x + SQLite |
+| **UI 组件** | shadcn/ui + Radix UI + Tailwind CSS 4 |
+| **Web3** | ConnectKit 1.9 + Wagmi 3 + viem 2.x (Base L2) |
+| **支付** | Stripe 22.x + x402 双轨 |
+| **实时通信** | Socket.IO 4.8 + Caddy XTransformPort Gateway |
+| **合约** | 10 Solidity Contracts on Base L2 (8453) |
+| **语言支持** | 8 languages (zh/en/ja/ko/es/fr/de/ar) |
+
+### 1.2 系统架构图
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      用户浏览器 (Client)                      │
-│            React 19 + Zustand + TanStack Query              │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
+┌──────────────────────────────────────────────────────────────────┐
+│                     用户浏览器 (Client)                           │
+│          React 19 + Zustand + TanStack Query + ConnectKit        │
+│                   8 languages i18n support                       │
+└──────────────────────────┬───────────────────────────────────────┘
+                           │ HTTPS / WSS
                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Caddy 反向代理网关 (:81)                    │
-│              XTransformPort 路由 → 后端微服务                  │
-└──────┬───────┬───────┬───────┬───────┬───────┬───────┬─────┘
-       │       │       │       │       │       │       │
-       ▼       ▼       ▼       ▼       ▼       ▼       ▼
-  ┌────────┐┌──────┐┌──────┐┌──────┐┌──────┐┌──────┐┌──────┐
-  │App     ││Reson ││Monit ││IFD   ││ECE   ││PoUE  ││MCP   │
-  │:3000   ││:3003 ││:3004 ││:3005 ││:3006 ││:3007 ││:3008 │
-  │Next.js ││Sim   ││Sim   ││Calc  ││Oracle││Prover││Router│
-  └───┬────┘└──────┘└──────┘└──────┘└──────┘└──────┘└──────┘
-      │
-      ▼
-  ┌────────┐
-  │SQLite  │
-  │Prisma  │
-  └────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│              Caddy 反向代理网关 (:81 / :80 / :443)                │
+│         XTransformPort 路由 → 后端微服务 Socket.IO                │
+└──┬──────┬──────┬──────┬──────┬──────┬──────┬──────┬─────────────┘
+   │      │      │      │      │      │      │      │
+   ▼      ▼      ▼      ▼      ▼      ▼      ▼      │
+┌──────┐┌──────┐┌──────┐┌──────┐┌──────┐┌──────┐┌──────┐        │
+│App   ││Reson ││Monit ││IFD   ││ECE   ││PoUE  ││MCP   │        │
+│:3000 ││:3003 ││:3004 ││:3005 ││:3006 ││:3007 ││:3008 │        │
+│Next16││Sim   ││Sim   ││Calc  ││Oracle││Prover││Router│        │
+│Bun   ││Bun   ││Bun   ││Bun   ││Bun   ││Bun   ││Bun   │        │
+└──┬───┘└──────┘└──────┘└──────┘└──────┘└──────┘└──────┘        │
+   │   WebSocket 广播: 3-30s 间隔                                │
+   ▼                                                             │
+┌──────────┐     ┌──────────────┐     ┌──────────────┐          │
+│ SQLite   │     │ Stripe API   │     │ Base L2 RPC  │◄─────────┘
+│ Prisma   │     │ + x402 Pay   │     │ 10 Contracts │
+└──────────┘     └──────────────┘     └──────────────┘
 ```
 
-### 1.2 最低硬件要求
+### 1.3 服务端口映射
 
-| 环境 | CPU | 内存 | 磁盘 | 网络 |
-|------|-----|------|------|------|
-| 开发环境 | 2 核 | 4 GB | 10 GB SSD | 5 Mbps |
-| 预发布 | 2 核 | 4 GB | 20 GB SSD | 10 Mbps |
-| 生产环境 | 4 核 | 8 GB | 50 GB SSD | 50 Mbps |
+| 端口 | 服务名称 | 说明 | 技术栈 | 协议 | 依赖级别 |
+|------|---------|------|--------|------|---------|
+| 3000 | App (主应用) | Next.js 16 前端 + API | Next.js / Bun | HTTP | **必须** |
+| 3003 | Resonance-Sim | 情绪共振模拟引擎 | Socket.IO / Bun | WebSocket | 推荐 |
+| 3004 | Monitoring-Sim | 系统监控模拟服务 | Socket.IO / Bun | WebSocket | 推荐 |
+| 3005 | IFD-Calculator | 流体民主权重计算引擎 | Socket.IO / Bun | WebSocket | 可选 |
+| 3006 | ECE-Oracle | 情绪共识预言机 | Socket.IO / Bun | WebSocket | 可选 |
+| 3007 | POUE-Prover | 认知理解证明引擎 | Socket.IO / Bun | WebSocket | 可选 |
+| 3008 | MCP-Router | 模型上下文协议路由 | Socket.IO / Bun | WebSocket | 可选 |
+| 81 | Caddy Gateway | 反向代理网关 | Caddy | HTTP/WS | **必须** |
 
-### 1.3 服务依赖关系图
+### 1.4 最低硬件要求
 
-| 端口 | 服务名称 | 说明 | 技术栈 | 协议 |
-|------|---------|------|--------|------|
-| 3000 | App (主应用) | Next.js 16 前端 + API | Next.js / Bun | HTTP |
-| 3003 | Resonance-Sim | 情绪共振模拟引擎 | Socket.IO / Bun | WebSocket |
-| 3004 | Monitoring-Sim | 系统监控模拟服务 | Socket.IO / Bun | WebSocket |
-| 3005 | IFD-Calculator | 流体民主权重计算引擎 | Socket.IO / Bun | WebSocket |
-| 3006 | ECE-Oracle | 情绪共识预言机 | Socket.IO / Bun | WebSocket |
-| 3007 | POUE-Prover | 认知理解证明引擎 | Socket.IO / Bun | WebSocket |
-| 3008 | MCP-Router | 模型上下文协议路由 | Socket.IO / Bun | WebSocket |
-| 81 | Caddy Gateway | 反向代理网关 | Caddy | HTTP/WS |
-
-**服务依赖关系**：
-
-```
-Caddy Gateway (81)
-  ├── App (3000) ──── 必须
-  ├── Resonance-Sim (3003) ──── 推荐（实时共振数据）
-  ├── Monitoring-Sim (3004) ──── 推荐（系统监控）
-  ├── IFD-Calculator (3005) ──── 可选（流体民主功能）
-  ├── ECE-Oracle (3006) ──── 可选（预言机功能）
-  ├── POUE-Prover (3007) ──── 可选（ZK证明功能）
-  └── MCP-Router (3008) ──── 可选（MCP路由功能）
-```
-
-> **注意**: 仅 App (3000) 为必须服务，其余微服务可根据功能需求按需启动。缺少微服务仅影响对应功能模块，不会导致主应用崩溃。
+| 环境 | CPU | 内存 | 磁盘 | 网络 | 月成本估算 |
+|------|-----|------|------|------|-----------|
+| 开发环境 | 2 核 | 4 GB | 10 GB SSD | 5 Mbps | $0 (本地) |
+| 预发布 | 2 核 | 4 GB | 20 GB SSD | 10 Mbps | ~$20-40 |
+| 生产 (VPS) | 4 核 | 8 GB | 50 GB SSD | 50 Mbps | ~$40-80 |
+| 生产 (AWS ECS) | 2×512 CPU | 2×1GB | RDS 50GB | ALB | ~$200-500 |
+| 生产 (K8s) | 4+ 核 | 8+ GB | PV 100GB | LB | ~$300-800 |
 
 ---
 
-## 2. 环境要求
+## 2. Quick Start 快速开始
 
-### 2.1 硬件要求
+> **目标**: 5 分钟内在本地运行 BB Protocol，快速评估功能。
 
-#### 开发环境
+### 2.1 前提条件
 
-| 资源 | 最低要求 | 推荐配置 |
-|------|---------|---------|
-| CPU | 2 核 | 4 核 |
-| 内存 | 4 GB RAM | 8 GB RAM |
-| 磁盘 | 10 GB 可用空间 | 20 GB SSD |
-| 网络 | 稳定互联网连接 | 10 Mbps+ |
+```bash
+# 确保已安装 Bun (推荐) 或 Node.js 20+
+curl -fsSL https://bun.sh/install | bash
+source ~/.bashrc
 
-#### 生产环境
+# 验证安装
+bun --version   # >= 1.0.0
+node --version  # >= 20.0.0 (可选)
+git --version   # >= 2.30
+```
 
-| 资源 | 最低要求 | 推荐配置 |
-|------|---------|---------|
-| CPU | 4 核 | 8 核 |
-| 内存 | 8 GB RAM | 16 GB RAM |
-| 磁盘 | 50 GB SSD | 100 GB NVMe SSD |
-| 网络 | 50 Mbps | 100 Mbps+ |
+### 2.2 一键启动 (5步)
 
-> **提示**: 生产环境建议使用 NVMe SSD 以获得最佳数据库 I/O 性能。SQLite 在 SSD 上读写性能可达 HDD 的 10 倍以上。
+```bash
+# Step 1: 克隆仓库
+git clone https://github.com/your-org/bb-protocol.git && cd bb-protocol
 
-### 2.2 软件要求
+# Step 2: 安装依赖
+bun install
 
-| 软件 | 版本要求 | 用途 | 安装方式 |
-|------|---------|------|---------|
-| Node.js | 20+ | JavaScript 运行时 | [nvm](https://github.com/nvm-sh/nvm) / [fnm](https://github.com/Schniz/fnm) |
-| Bun | 1.0+ | 高性能运行时（推荐） | `curl -fsSL https://bun.sh/install \| bash` |
-| Git | 2.30+ | 版本控制 | 系统包管理器 |
-| Docker | 24+ | 容器化部署 | [官方文档](https://docs.docker.com/get-docker/) |
-| Docker Compose | 2.20+ | 容器编排 | 随 Docker Desktop 安装 |
-| SQLite3 | 3.39+ | 嵌入式数据库（Prisma 内置） | 随 Prisma 安装 |
+# Step 3: 配置环境变量
+cp .env.example .env
+# 快速评估仅需修改 NEXTAUTH_SECRET（生产部署需修改所有变量）
+sed -i "s/change-me-to-a-secure-random-string-at-least-32-chars/$(openssl rand -base64 32)/" .env
 
-**操作系统支持**：
+# Step 4: 初始化数据库
+bun run db:push && bun run db:generate
 
-- macOS 12+ (Monterey 及以上)
-- Ubuntu 22.04 LTS (推荐)
-- Debian 12+
-- CentOS Stream 9+
-- Windows 10/11 (通过 WSL2)
+# Step 5: 启动开发服务器
+bun run dev
+```
+
+### 2.3 验证部署
+
+```bash
+# 检查主应用
+curl -s http://localhost:3000/api/health | jq .
+
+# 预期输出:
+# { "status": "ok", "timestamp": "2026-03-05T...", "version": "5.0.0" }
+
+# 浏览器访问
+open http://localhost:3000
+```
+
+### 2.4 快速启动微服务 (可选)
+
+```bash
+# 在新终端窗口中启动核心微服务
+bash start-services.sh
+
+# 或单独启动
+cd mini-services/resonance-sim && bun run dev &   # 端口 3003
+cd mini-services/monitoring-sim && bun run dev &   # 端口 3004
+```
+
+> **注意**: 缺少微服务仅影响对应功能模块（如共振波形、监控面板），主应用不会崩溃，会自动 fallback 到 mock 数据。
 
 ---
 
-## 3. 环境变量配置
+## 3. 本地开发环境部署
 
-### 3.1 完整环境变量表
+### 3.1 概述
 
-| 变量名 | 必需 | 默认值 | 说明 |
-|--------|------|--------|------|
-| `DATABASE_URL` | ✅ | `file:./db/custom.db` | Prisma SQLite 数据库连接字符串 |
-| `NEXTAUTH_SECRET` | ✅ | - | NextAuth.js 密钥，生产环境必须修改 |
-| `NEXTAUTH_URL` | ✅ | `http://localhost:3000` | NextAuth.js 回调 URL |
-| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | ✅ | - | WalletConnect 项目 ID |
-| `NEXT_PUBLIC_CHAIN_ID` | ❌ | `8453` | 区块链 Chain ID (8453=Base主网, 84532=Sepolia测试网) |
-| `NEXT_PUBLIC_RPC_URL` | ❌ | `https://mainnet.base.org` | RPC 节点 URL |
-| `STRIPE_SECRET_KEY` | ❌ | `sk_test_placeholder` | Stripe 密钥 |
-| `STRIPE_WEBHOOK_SECRET` | ❌ | - | Stripe Webhook 签名密钥 |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | ❌ | `pk_test_placeholder` | Stripe 公钥 |
-| `STRIPE_STARTER_PRICE_ID` | ❌ | `price_starter_placeholder` | Starter 订阅价格 ID |
-| `STRIPE_PRO_PRICE_ID` | ❌ | `price_pro_placeholder` | Pro 订阅价格 ID |
-| `STRIPE_ENTERPRISE_PRICE_ID` | ❌ | `price_enterprise_placeholder` | Enterprise 订阅价格 ID |
-| `CORS_ORIGIN` | ❌ | `http://localhost:3000` | CORS 允许源 |
-| `NODE_ENV` | ✅ | `development` | 运行环境 (development/production) |
-| `NEXT_TELEMETRY_DISABLED` | ❌ | `0` | 禁用 Next.js 遥测 |
-| `VERSION` | ❌ | `5.0.0` | 应用版本号 |
-| `PORT` | ❌ | `3000` | 主应用端口 |
+本地开发环境支持完整的前后端 + 微服务开发体验，包括热重载、数据库管理、Web3 钱包连接等。
 
-### 3.2 .env.example 模板
+### 3.2 前提条件
+
+| 软件 | 版本要求 | 安装方式 | 验证命令 |
+|------|---------|---------|---------|
+| Bun | 1.0+ | `curl -fsSL https://bun.sh/install \| bash` | `bun --version` |
+| Node.js | 20+ | `nvm install 20` | `node --version` |
+| Git | 2.30+ | 系统包管理器 | `git --version` |
+| SQLite3 | 3.39+ | 随 Prisma 安装 | `sqlite3 --version` |
+
+**操作系统支持**: macOS 12+ / Ubuntu 22.04+ / Debian 12+ / Windows WSL2
+
+### 3.3 完整安装步骤
+
+```bash
+# ── Step 1: 克隆仓库 ─────────────────────────────────────
+git clone https://github.com/your-org/bb-protocol.git
+cd bb-protocol
+
+# ── Step 2: 安装依赖 ─────────────────────────────────────
+bun install
+
+# ── Step 3: 配置环境变量 ─────────────────────────────────
+cp .env.example .env
+
+# 必须修改的变量:
+# NEXTAUTH_SECRET — 生成方式:
+openssl rand -base64 32
+# 将输出填入 .env 中的 NEXTAUTH_SECRET
+
+# NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID — 从 https://cloud.walletconnect.com 获取
+
+# ── Step 4: 初始化数据库 ─────────────────────────────────
+bun run db:push      # 推送 Prisma Schema → SQLite
+bun run db:generate  # 生成 Prisma Client
+
+# ── Step 5: 种子数据 ─────────────────────────────────────
+# 先启动服务器，然后通过 API 初始化
+bun run dev &
+sleep 5
+curl -X POST http://localhost:3000/api/seed
+# 种子数据包含: 3 Avatar / 5 Skill / 收益记录 / 委托 / 时间线 / LP / 合规 / 多链
+
+# ── Step 6: 启动主应用 ───────────────────────────────────
+bun run dev
+# 访问 http://localhost:3000
+```
+
+### 3.4 启动微服务
+
+```bash
+# 每个微服务需在独立终端窗口启动:
+
+# 情绪共振模拟 (端口 3003, 广播间隔 6s/15-30s)
+cd mini-services/resonance-sim && bun --hot index.ts
+
+# 系统监控模拟 (端口 3004, 广播间隔 3s/10s)
+cd mini-services/monitoring-sim && bun --hot index.ts
+
+# IFD 权重计算 (端口 3005, 广播间隔 5s)
+cd mini-services/ifd-calculator && bun --hot index.ts
+
+# ECE 预言机 (端口 3006, 广播间隔 3s)
+cd mini-services/ece-oracle && bun --hot index.ts
+
+# POUE 证明引擎 (端口 3007, 广播间隔 8s)
+cd mini-services/poue-prover && bun --hot index.ts
+
+# MCP 路由 (端口 3008, 广播间隔 7s)
+cd mini-services/mcp-router && bun --hot index.ts
+```
+
+### 3.5 Caddy 网关 (开发环境)
+
+```bash
+# 安装 Caddy (macOS)
+brew install caddy
+
+# 安装 Caddy (Ubuntu)
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update && sudo apt install caddy
+
+# 启动 Caddy 网关 (端口 81)
+caddy run --config Caddyfile
+```
+
+### 3.6 验证所有服务
+
+```bash
+#!/bin/bash
+# health-check.sh — 批量健康检查
+services=("3000:App" "3003:Resonance-Sim" "3004:Monitoring-Sim" \
+          "3005:IFD-Calculator" "3006:ECE-Oracle" "3007:POUE-Prover" "3008:MCP-Router")
+
+for service in "${services[@]}"; do
+    IFS=':' read -r port name <<< "$service"
+    status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:$port/health 2>/dev/null || echo "000")
+    if [ "$status" == "200" ]; then
+        echo "✅ $name (:$port) — 在线"
+    else
+        echo "❌ $name (:$port) — 离线 (HTTP $status)"
+    fi
+done
+```
+
+### 3.7 开发环境故障排查
+
+| 问题 | 原因 | 解决方案 |
+|------|------|---------|
+| 端口被占用 | 旧进程未释放 | `lsof -i :3000` → `kill -9 <PID>` |
+| Prisma Client 未生成 | 安装后未运行 generate | `bun run db:generate` |
+| 数据库文件损坏 | 异常退出 | `rm -f db/custom.db && bun run db:push` |
+| Bun 安装失败 | lockfile 不一致 | `rm -rf node_modules bun.lock && bun install` |
+| WebSocket 连接失败 | 未通过 Caddy 网关 | 使用 `io("/?XTransformPort=3003")` 而非 `io("http://localhost:3003")` |
+| Hydration mismatch | `new Date()` 在 SSR/Client 不同 | 使用 `useClientTime()` hook |
+
+---
+
+## 4. Docker Compose 单机部署
+
+### 4.1 概述
+
+Docker Compose 适合单服务器部署场景，将所有服务（App + 6 微服务 + Caddy 网关）编排在一台主机上。
+
+### 4.2 前提条件
+
+```bash
+# 安装 Docker & Docker Compose
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+newgrp docker
+
+# 验证
+docker --version       # >= 24.0
+docker compose version # >= 2.20
+```
+
+### 4.3 完整 docker-compose.yml
+
+```yaml
+# docker-compose.yml — BB Protocol 生产环境 Docker Compose 配置
+version: "3.9"
+
+services:
+  # ── Next.js 主应用 ──────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
+        VERSION: "5.0.0"
+    container_name: bb-protocol-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:./db/production.db
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?NEXTAUTH_SECRET is required}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=${NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID:-}
+      - NEXT_PUBLIC_CHAIN_ID=${NEXT_PUBLIC_CHAIN_ID:-8453}
+      - NEXT_PUBLIC_RPC_URL=${NEXT_PUBLIC_RPC_URL:-https://mainnet.base.org}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+    volumes:
+      - app_data:/app/db
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ── Resonance-Sim 共振模拟 ──────────────────────────────
+  resonance-sim:
+    build:
+      context: .
+      dockerfile: mini-services/resonance-sim/Dockerfile
+    container_name: bb-protocol-resonance-sim
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── Monitoring-Sim 监控模拟 ──────────────────────────────
+  monitoring-sim:
+    build:
+      context: .
+      dockerfile: mini-services/monitoring-sim/Dockerfile
+    container_name: bb-protocol-monitoring-sim
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=production
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── IFD-Calculator 流体民主引擎 ─────────────────────────
+  ifd-calculator:
+    build:
+      context: ./mini-services/ifd-calculator
+      dockerfile: Dockerfile
+    container_name: bb-protocol-ifd-calculator
+    profiles:
+      - engine
+    restart: unless-stopped
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=production
+      - RPC_URL=${NEXT_PUBLIC_RPC_URL:-https://mainnet.base.org}
+      - CHAIN_ID=${NEXT_PUBLIC_CHAIN_ID:-8453}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── ECE-Oracle 情绪共识预言机 ──────────────────────────
+  ece-oracle:
+    build:
+      context: ./mini-services/ece-oracle
+      dockerfile: Dockerfile
+    container_name: bb-protocol-ece-oracle
+    profiles:
+      - engine
+    restart: unless-stopped
+    ports:
+      - "3006:3006"
+    environment:
+      - NODE_ENV=production
+      - RPC_URL=${NEXT_PUBLIC_RPC_URL:-https://mainnet.base.org}
+      - CHAIN_ID=${NEXT_PUBLIC_CHAIN_ID:-8453}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── POUE-Prover 认知理解证明引擎 ────────────────────────
+  poue-prover:
+    build:
+      context: ./mini-services/poue-prover
+      dockerfile: Dockerfile
+    container_name: bb-protocol-poue-prover
+    profiles:
+      - engine
+    restart: unless-stopped
+    ports:
+      - "3007:3007"
+    environment:
+      - NODE_ENV=production
+      - RPC_URL=${NEXT_PUBLIC_RPC_URL:-https://mainnet.base.org}
+      - CHAIN_ID=${NEXT_PUBLIC_CHAIN_ID:-8453}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3007/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── MCP-Router 模型上下文路由 ──────────────────────────
+  mcp-router:
+    build:
+      context: ./mini-services/mcp-router
+      dockerfile: Dockerfile
+    container_name: bb-protocol-mcp-router
+    profiles:
+      - engine
+    restart: unless-stopped
+    ports:
+      - "3008:3008"
+    environment:
+      - NODE_ENV=production
+      - RPC_URL=${NEXT_PUBLIC_RPC_URL:-https://mainnet.base.org}
+      - CHAIN_ID=${NEXT_PUBLIC_CHAIN_ID:-8453}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── Caddy 网关 ──────────────────────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    container_name: bb-protocol-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - internal
+    depends_on:
+      app:
+        condition: service_healthy
+      resonance-sim:
+        condition: service_healthy
+      monitoring-sim:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "caddy", "version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  app_data:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+
+networks:
+  internal:
+    driver: bridge
+```
+
+### 4.4 部署步骤
+
+```bash
+# ── Step 1: 配置环境变量 ─────────────────────────────────
+cp .env.example .env
+nano .env  # 填写 NEXTAUTH_SECRET, WALLETCONNECT_PROJECT_ID 等
+
+# ── Step 2: 构建并启动基础服务 ────────────────────────────
+docker compose up -d
+
+# ── Step 3: 启动完整服务（含 engine 微服务）──────────────
+docker compose --profile engine up -d
+
+# ── Step 4: 查看服务状态 ─────────────────────────────────
+docker compose ps
+
+# ── Step 5: 查看日志 ─────────────────────────────────────
+docker compose logs -f app
+```
+
+### 4.5 数据库备份
+
+```bash
+# 从容器中导出数据库
+docker compose cp app:/app/db/production.db ./backups/production-$(date +%Y%m%d).db
+
+# 自动备份脚本 (crontab)
+# 0 2 * * * cd /home/deploy/bb-protocol && docker compose cp app:/app/db/production.db ./backups/production-$(date +\%Y\%m\%d).db
+```
+
+### 4.6 Docker 环境故障排查
+
+| 问题 | 解决方案 |
+|------|---------|
+| 构建失败 `bun install` 超时 | 增加 Docker BuildKit 超时: `export DOCKER_BUILDKIT=0` |
+| 容器启动后立即退出 | 查看 logs: `docker compose logs app` |
+| 健康检查失败 | 检查 `curl` 是否可用，增加 `start_period` |
+| 数据库卷数据丢失 | 确保 `app_data` 卷正确挂载 |
+| 网络不通 | 检查 `internal` network: `docker network ls` |
+
+---
+
+## 5. Vercel Serverless 部署
+
+### 5.1 概述
+
+Vercel 部署适合 Next.js 主应用的 serverless 场景，**但微服务需要单独部署到 VPS/云服务器**。
+
+> ⚠️ **重要限制**: Vercel 不支持持久化文件系统（SQLite 不可用），需要外部数据库。WebSocket 微服务不支持 Vercel 部署。
+
+### 5.2 前提条件
+
+- Vercel 账号
+- Git 仓库已推送到 GitHub/GitLab/Bitbucket
+- 外部数据库 (Turso / PlanetScale / Neon)
+
+### 5.3 部署步骤
+
+```bash
+# ── Step 1: 安装 Vercel CLI ──────────────────────────────
+npm i -g vercel
+
+# ── Step 2: 登录 ─────────────────────────────────────────
+vercel login
+
+# ── Step 3: 部署 (预发布) ────────────────────────────────
+vercel
+
+# ── Step 4: 部署 (生产) ──────────────────────────────────
+vercel --prod
+```
+
+### 5.4 Vercel 项目配置
+
+在 Vercel Dashboard → Settings → General 中配置：
+
+```yaml
+Framework Preset: Next.js
+Build Command: bun run build
+Output Directory: .next
+Install Command: bun install
+Node.js Version: 20.x
+Node.js Options: --max-old-space-size=4096
+```
+
+### 5.5 环境变量配置
+
+| 变量名 | 值 | 环境 |
+|--------|---|------|
+| `DATABASE_URL` | Turso/Neon 连接字符串 | Production |
+| `NEXTAUTH_SECRET` | `openssl rand -base64 32` | Production |
+| `NEXTAUTH_URL` | `https://your-domain.com` | Production |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | WalletConnect 项目 ID | All |
+| `NEXT_PUBLIC_CHAIN_ID` | `8453` | Production |
+| `NEXT_PUBLIC_RPC_URL` | `https://mainnet.base.org` | Production |
+| `STRIPE_SECRET_KEY` | `sk_live_xxx` | Production |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_xxx` | Production |
+
+### 5.6 外部数据库配置 (推荐 Turso)
+
+```bash
+# ── 安装 Turso CLI ───────────────────────────────────────
+curl -sSfL https://get.tur.so/install.sh | bash
+
+# ── 创建数据库 ───────────────────────────────────────────
+turso db create bb-protocol-prod
+
+# ── 获取连接 URL ─────────────────────────────────────────
+turso db show bb-protocol-prod --url
+# 输出: libsql://bb-protocol-prod-xxx.turso.io
+
+# ── 创建 Auth Token ──────────────────────────────────────
+turso db tokens create bb-protocol-prod
+# 输出: eyJhbGciOiJF...
+
+# ── 设置环境变量 ─────────────────────────────────────────
+DATABASE_URL="libsql://bb-protocol-prod-xxx.turso.io?authToken=eyJhbGciOiJF..."
+```
+
+### 5.7 自定义域名
+
+```bash
+# 在 Vercel Dashboard → Settings → Domains 添加域名
+# DNS 配置:
+# 类型    名称    值
+# CNAME   @       cname.vercel-dns.com
+# CNAME   www     cname.vercel-dns.com
+
+# 或使用 Vercel CLI
+vercel domains add your-domain.com
+```
+
+### 5.8 Vercel 部署注意事项
+
+1. **微服务部署**: Resonance-Sim / Monitoring-Sim 等需部署到 VPS，通过 Caddy/Nginx 代理
+2. **WebSocket 限制**: Vercel Serverless Functions 不支持长连接，Socket.IO 需要外部服务
+3. **数据库迁移**: 部署前手动运行 `bun run db:migrate`，Vercel 构建时不自动执行
+4. **Cold Start**: Serverless 函数冷启动约 1-3 秒，对 WebSocket 重连有影响
+
+---
+
+## 6. VPS/云服务器部署
+
+### 6.1 概述
+
+VPS 部署是性价比最高的生产方案，使用 Nginx + PM2 + Let's Encrypt 实现完整的生产环境。
+
+### 6.2 前提条件
+
+- Ubuntu 22.04 LTS VPS（推荐 4核/8GB）
+- 域名已指向服务器 IP
+- SSH 访问权限
+
+### 6.3 服务器初始化
+
+```bash
+#!/bin/bash
+# server-init.sh — VPS 初始化脚本
+
+set -e
+
+# ── 系统更新 ─────────────────────────────────────────────
+sudo apt update && sudo apt upgrade -y
+
+# ── 安装基础工具 ─────────────────────────────────────────
+sudo apt install -y curl git build-essential
+
+# ── 安装 Bun ─────────────────────────────────────────────
+curl -fsSL https://bun.sh/install | bash
+source ~/.bashrc
+
+# ── 安装 Node.js 20 ─────────────────────────────────────
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# ── 安装 Nginx ──────────────────────────────────────────
+sudo apt install -y nginx
+
+# ── 安装 Certbot (Let's Encrypt) ────────────────────────
+sudo apt install -y certbot python3-certbot-nginx
+
+# ── 安装 PM2 ────────────────────────────────────────────
+sudo npm install -g pm2
+
+# ── 配置防火墙 ──────────────────────────────────────────
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw --force enable
+
+echo "✅ 服务器初始化完成！"
+```
+
+### 6.4 Nginx 反向代理配置
+
+```nginx
+# /etc/nginx/sites-available/bb-protocol
+
+# ── 上游服务定义 ──────────────────────────────────────────
+upstream nextjs_app {
+    server 127.0.0.1:3000;
+    keepalive 64;
+}
+
+upstream resonance_sim { server 127.0.0.1:3003; }
+upstream monitoring_sim { server 127.0.0.1:3004; }
+upstream ifd_calculator { server 127.0.0.1:3005; }
+upstream ece_oracle { server 127.0.0.1:3006; }
+upstream poue_prover { server 127.0.0.1:3007; }
+upstream mcp_router { server 127.0.0.1:3008; }
+
+# ── HTTP → HTTPS 重定向 ──────────────────────────────────
+server {
+    listen 80;
+    server_name your-domain.com www.your-domain.com;
+    return 301 https://$server_name$request_uri;
+}
+
+# ── HTTPS 主配置 ─────────────────────────────────────────
+server {
+    listen 443 ssl http2;
+    server_name your-domain.com www.your-domain.com;
+
+    # SSL 证书
+    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+
+    # SSL 优化
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    # 安全头部
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' wss: https: https://mainnet.base.org;" always;
+
+    # Gzip 压缩
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+    gzip_min_length 1000;
+    gzip_comp_level 6;
+
+    # 文件上传限制
+    client_max_body_size 10M;
+
+    # 主应用代理
+    location / {
+        proxy_pass http://nextjs_app;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+    }
+
+    # WebSocket 微服务代理
+    location /ws/resonance/ {
+        proxy_pass http://resonance_sim/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400s;
+    }
+
+    location /ws/monitoring/ {
+        proxy_pass http://monitoring_sim/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400s;
+    }
+
+    location /ws/ifd/ {
+        proxy_pass http://ifd_calculator/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400s;
+    }
+
+    location /ws/ece/ {
+        proxy_pass http://ece_oracle/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400s;
+    }
+
+    location /ws/poue/ {
+        proxy_pass http://poue_prover/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400s;
+    }
+
+    location /ws/mcp/ {
+        proxy_pass http://mcp_router/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400s;
+    }
+
+    # 静态资源长缓存
+    location /_next/static/ {
+        proxy_pass http://nextjs_app;
+        expires 365d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # 健康检查（无日志）
+    location /api/health {
+        proxy_pass http://nextjs_app;
+        access_log off;
+    }
+
+    access_log /var/log/nginx/bb-protocol-access.log;
+    error_log /var/log/nginx/bb-protocol-error.log;
+}
+```
+
+### 6.5 启用 Nginx 配置
+
+```bash
+# 创建软链接
+sudo ln -s /etc/nginx/sites-available/bb-protocol /etc/nginx/sites-enabled/
+
+# 移除默认配置
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# 测试配置
+sudo nginx -t
+
+# 重载配置
+sudo systemctl reload nginx
+```
+
+### 6.6 SSL 证书配置
+
+```bash
+# 获取 Let's Encrypt 证书
+sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+
+# 测试自动续期
+sudo certbot renew --dry-run
+
+# 查看续期定时器
+sudo systemctl status certbot.timer
+```
+
+### 6.7 PM2 进程管理配置
+
+```javascript
+// ecosystem.config.js — BB Protocol PM2 配置
+module.exports = {
+  apps: [
+    {
+      name: 'bb-protocol-app',
+      script: 'bun',
+      args: 'server.js',
+      cwd: '/home/deploy/bb-protocol',
+      instances: 1,
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3000,
+        DATABASE_URL: 'file:./db/production.db',
+        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+        NEXTAUTH_URL: 'https://your-domain.com',
+      },
+      max_memory_restart: '1G',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      error_file: '/var/log/pm2/bb-app-error.log',
+      out_file: '/var/log/pm2/bb-app-out.log',
+      merge_logs: true,
+    },
+    {
+      name: 'bb-resonance-sim',
+      script: 'bun',
+      args: 'index.ts',
+      cwd: '/home/deploy/bb-protocol/mini-services/resonance-sim',
+      instances: 1,
+      env: { NODE_ENV: 'production', PORT: 3003 },
+      max_memory_restart: '512M',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      error_file: '/var/log/pm2/bb-resonance-error.log',
+      out_file: '/var/log/pm2/bb-resonance-out.log',
+    },
+    {
+      name: 'bb-monitoring-sim',
+      script: 'bun',
+      args: 'index.ts',
+      cwd: '/home/deploy/bb-protocol/mini-services/monitoring-sim',
+      instances: 1,
+      env: { NODE_ENV: 'production', PORT: 3004 },
+      max_memory_restart: '512M',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      error_file: '/var/log/pm2/bb-monitoring-error.log',
+      out_file: '/var/log/pm2/bb-monitoring-out.log',
+    },
+    {
+      name: 'bb-ifd-calculator',
+      script: 'bun',
+      args: 'index.ts',
+      cwd: '/home/deploy/bb-protocol/mini-services/ifd-calculator',
+      instances: 1,
+      env: { NODE_ENV: 'production', PORT: 3005 },
+      max_memory_restart: '512M',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      error_file: '/var/log/pm2/bb-ifd-error.log',
+      out_file: '/var/log/pm2/bb-ifd-out.log',
+    },
+    {
+      name: 'bb-ece-oracle',
+      script: 'bun',
+      args: 'index.ts',
+      cwd: '/home/deploy/bb-protocol/mini-services/ece-oracle',
+      instances: 1,
+      env: { NODE_ENV: 'production', PORT: 3006 },
+      max_memory_restart: '512M',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      error_file: '/var/log/pm2/bb-ece-error.log',
+      out_file: '/var/log/pm2/bb-ece-out.log',
+    },
+    {
+      name: 'bb-poue-prover',
+      script: 'bun',
+      args: 'index.ts',
+      cwd: '/home/deploy/bb-protocol/mini-services/poue-prover',
+      instances: 1,
+      env: { NODE_ENV: 'production', PORT: 3007 },
+      max_memory_restart: '512M',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      error_file: '/var/log/pm2/bb-poue-error.log',
+      out_file: '/var/log/pm2/bb-poue-out.log',
+    },
+    {
+      name: 'bb-mcp-router',
+      script: 'bun',
+      args: 'index.ts',
+      cwd: '/home/deploy/bb-protocol/mini-services/mcp-router',
+      instances: 1,
+      env: { NODE_ENV: 'production', PORT: 3008 },
+      max_memory_restart: '512M',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      error_file: '/var/log/pm2/bb-mcp-error.log',
+      out_file: '/var/log/pm2/bb-mcp-out.log',
+    },
+  ],
+};
+```
+
+### 6.8 PM2 常用命令
+
+```bash
+# 启动所有服务
+pm2 start ecosystem.config.js
+
+# 查看状态
+pm2 status
+
+# 查看日志
+pm2 logs
+pm2 logs bb-protocol-app --lines 100
+
+# 重启服务
+pm2 restart bb-protocol-app
+pm2 restart all
+
+# 设置开机自启
+pm2 startup
+pm2 save
+
+# 监控面板
+pm2 monit
+```
+
+### 6.9 自动化部署脚本
+
+```bash
+#!/bin/bash
+# deploy.sh — BB Protocol 自动化部署脚本
+set -e
+
+PROJECT_DIR="/home/deploy/bb-protocol"
+BRANCH="main"
+BACKUP_DIR="/home/deploy/backups"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
+log_info()  { echo -e "${GREEN}[INFO]${NC} $1"; }
+log_warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+# ── 备份数据库 ────────────────────────────────────────────
+log_info "备份数据库..."
+mkdir -p $BACKUP_DIR
+cp $PROJECT_DIR/db/production.db $BACKUP_DIR/production-$TIMESTAMP.db
+
+# ── 拉取最新代码 ──────────────────────────────────────────
+log_info "拉取最新代码..."
+cd $PROJECT_DIR && git fetch origin && git checkout $BRANCH && git pull origin $BRANCH
+
+# ── 安装依赖 ──────────────────────────────────────────────
+log_info "安装依赖..."
+bun install
+
+# ── 数据库迁移 ────────────────────────────────────────────
+log_info "推送数据库 Schema..."
+bun run db:push
+
+# ── 构建应用 ──────────────────────────────────────────────
+log_info "构建 Next.js 应用..."
+bun run build
+
+# ── 重启服务 ──────────────────────────────────────────────
+log_info "重启 PM2 服务..."
+pm2 restart all
+
+# ── 健康检查 ──────────────────────────────────────────────
+log_info "执行健康检查..."
+sleep 10
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health)
+
+if [ "$HTTP_STATUS" == "200" ]; then
+    log_info "✅ 部署成功！"
+else
+    log_error "❌ 健康检查失败 (HTTP $HTTP_STATUS)"
+    pm2 restart all
+    log_warn "请检查日志: pm2 logs"
+fi
+
+# ── 清理旧备份 ────────────────────────────────────────────
+find $BACKUP_DIR -name "production-*.db" -mtime +30 -delete
+log_info "部署流程完成！"
+```
+
+### 6.10 VPS 部署验证
+
+```bash
+# 验证 HTTPS
+curl -I https://your-domain.com/api/health
+
+# 验证 SSL
+openssl s_client -connect your-domain.com:443 -servername your-domain.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
+
+# 验证所有服务
+pm2 status
+```
+
+---
+
+## 7. AWS (ECS/Fargate) 部署
+
+### 7.1 概述
+
+AWS ECS/Fargate 部署适合需要高可用、自动扩缩容的生产环境，使用 ALB + RDS + S3 + CloudFront 完整架构。
+
+### 7.2 架构图
+
+```
+┌─────────────┐     ┌──────────────────┐     ┌────────────────────┐
+│  CloudFront  │────▶│  ALB (HTTPS:443) │────▶│  ECS Fargate Tasks │
+│  CDN + S3    │     │  HTTP:80 → 301   │     │  App :3000 (2-10)  │
+└─────────────┘     └────────┬─────────┘     │  Resonance :3003   │
+                             │               │  Monitoring :3004  │
+                             │               │  IFD :3005         │
+                             │               │  ECE :3006         │
+                             │               │  PoUE :3007        │
+                             │               │  MCP :3008         │
+                             │               └────────┬───────────┘
+                             │                        │
+                    ┌────────▼────────┐     ┌────────▼───────────┐
+                    │  RDS PostgreSQL │     │  S3 (Assets/Static) │
+                    │  Multi-AZ       │     │  + IPFS Cache       │
+                    │  + Read Replica │     └────────────────────┘
+                    └─────────────────┘
+```
+
+### 7.3 前提条件
+
+- AWS 账号 + CLI 配置
+- ECR 仓库已创建
+- ACM SSL 证书 (us-east-1)
+- Route53 Hosted Zone
+
+### 7.4 Docker 镜像构建与推送
+
+```bash
+# ── 登录 ECR ─────────────────────────────────────────────
+aws ecr get-login-password --region us-east-1 | \
+  docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com
+
+# ── 构建并推送主应用镜像 ──────────────────────────────────
+docker build -t bb-protocol-app:latest .
+docker tag bb-protocol-app:latest <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/bb-protocol:latest
+docker push <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/bb-protocol:latest
+
+# ── 构建并推送微服务镜像 ──────────────────────────────────
+docker build -t bb-resonance-sim:latest -f mini-services/resonance-sim/Dockerfile .
+docker tag bb-resonance-sim:latest <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/bb-protocol:resonance-sim-latest
+docker push <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/bb-protocol:resonance-sim-latest
+```
+
+### 7.5 SSM Parameter Store 配置
+
+```bash
+# 存储敏感配置到 AWS SSM Parameter Store
+aws ssm put-parameter --name "/cognitive-avatar/production/DATABASE_URL" \
+  --value "postgresql://dbadmin:PASSWORD@RDS_ENDPOINT:5432/cognitive_avatar" \
+  --type "SecureString" --region us-east-1
+
+aws ssm put-parameter --name "/cognitive-avatar/production/NEXTAUTH_SECRET" \
+  --value "$(openssl rand -base64 32)" \
+  --type "SecureString" --region us-east-1
+
+aws ssm put-parameter --name "/cognitive-avatar/production/NEXTAUTH_URL" \
+  --value "https://your-domain.com" \
+  --type "SecureString" --region us-east-1
+```
+
+### 7.6 Terraform 部署
+
+```bash
+# ── 初始化 Terraform ─────────────────────────────────────
+cd terraform
+terraform init
+
+# ── 规划 ─────────────────────────────────────────────────
+terraform plan -var="environment=production" \
+  -var="ecr_repository_url=<ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/bb-protocol" \
+  -var="domain_name=your-domain.com" \
+  -var="route53_zone_id=ZXXXXXXXXXX" \
+  -var="rds_password=CHANGE_ME_SECURE_PASSWORD" \
+  -out=tfplan
+
+# ── 应用 ─────────────────────────────────────────────────
+terraform apply tfplan
+```
+
+### 7.7 AWS 部署验证
+
+```bash
+# 获取 ALB DNS
+terraform output alb_dns_name
+
+# 健康检查
+curl -s https://your-domain.com/api/health | jq .
+
+# 查看 ECS 服务状态
+aws ecs describe-services --cluster cognitive-avatar-production-cluster \
+  --services cognitive-avatar-production-app | jq '.services[0].status'
+```
+
+### 7.8 AWS 注意事项
+
+1. **RDS vs SQLite**: AWS 生产环境使用 PostgreSQL RDS，需修改 `DATABASE_URL` 和 Prisma Schema
+2. **NAT Gateway**: 私有子网通过 NAT Gateway 访问外网，会产生数据传输费用
+3. **ALB XTransformPort**: ALB Listener Rules 通过 `query_string` 匹配 `XTransformPort` 参数路由到不同 Target Group
+4. **Auto Scaling**: CPU > 70% 扩容，内存 > 80% 扩容，请求数 > 1000/target 扩容
+
+---
+
+## 8. Google Cloud Platform (Cloud Run) 部署
+
+### 8.1 概述
+
+GCP Cloud Run 适合无服务器容器部署，按请求计费，自动扩缩容至零。
+
+### 8.2 前提条件
+
+```bash
+# 安装 gcloud CLI
+curl https://sdk.cloud.google.com | bash
+gcloud auth login
+gcloud config set project YOUR_PROJECT_ID
+```
+
+### 8.3 部署步骤
+
+```bash
+# ── 启用 API ─────────────────────────────────────────────
+gcloud services enable run.googleapis.com
+gcloud services enable cloudbuild.googleapis.com
+gcloud services enable sqladmin.googleapis.com
+
+# ── 构建镜像 ─────────────────────────────────────────────
+gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/bb-protocol
+
+# ── 部署主应用到 Cloud Run ───────────────────────────────
+gcloud run deploy bb-protocol-app \
+  --image gcr.io/YOUR_PROJECT_ID/bb-protocol \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --port 3000 \
+  --memory 1Gi \
+  --cpu 1 \
+  --min-instances 1 \
+  --max-instances 10 \
+  --set-env-vars "NODE_ENV=production" \
+  --set-env-vars "NEXT_PUBLIC_CHAIN_ID=8453" \
+  --set-env-vars "NEXT_PUBLIC_RPC_URL=https://mainnet.base.org" \
+  --set-secrets "DATABASE_URL=bb-protocol-db-url:latest" \
+  --set-secrets "NEXTAUTH_SECRET=bb-protocol-auth-secret:latest"
+
+# ── 部署微服务 ───────────────────────────────────────────
+gcloud run deploy bb-resonance-sim \
+  --image gcr.io/YOUR_PROJECT_ID/bb-resonance-sim \
+  --platform managed \
+  --region us-central1 \
+  --port 3003 \
+  --memory 512Mi \
+  --min-instances 0 \
+  --max-instances 3
+
+# 对其他微服务重复上述命令（3004-3008）
+```
+
+### 8.4 Cloud SQL 配置
+
+```bash
+# ── 创建 Cloud SQL PostgreSQL 实例 ───────────────────────
+gcloud sql instances create bb-protocol-db \
+  --database-version POSTGRES_16 \
+  --tier db-f1-micro \
+  --region us-central1 \
+  --storage-auto-increase
+
+# ── 创建数据库 ───────────────────────────────────────────
+gcloud sql databases create cognitive_avatar --instance bb-protocol-db
+
+# ── 获取连接字符串 ───────────────────────────────────────
+gcloud sql instances describe bb-protocol-db --format="value(connectionName)"
+```
+
+### 8.5 GCP 注意事项
+
+- Cloud Run 不支持持久化 WebSocket 长连接（最大 60 分钟），微服务需考虑重连机制
+- 最小实例设为 0 时，冷启动约 5-10 秒
+- 使用 Cloud SQL Proxy 连接数据库
+
+---
+
+## 9. Microsoft Azure (App Service) 部署
+
+### 9.1 概述
+
+Azure App Service for Containers 提供托管的容器部署，适合企业级场景。
+
+### 9.2 前提条件
+
+```bash
+# 安装 Azure CLI
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+az login
+az configure --defaults location=eastus group=bb-protocol-rg
+```
+
+### 9.3 部署步骤
+
+```bash
+# ── 创建资源组 ───────────────────────────────────────────
+az group create --name bb-protocol-rg --location eastus
+
+# ── 创建 ACR ────────────────────────────────────────────
+az acr create --name bbprotocolacr --sku Basic --resource-group bb-protocol-rg
+
+# ── 构建并推送镜像 ───────────────────────────────────────
+az acr build --registry bbprotocolacr --image bb-protocol:latest .
+
+# ── 创建 App Service Plan ────────────────────────────────
+az appservice plan create \
+  --name bb-protocol-plan \
+  --resource-group bb-protocol-rg \
+  --sku P1V3 \
+  --is-linux
+
+# ── 创建 Web App ────────────────────────────────────────
+az webapp create \
+  --name bb-protocol-app \
+  --plan bb-protocol-plan \
+  --resource-group bb-protocol-rg \
+  --deployment-container-image-name bbprotocolacr.azurecr.io/bb-protocol:latest
+
+# ── 配置环境变量 ─────────────────────────────────────────
+az webapp config appsettings set \
+  --name bb-protocol-app \
+  --resource-group bb-protocol-rg \
+  --settings \
+    NODE_ENV=production \
+    NEXT_PUBLIC_CHAIN_ID=8453 \
+    NEXT_PUBLIC_RPC_URL=https://mainnet.base.org \
+    DATABASE_URL="file:./db/production.db"
+
+# ── 配置 Key Vault 引用（敏感变量）───────────────────────
+az webapp config appsettings set \
+  --name bb-protocol-app \
+  --resource-group bb-protocol-rg \
+  --settings \
+    NEXTAUTH_SECRET="@Microsoft.KeyVault(VaultName=bb-protocol-kv;SecretName=NextAuthSecret)"
+
+# ── 配置自定义域名 ───────────────────────────────────────
+az webapp config hostname add \
+  --hostname your-domain.com \
+  --webapp-name bb-protocol-app \
+  --resource-group bb-protocol-rg
+```
+
+### 9.4 Azure 部署验证
+
+```bash
+# 获取应用 URL
+az webapp show --name bb-protocol-app --resource-group bb-protocol-rg \
+  --query defaultHostName -o tsv
+
+# 健康检查
+curl -s https://bb-protocol-app.azurewebsites.net/api/health | jq .
+```
+
+---
+
+## 10. Kubernetes (K8s) 生产级编排
+
+### 10.1 概述
+
+Kubernetes 部署适合大规模生产环境，提供自动扩缩容、滚动更新、服务发现等企业级特性。
+
+### 10.2 Helm Chart 结构
+
+```
+helm/bb-protocol/
+├── Chart.yaml
+├── values.yaml
+├── values-production.yaml
+├── templates/
+│   ├── _helpers.tpl
+│   ├── app-deployment.yaml
+│   ├── app-service.yaml
+│   ├── app-hpa.yaml
+│   ├── app-ingress.yaml
+│   ├── app-configmap.yaml
+│   ├── app-secret.yaml
+│   ├── microservice-deployment.yaml
+│   ├── microservice-service.yaml
+│   ├── caddy-configmap.yaml
+│   ├── caddy-deployment.yaml
+│   ├── caddy-service.yaml
+│   ├── prometheus-configmap.yaml
+│   ├── grafana-configmap.yaml
+│   └── NOTES.txt
+```
+
+### 10.3 values.yaml
+
+```yaml
+# helm/bb-protocol/values.yaml
+global:
+  project: bb-protocol
+  environment: production
+
+app:
+  replicaCount: 2
+  image:
+    repository: your-registry/bb-protocol
+    tag: "5.0.0"
+    pullPolicy: IfNotPresent
+  port: 3000
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  env:
+    NODE_ENV: production
+    NEXT_PUBLIC_CHAIN_ID: "8453"
+    NEXT_PUBLIC_RPC_URL: "https://mainnet.base.org"
+  secrets:
+    DATABASE_URL: "CHANGE_ME"
+    NEXTAUTH_SECRET: "CHANGE_ME"
+    NEXTAUTH_URL: "https://your-domain.com"
+    STRIPE_SECRET_KEY: "CHANGE_ME"
+
+microservices:
+  resonance-sim:
+    enabled: true
+    port: 3003
+    replicaCount: 1
+    resources:
+      requests: { cpu: 128m, memory: 256Mi }
+      limits: { cpu: 256m, memory: 512Mi }
+  monitoring-sim:
+    enabled: true
+    port: 3004
+    replicaCount: 1
+    resources:
+      requests: { cpu: 128m, memory: 256Mi }
+      limits: { cpu: 256m, memory: 512Mi }
+  ifd-calculator:
+    enabled: true
+    port: 3005
+    replicaCount: 1
+  ece-oracle:
+    enabled: true
+    port: 3006
+    replicaCount: 1
+  poue-prover:
+    enabled: true
+    port: 3007
+    replicaCount: 1
+  mcp-router:
+    enabled: true
+    port: 3008
+    replicaCount: 1
+
+caddy:
+  enabled: true
+  image: caddy:2-alpine
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/websocket-services: "resonance-sim,monitoring-sim"
+  hosts:
+    - host: your-domain.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: app
+  tls:
+    - secretName: bb-protocol-tls
+      hosts:
+        - your-domain.com
+
+persistence:
+  enabled: true
+  storageClass: standard
+  size: 10Gi
+```
+
+### 10.4 主应用 Deployment
+
+```yaml
+# helm/bb-protocol/templates/app-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bb-protocol.fullname" . }}-app
+  labels:
+    {{- include "bb-protocol.labels" . | nindent 4 }}
+    app.kubernetes.io/component: app
+spec:
+  replicas: {{ .Values.app.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "bb-protocol.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: app
+  template:
+    metadata:
+      labels:
+        {{- include "bb-protocol.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: app
+    spec:
+      containers:
+        - name: app
+          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.app.port }}
+              protocol: TCP
+          env:
+            {{- range $key, $value := .Values.app.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ include "bb-protocol.fullname" . }}-app-secrets
+          resources:
+            {{- toYaml .Values.app.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: {{ .Values.app.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: {{ .Values.app.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: db-data
+              mountPath: /app/db
+      volumes:
+        - name: db-data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "bb-protocol.fullname" . }}-db-pvc
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+```
+
+### 10.5 Helm 部署命令
+
+```bash
+# ── 安装 Helm ────────────────────────────────────────────
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+# ── 安装 Ingress Controller ──────────────────────────────
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx --create-namespace
+
+# ── 安装 cert-manager ────────────────────────────────────
+helm repo add jetstack https://charts.jetstack.io
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager --create-namespace \
+  --set installCRDs=true
+
+# ── 部署 BB Protocol ────────────────────────────────────
+helm install bb-protocol ./helm/bb-protocol \
+  --namespace bb-protocol --create-namespace \
+  -f helm/bb-protocol/values-production.yaml \
+  --set app.secrets.DATABASE_URL="postgresql://..." \
+  --set app.secrets.NEXTAUTH_SECRET="$(openssl rand -base64 32)" \
+  --set app.secrets.NEXTAUTH_URL="https://your-domain.com"
+
+# ── 升级 ─────────────────────────────────────────────────
+helm upgrade bb-protocol ./helm/bb-protocol \
+  --namespace bb-protocol \
+  -f helm/bb-protocol/values-production.yaml \
+  --set app.image.tag="5.0.1"
+
+# ── 回滚 ─────────────────────────────────────────────────
+helm rollback bb-protocol 1 --namespace bb-protocol
+```
+
+### 10.6 K8s 部署验证
+
+```bash
+# 检查 Pod 状态
+kubectl get pods -n bb-protocol
+
+# 检查服务
+kubectl get svc -n bb-protocol
+
+# 查看 Ingress
+kubectl get ingress -n bb-protocol
+
+# 查看日志
+kubectl logs -f deployment/bb-protocol-app -n bb-protocol
+
+# 端口转发调试
+kubectl port-forward svc/bb-protocol-app 3000:3000 -n bb-protocol
+```
+
+---
+
+## 11. Terraform IaC 基础设施编排
+
+### 11.1 概述
+
+项目已包含完整的 Terraform 配置，位于 `terraform/` 目录，支持 AWS 基础设施的一键部署。
+
+### 11.2 文件结构
+
+```
+terraform/
+├── main.tf          # VPC, Subnets, Security Groups, NAT Gateway
+├── ecs.tf           # ECS Cluster, Task Definitions, ALB, Auto-scaling
+├── rds.tf           # RDS PostgreSQL, Parameter Group, Read Replica
+├── s3.tf            # S3 Buckets, CloudFront CDN, ACM Certificate
+├── variables.tf     # 所有可配置变量
+└── outputs.tf       # 输出值（endpoints, ARNs, etc.）
+```
+
+### 11.3 关键变量
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `environment` | (必填) | `staging` 或 `production` |
+| `aws_region` | `us-east-1` | AWS 区域 |
+| `app_cpu` | 512 | App Task CPU (1 vCPU = 1024) |
+| `app_memory` | 1024 | App Task 内存 (MiB) |
+| `app_desired_count` | 2 | App 实例数 |
+| `app_min_count` | 2 | 最小实例 |
+| `app_max_count` | 10 | 最大实例 |
+| `rds_instance_class` | db.t3.medium | RDS 实例类型 |
+| `domain_name` | (必填) | 主域名 |
+| `chain_id` | 8453 | Base L2 Chain ID |
+
+### 11.4 部署命令
+
+```bash
+# ── 初始化 ───────────────────────────────────────────────
+cd terraform
+terraform init -backend-config=backend.hcl
+
+# ── 创建 staging 环境 ────────────────────────────────────
+terraform workspace new staging
+terraform plan -var="environment=staging" \
+  -var="ecr_repository_url=xxx.dkr.ecr.us-east-1.amazonaws.com/bb-protocol" \
+  -var="domain_name=staging.your-domain.com" \
+  -var="route53_zone_id=ZXXXXX" \
+  -var="rds_password=CHANGE_ME" \
+  -out=staging.tfplan
+
+terraform apply staging.tfplan
+
+# ── 创建 production 环境 ─────────────────────────────────
+terraform workspace new production
+terraform plan -var="environment=production" \
+  -var="ecr_repository_url=xxx.dkr.ecr.us-east-1.amazonaws.com/bb-protocol" \
+  -var="domain_name=your-domain.com" \
+  -var="route53_zone_id=ZXXXXX" \
+  -var="rds_password=CHANGE_ME" \
+  -var="app_desired_count=3" \
+  -out=production.tfplan
+
+terraform apply production.tfplan
+```
+
+### 11.5 Terraform 输出
+
+```bash
+# 查看所有输出
+terraform output
+
+# 关键输出:
+# app_url                    = "https://your-domain.com"
+# alb_dns_name               = "bb-protocol-prod-alb-xxx.us-east-1.elb.amazonaws.com"
+# rds_endpoint               = "bb-protocol-prod-db.xxx.us-east-1.rds.amazonaws.com:5432"
+# cloudfront_domain_name     = "xxx.cloudfront.net"
+# ecs_cluster_name           = "bb-protocol-production-cluster"
+```
+
+### 11.6 GCP Terraform 示例
+
+```hcl
+# terraform/gcp/main.tf — GCP Cloud Run 部署示例
+provider "google" {
+  project = var.gcp_project_id
+  region  = var.gcp_region
+}
+
+resource "google_cloud_run_service" "app" {
+  name     = "bb-protocol-app"
+  location = var.gcp_region
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/${var.gcp_project_id}/bb-protocol:${var.app_image_tag}"
+        ports { container_port = 3000 }
+        resources {
+          limits = { cpu = "1", memory = "1Gi" }
+        }
+        env {
+          name  = "NODE_ENV"
+          value = "production"
+        }
+      }
+    }
+  }
+
+  traffic { percent = 100 latest_revision = true }
+}
+
+resource "google_cloud_run_service_iam_member" "public" {
+  service  = google_cloud_run_service.app.name
+  location = google_cloud_run_service.app.location
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+```
+
+### 11.7 Azure Terraform 示例
+
+```hcl
+# terraform/azure/main.tf — Azure App Service 部署示例
+provider "azurerm" {
+  features {}
+}
+
+resource "azurerm_resource_group" "main" {
+  name     = "bb-protocol-rg"
+  location = var.azure_location
+}
+
+resource "azurerm_container_registry" "acr" {
+  name                = "bbprotocolacr"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  sku                 = "Basic"
+}
+
+resource "azurerm_linux_web_app" "app" {
+  name                = "bb-protocol-app"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_service_plan.main.location
+  service_plan_id     = azurerm_service_plan.main.id
+
+  site_config {
+    linux_fx_image = "${azurerm_container_registry.acr.login_server}/bb-protocol:latest"
+  }
+
+  app_settings = {
+    NODE_ENV             = "production"
+    NEXT_PUBLIC_CHAIN_ID = "8453"
+    NEXT_PUBLIC_RPC_URL  = "https://mainnet.base.org"
+  }
+}
+```
+
+---
+
+## 12. GitHub Actions CI/CD 流水线
+
+### 12.1 概述
+
+完整的 CI/CD 流水线，支持自动化测试、构建、部署到 staging/production 环境。
+
+### 12.2 完整 workflow 配置
+
+```yaml
+# .github/workflows/deploy.yml
+name: BB Protocol CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ── 代码检查 ───────────────────────────────────────────
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bun run db:generate
+
+  # ── 单元测试 ───────────────────────────────────────────
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run db:push
+      - run: bun run db:generate
+      - run: bun run test --if-present
+
+  # ── E2E 测试 ───────────────────────────────────────────
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run db:push && bun run db:generate
+      - run: bun run build
+      - run: bun playwright install --with-deps
+      - run: bunx playwright test
+        env:
+          BASE_URL: http://localhost:3000
+
+  # ── 构建并推送 Docker 镜像 ─────────────────────────────
+  build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: [test, e2e]
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=sha,prefix=
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── 部署到 Staging ────────────────────────────────────
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to ECS Staging
+        run: |
+          aws ecs update-service \
+            --cluster bb-protocol-staging-cluster \
+            --service bb-protocol-staging-app \
+            --force-new-deployment
+
+      - name: Health Check
+        run: |
+          for i in $(seq 1 10); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://staging.your-domain.com/api/health)
+            if [ "$STATUS" == "200" ]; then
+              echo "✅ Staging deployment healthy"
+              exit 0
+            fi
+            echo "Waiting for staging... (attempt $i/10)"
+            sleep 15
+          done
+          echo "❌ Staging health check failed"
+          exit 1
+
+  # ── 部署到 Production ─────────────────────────────────
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to ECS Production
+        run: |
+          # 更新 Task Definition 使用新镜像
+          TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition bb-protocol-production-app \
+            --query 'taskDefinition' --output json)
+
+          NEW_TASK_DEF=$(echo "$TASK_DEF" | jq \
+            --arg IMAGE "${{ needs.build.outputs.image_tag }}" \
+            '.containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+
+          NEW_ARN=$(aws ecs register-task-definition \
+            --cli-input-json "$NEW_TASK_DEF" \
+            --query 'taskDefinition.taskDefinitionArn' --output text)
+
+          # 滚动更新
+          aws ecs update-service \
+            --cluster bb-protocol-production-cluster \
+            --service bb-protocol-production-app \
+            --task-definition "$NEW_ARN" \
+            --force-new-deployment
+
+      - name: Production Health Check
+        run: |
+          for i in $(seq 1 15); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://your-domain.com/api/health)
+            if [ "$STATUS" == "200" ]; then
+              echo "✅ Production deployment healthy"
+              exit 0
+            fi
+            echo "Waiting for production... (attempt $i/15)"
+            sleep 20
+          done
+          echo "❌ Production health check failed — initiating rollback"
+          aws ecs update-service \
+            --cluster bb-protocol-production-cluster \
+            --service bb-protocol-production-app \
+            --force-new-deployment
+          exit 1
+```
+
+### 12.3 必需的 GitHub Secrets
+
+| Secret 名称 | 说明 |
+|-------------|------|
+| `AWS_ACCESS_KEY_ID` | AWS 访问密钥 |
+| `AWS_SECRET_ACCESS_KEY` | AWS 密钥 |
+| `NEXTAUTH_SECRET` | 认证密钥 |
+| `DATABASE_URL` | 数据库连接字符串 |
+| `STRIPE_SECRET_KEY` | Stripe API 密钥 |
+
+---
+
+## 13. 数据库管理
+
+### 13.1 Prisma Migrate vs db:push
+
+| 特性 | `db:push` | `migrate dev` / `migrate deploy` |
+|------|-----------|----------------------------------|
+| 创建迁移文件 | ❌ 否 | ✅ 是 |
+| 适用于开发 | ✅ 推荐 | ⚠️ 可用 |
+| 适用于生产 | ❌ 不推荐 | ✅ 推荐 |
+| 数据丢失风险 | ⚠️ 可能 | ✅ 安全（可回滚） |
+| 速度 | ⚡ 快 | 🐢 较慢 |
+| 版本追踪 | ❌ 无 | ✅ 有 |
+
+### 13.2 开发环境数据库操作
+
+```bash
+# 推送 Schema 到数据库（开发阶段）
+bun run db:push
+
+# 创建命名迁移
+bunx prisma migrate dev --name add_avatar_skills
+
+# 生成 Prisma Client
+bun run db:generate
+
+# 重置数据库（清空所有数据）
+bun run db:reset
+
+# 打开 Prisma Studio（可视化管理）
+bunx prisma studio
+```
+
+### 13.3 生产环境数据库迁移
+
+```bash
+# ── 运行待执行的迁移 ─────────────────────────────────────
+bunx prisma migrate deploy
+
+# ── 检查迁移状态 ─────────────────────────────────────────
+bunx prisma migrate status
+
+# ── 回滚迁移（需要手动回滚 SQL）─────────────────────────
+# Prisma 不支持自动回滚，需要手动编写 down migration
+```
+
+### 13.4 数据库备份策略
+
+```bash
+#!/bin/bash
+# backup-db.sh — SQLite 数据库备份脚本
+
+DB_PATH="/home/deploy/bb-protocol/db/production.db"
+BACKUP_DIR="/home/deploy/backups/db"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+RETENTION_DAYS=30
+
+mkdir -p $BACKUP_DIR
+
+# ── SQLite 安全备份（使用 .backup 命令）──────────────────
+sqlite3 $DB_PATH ".backup '${BACKUP_DIR}/production-${TIMESTAMP}.db'"
+
+# ── 压缩备份 ─────────────────────────────────────────────
+gzip ${BACKUP_DIR}/production-${TIMESTAMP}.db
+
+# ── 上传到 S3（可选）─────────────────────────────────────
+# aws s3 cp ${BACKUP_DIR}/production-${TIMESTAMP}.db.gz \
+#   s3://bb-protocol-backups/db/
+
+# ── 清理旧备份 ──────────────────────────────────────────
+find $BACKUP_DIR -name "production-*.db.gz" -mtime +$RETENTION_DAYS -delete
+
+echo "✅ 数据库备份完成: production-${TIMESTAMP}.db.gz"
+```
+
+### 13.5 数据库恢复
+
+```bash
+# ── 停止应用 ─────────────────────────────────────────────
+pm2 stop bb-protocol-app
+
+# ── 恢复数据库 ───────────────────────────────────────────
+gunzip -c /home/deploy/backups/db/production-20260305_020000.db.gz > /home/deploy/bb-protocol/db/production.db
+
+# ── 验证数据库完整性 ─────────────────────────────────────
+sqlite3 /home/deploy/bb-protocol/db/production.db "PRAGMA integrity_check;"
+
+# ── 重启应用 ─────────────────────────────────────────────
+pm2 start bb-protocol-app
+```
+
+### 13.6 数据库扩容
+
+| 场景 | 方案 |
+|------|------|
+| SQLite → 多读 | 添加 SQLite WAL mode + Read replicas |
+| SQLite → 高并发 | 迁移到 PostgreSQL (RDS/Neon) |
+| PostgreSQL 扩展 | RDS Read Replica + Connection Pooling (PgBouncer) |
+| 全球用户 | 多区域 RDS + 读写分离 |
+
+---
+
+## 14. Stripe 支付配置
+
+### 14.1 概述
+
+BB Protocol 使用 Stripe + x402 双轨支付系统，Stripe 处理法币订阅，x402 处理微支付。
+
+### 14.2 Stripe 账户设置
+
+```bash
+# ── 1. 创建 Stripe 账户 ─────────────────────────────────
+# 访问 https://dashboard.stripe.com/register
+
+# ── 2. 获取 API 密钥 ────────────────────────────────────
+# Dashboard → Developers → API keys
+# - Publishable key: pk_test_xxx / pk_live_xxx
+# - Secret key: sk_test_xxx / sk_live_xxx
+
+# ── 3. 创建产品和价格 ───────────────────────────────────
+# Dashboard → Products → Add product
+
+# 使用 Stripe CLI 创建:
+stripe products create --name="BB Protocol Starter" --description="入门版订阅"
+stripe prices create --product=prod_XXX --unit-amount=999 --currency=usd --recurring[interval]=month
+```
+
+### 14.3 环境变量配置
+
+```bash
+# .env — Stripe 相关配置
+STRIPE_SECRET_KEY="sk_live_your_stripe_secret_key"
+STRIPE_WEBHOOK_SECRET="whsec_your_webhook_secret"
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_live_your_stripe_publishable_key"
+STRIPE_STARTER_PRICE_ID="price_starter_id"
+STRIPE_PRO_PRICE_ID="price_pro_id"
+STRIPE_ENTERPRISE_PRICE_ID="price_enterprise_id"
+```
+
+### 14.4 Webhook 配置
+
+```bash
+# ── 安装 Stripe CLI ──────────────────────────────────────
+brew install stripe/stripe-cli/stripe
+
+# ── 本地测试 Webhook ─────────────────────────────────────
+stripe listen --forward-to localhost:3000/api/stripe/webhook
+# 输出: whsec_xxx (填入 STRIPE_WEBHOOK_SECRET)
+
+# ── 生产 Webhook 端点配置 ───────────────────────────────
+# Dashboard → Developers → Webhooks → Add endpoint
+# Endpoint URL: https://your-domain.com/api/stripe/webhook
+# Events: checkout.session.completed, customer.subscription.updated, invoice.paid
+```
+
+### 14.5 Stripe API 路由
+
+| 路由 | 方法 | 说明 |
+|------|------|------|
+| `/api/stripe/create-session` | POST | 创建 Checkout Session |
+| `/api/stripe/webhook` | POST | 接收 Stripe Webhook |
+| `/api/stripe/subscription` | GET | 获取订阅状态 |
+| `/api/stripe/products` | GET | 获取产品列表 |
+| `/api/stripe/usage` | GET | 获取使用量 |
+| `/api/stripe/config` | GET | 获取 Stripe 配置 |
+| `/api/stripe/confirm` | POST | 确认支付 |
+| `/api/stripe/refund` | POST | 退款 |
+
+---
+
+## 15. Web3 配置
+
+### 15.1 概述
+
+BB Protocol 运行在 Base L2 (Chain ID: 8453) 上，使用 ConnectKit + Wagmi + viem 实现 Web3 集成，包含 10 个 Solidity 智能合约。
+
+### 15.2 WalletConnect 配置
+
+```bash
+# ── 1. 创建 WalletConnect 项目 ──────────────────────────
+# 访问 https://cloud.walletconnect.com
+# Create Project → 获取 Project ID
+
+# ── 2. 配置环境变量 ─────────────────────────────────────
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID="your-project-id"
+NEXT_PUBLIC_CHAIN_ID="8453"
+NEXT_PUBLIC_RPC_URL="https://mainnet.base.org"
+```
+
+### 15.3 RPC 端点配置
+
+| 网络 | Chain ID | RPC URL | 用途 |
+|------|----------|---------|------|
+| Base Mainnet | 8453 | `https://mainnet.base.org` | 生产环境 |
+| Base Sepolia | 84532 | `https://sepolia.base.org` | 测试环境 |
+| Alchemy Base | 8453 | `https://base-mainnet.g.alchemy.com/v2/YOUR_KEY` | 高可用 |
+| Infura Base | 8453 | `https://base-mainnet.infura.io/v3/YOUR_KEY` | 高可用 |
+
+### 15.4 智能合约部署
+
+```bash
+# ── 安装 Foundry ─────────────────────────────────────────
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+
+# ── 编译合约 ─────────────────────────────────────────────
+cd contracts
+forge build
+
+# ── 部署到 Base Sepolia (测试) ───────────────────────────
+forge script script/Deploy.s.sol:DeployScript \
+  --rpc-url https://sepolia.base.org \
+  --private-key $PRIVATE_KEY \
+  --broadcast
+
+# ── 部署到 Base Mainnet (生产) ──────────────────────────
+forge script script/Deploy.s.sol:DeployScript \
+  --rpc-url https://mainnet.base.org \
+  --private-key $PRIVATE_KEY \
+  --broadcast \
+  --verify
+```
+
+### 15.5 合约清单
+
+| 合约 | 文件 | 说明 |
+|------|------|------|
+| AvatarCore | `AvatarCore.sol` | 认知分身核心 |
+| SkillVault | `SkillVault.sol` | 技能金库 |
+| DynamicSplitter | `DynamicSplitter.sol` | 动态分账 |
+| CircuitGuard | `CircuitGuard.sol` | 熔断保护 |
+| GovernanceToken | `GovernanceToken.sol` | 治理代币 |
+| IFDRouter | `IFDRouter.sol` | 流体民主路由 |
+| ECEOracle | `ECEOracle.sol` | 情绪共识预言机 |
+| PoUEVerifier | `PoUEVerifier.sol` | 认知理解证明 |
+| MCPRouter | `MCPRouter.sol` | MCP 路由合约 |
+| TokenVault | `TokenVault.sol` | 代币金库 |
+
+---
+
+## 16. 微服务部署与健康监控
+
+### 16.1 微服务架构概览
+
+```
+                        ┌───────────────────────────────────┐
+                        │     Caddy Gateway (:81)           │
+                        │  XTransformPort Query Routing     │
+                        └──┬──┬──┬──┬──┬──┬──┬──────────────┘
+                           │  │  │  │  │  │  │
+          ┌────────────────┘  │  │  │  │  │  └───────────────┐
+          ▼                   ▼  ▼  ▼  ▼  ▼                  ▼
+    ┌──────────┐  ┌────────┐ ┌────────┐ ┌────────┐  ┌──────────┐
+    │  App     │  │Reson   │ │Monit   │ │IFD/ECE │  │  MCP     │
+    │  :3000   │  │:3003   │ │:3004   │ │:3005-6 │  │:3007-8   │
+    │  HTTP    │  │WS 6s   │ │WS 3s   │ │WS 3-5s │  │WS 7-8s   │
+    └──────────┘  └────────┘ └────────┘ └────────┘  └──────────┘
+```
+
+### 16.2 各微服务详情
+
+| 微服务 | 端口 | 广播间隔 | 功能描述 | 关键指标 |
+|--------|------|---------|---------|---------|
+| Resonance-Sim | 3003 | 6s (共振) / 15-30s (收益) | 情绪共振模拟，提供实时共振强度数据 | resonanceLevel, revenueEvents |
+| Monitoring-Sim | 3004 | 3s (指标) / 10s (链上事件) | 系统监控，CPU/Memory/Network 指标 | cpuUsage, memoryUsage, chainEvents |
+| IFD-Calculator | 3005 | 5s (权重更新) | 流体民主权重计算引擎 | totalWeight, nodes, cycles |
+| ECE-Oracle | 3006 | 3s (价格更新) | 情绪共识预言机 | assetsTracked, priceUpdates |
+| POUE-Prover | 3007 | 8s (证明提交) | 认知理解证明引擎 | proofsGenerated, verificationRate |
+| MCP-Router | 3008 | 7s (请求路由) | 模型上下文协议路由 | requestsRouted, activeModels |
+
+### 16.3 微服务健康检查
+
+```bash
+# 批量健康检查脚本
+#!/bin/bash
+services=("3000:App" "3003:Resonance-Sim" "3004:Monitoring-Sim" \
+          "3005:IFD-Calculator" "3006:ECE-Oracle" "3007:POUE-Prover" "3008:MCP-Router")
+
+echo "=== BB Protocol 服务健康状态 ==="
+for service in "${services[@]}"; do
+    IFS=':' read -r port name <<< "$service"
+    status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:$port/health 2>/dev/null || echo "000")
+    if [ "$status" == "200" ]; then
+        echo "✅ $name (:$port) — 在线"
+    else
+        echo "❌ $name (:$port) — 离线 (HTTP $status)"
+    fi
+done
+```
+
+### 16.4 前端连接方式
+
+```typescript
+// ✅ 正确: 通过 Caddy 网关 + XTransformPort 连接
+import { io } from 'socket.io-client';
+
+const resonanceSocket = io('/?XTransformPort=3003');
+const monitoringSocket = io('/?XTransformPort=3004');
+
+// ❌ 错误: 直接连接微服务 (CORS 问题 + 安全风险)
+const badSocket = io('http://localhost:3003');  // 禁止！
+```
+
+### 16.5 Caddy 网关 XTransformPort 配置
+
+```caddyfile
+:81 {
+    @transform_port_query {
+        query XTransformPort=*
+    }
+    handle @transform_port_query {
+        reverse_proxy localhost:{query.XTransformPort} {
+            header_up Host {host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+    handle {
+        reverse_proxy localhost:3000 {
+            header_up Host {host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+}
+```
+
+---
+
+## 17. 监控与可观测性
+
+### 17.1 概述
+
+生产环境需要完整的监控体系，包括指标采集、日志聚合、告警通知。
+
+### 17.2 Prometheus + Grafana 配置
+
+```yaml
+# monitoring/docker-compose.monitoring.yml
+version: "3.9"
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: bb-protocol-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=30d'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: bb-protocol-grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    depends_on:
+      - prometheus
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: bb-protocol-node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+
+volumes:
+  prometheus_data:
+  grafana_data:
+```
+
+### 17.3 Prometheus 配置
+
+```yaml
+# monitoring/prometheus.yml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'bb-protocol-app'
+    metrics_path: '/api/health'
+    static_configs:
+      - targets: ['host.docker.internal:3000']
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: 'caddy'
+    static_configs:
+      - targets: ['host.docker.internal:81']
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+rule_files:
+  - 'alert_rules.yml'
+```
+
+### 17.4 告警规则
+
+```yaml
+# monitoring/alert_rules.yml
+groups:
+  - name: bb-protocol-alerts
+    rules:
+      - alert: HighCPUUsage
+        expr: process_cpu_seconds_total > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+
+      - alert: ServiceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.instance }} is down"
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes > 1073741824
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Memory usage exceeds 1GB"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "5XX error rate exceeds 5%"
+```
+
+### 17.5 日志聚合
+
+```bash
+# PM2 日志轮转
+pm2 install pm2-logrotate
+pm2 set pm2-logrotate:max_size 50M
+pm2 set pm2-logrotate:retain 30
+pm2 set pm2-logrotate:compress true
+
+# Docker 日志
+docker compose logs -f --since 1h app
+
+# Nginx 日志
+tail -f /var/log/nginx/bb-protocol-access.log
+tail -f /var/log/nginx/bb-protocol-error.log
+```
+
+---
+
+## 18. 安全加固
+
+### 18.1 SSL/TLS 配置
+
+```nginx
+# Nginx SSL 最佳实践
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384;
+ssl_prefer_server_ciphers off;
+ssl_session_cache shared:SSL:10m;
+ssl_session_timeout 1d;
+ssl_session_tickets off;
+```
+
+### 18.2 安全头部
+
+```nginx
+# 安全 HTTP 头部配置
+add_header X-Frame-Options "DENY" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-XSS-Protection "1; mode=block" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' wss: https: https://mainnet.base.org https://api.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com;" always;
+add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+```
+
+### 18.3 CORS 配置
+
+```bash
+# .env — CORS 配置
+CORS_ORIGIN="https://your-domain.com"  # 仅允许生产域名
+
+# 微服务 CORS 设置
+# 每个 Socket.IO 服务仅允许来自 CORS_ORIGIN 的连接
+```
+
+### 18.4 Rate Limiting
+
+```nginx
+# Nginx 限流配置
+limit_req_zone $binary_remote_addr zone=api:10m rate=30r/m;
+limit_req_zone $binary_remote_addr zone=auth:10m rate=5r/m;
+
+location /api/ {
+    limit_req zone=api burst=10 nodelay;
+    proxy_pass http://nextjs_app;
+}
+
+location /api/stripe/ {
+    limit_req zone=auth burst=3 nodelay;
+    proxy_pass http://nextjs_app;
+}
+```
+
+### 18.5 密钥管理
+
+```bash
+# ⚠️ 安全警告: 绝不要将密钥提交到 Git
+
+# 方案 1: .env 文件 (开发/小规模)
+echo ".env" >> .gitignore
+
+# 方案 2: AWS SSM Parameter Store (生产推荐)
+aws ssm put-parameter --name "/bb-protocol/prod/NEXTAUTH_SECRET" \
+  --value "$(openssl rand -base64 32)" --type "SecureString"
+
+# 方案 3: AWS Secrets Manager (高安全)
+aws secretsmanager create-secret \
+  --name bb-protocol/prod/secrets \
+  --secret-string '{"DATABASE_URL":"...","NEXTAUTH_SECRET":"..."}'
+
+# 方案 4: HashiCorp Vault (企业级)
+vault kv put secret/bb-protocol NEXTAUTH_SECRET="$(openssl rand -base64 32)"
+```
+
+### 18.6 防火墙配置
+
+```bash
+# ── UFW 防火墙规则 ─────────────────────────────────────
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# 允许 SSH (建议限制来源 IP)
+sudo ufw allow from YOUR_IP to any port 22
+
+# 允许 HTTP/HTTPS
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+# 拒绝直接访问内部端口
+sudo ufw deny 3000:3008/tcp
+
+sudo ufw --force enable
+sudo ufw status verbose
+```
+
+---
+
+## 19. 备份与灾难恢复
+
+### 19.1 备份策略
+
+| 数据类型 | 备份频率 | 保留期限 | 存储位置 |
+|---------|---------|---------|---------|
+| SQLite 数据库 | 每日 2:00 AM | 30 天 | 本地 + S3 |
+| RDS PostgreSQL | 自动（RDS 备份） | 7 天 | AWS RDS |
+| .env 配置 | 每次变更 | 无限 | AWS SSM |
+| Docker 镜像 | 每次构建 | 10 个版本 | ECR/GHCR |
+| 合约 ABI | 每次部署 | 无限 | Git |
+
+### 19.2 自动化备份脚本
+
+```bash
+#!/bin/bash
+# backup-all.sh — 完整备份脚本
+set -e
+
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR="/home/deploy/backups"
+S3_BUCKET="s3://bb-protocol-backups"
+
+# ── 数据库备份 ───────────────────────────────────────────
+sqlite3 /home/deploy/bb-protocol/db/production.db \
+  ".backup '${BACKUP_DIR}/db/production-${TIMESTAMP}.db'"
+gzip ${BACKUP_DIR}/db/production-${TIMESTAMP}.db
+
+# ── 配置备份 ─────────────────────────────────────────────
+cp /home/deploy/bb-protocol/.env ${BACKUP_DIR}/config/env-${TIMESTAMP}
+
+# ── 上传到 S3 ───────────────────────────────────────────
+aws s3 sync ${BACKUP_DIR}/db/ ${S3_BUCKET}/db/ --exclude "*" --include "*${TIMESTAMP}*"
+
+# ── Point-in-time 恢复标记 ──────────────────────────────
+echo "${TIMESTAMP}" > ${BACKUP_DIR}/latest-backup.txt
+
+echo "✅ 完整备份完成: ${TIMESTAMP}"
+```
+
+### 19.3 灾难恢复流程
+
+```bash
+# ── 场景 1: 数据库损坏 ──────────────────────────────────
+pm2 stop bb-protocol-app
+LATEST=$(ls -t /home/deploy/backups/db/production-*.db.gz | head -1)
+gunzip -c $LATEST > /home/deploy/bb-protocol/db/production.db
+sqlite3 /home/deploy/bb-protocol/db/production.db "PRAGMA integrity_check;"
+pm2 start bb-protocol-app
+
+# ── 场景 2: 服务器宕机 ──────────────────────────────────
+# 1. 启动新 VPS
+# 2. 运行 server-init.sh
+# 3. 克隆仓库 + 配置 .env
+# 4. 从 S3 恢复数据库:
+aws s3 cp s3://bb-protocol-backups/db/production-XXXXXX.db.gz /tmp/
+gunzip /tmp/production-XXXXXX.db.gz
+cp /tmp/production-XXXXXX.db /home/deploy/bb-protocol/db/production.db
+# 5. bun install && bun run build && pm2 start ecosystem.config.js
+
+# ── 场景 3: 合约升级失败 ────────────────────────────────
+# 使用 Foundry 部署新合约 → 更新前端合约地址 → 验证
+```
+
+### 19.4 备份验证
+
+```bash
+# 每周验证备份完整性
+#!/bin/bash
+LATEST=$(ls -t /home/deploy/backups/db/production-*.db.gz | head -1)
+TEMP_DB="/tmp/verify-$(date +%s).db"
+gunzip -c $LATEST > $TEMP_DB
+RESULT=$(sqlite3 $TEMP_DB "PRAGMA integrity_check;")
+rm $TEMP_DB
+
+if [ "$RESULT" == "ok" ]; then
+    echo "✅ 备份验证通过: $LATEST"
+else
+    echo "❌ 备份损坏: $LATEST" | mail -s "BB Protocol Backup Alert" admin@your-domain.com
+fi
+```
+
+---
+
+## 20. 扩缩容策略
+
+### 20.1 水平扩展 (Horizontal Scaling)
+
+| 组件 | 扩展方式 | 最小 | 最大 | 触发条件 |
+|------|---------|------|------|---------|
+| App (ECS) | Auto Scaling | 2 | 10 | CPU > 70% / 内存 > 80% / 请求数 > 1000/target |
+| Resonance-Sim | 手动 | 1 | 3 | WebSocket 连接数 > 500 |
+| Monitoring-Sim | 手动 | 1 | 3 | 数据采集延迟 > 5s |
+| RDS | Read Replica | 1 | 3 | 连接数 > 80% / 查询延迟 > 100ms |
+
+### 20.2 垂直扩展 (Vertical Scaling)
+
+| 组件 | 最小 | 推荐 | 最大 |
+|------|------|------|------|
+| App CPU | 256 | 512 | 2048 |
+| App 内存 | 512Mi | 1Gi | 4Gi |
+| RDS 实例 | db.t3.micro | db.t3.medium | db.r6g.xlarge |
+| Redis (可选) | 128Mi | 256Mi | 1Gi |
+
+### 20.3 负载均衡
+
+```
+                     ┌────────────────────┐
+                     │  Load Balancer      │
+                     │  (ALB / Nginx)      │
+                     └──┬────┬────┬────────┘
+                        │    │    │
+              ┌─────────┘    │    └──────────┐
+              ▼              ▼               ▼
+        ┌──────────┐  ┌──────────┐  ┌──────────┐
+        │  App #1  │  │  App #2  │  │  App #3  │
+        │  :3000   │  │  :3000   │  │  :3000   │
+        └──────────┘  └──────────┘  └──────────┘
+              │              │               │
+              └──────────────┼───────────────┘
+                             ▼
+                    ┌──────────────────┐
+                    │  RDS PostgreSQL   │
+                    │  + Read Replica   │
+                    └──────────────────┘
+```
+
+### 20.4 数据库扩展路径
+
+```
+SQLite (开发)
+  ↓ 高并发需求
+PostgreSQL RDS Single-AZ (staging)
+  ↓ 高可用需求
+PostgreSQL RDS Multi-AZ + Read Replica (production)
+  ↓ 全球用户
+Aurora PostgreSQL + Global Database (enterprise)
+```
+
+---
+
+## 21. 故障排查指南
+
+### 21.1 常见问题与解决方案
+
+| # | 问题 | 症状 | 原因 | 解决方案 |
+|---|------|------|------|---------|
+| 1 | 端口被占用 | `EADDRINUSE` | 旧进程未释放 | `lsof -i :3000` → `kill -9 <PID>` |
+| 2 | Prisma Client 未生成 | `Cannot find module '.prisma/client'` | 安装后未 generate | `bun run db:generate` |
+| 3 | 数据库损坏 | `SQLITE_CORRUPT` | 异常关机 | `rm -f db/custom.db && bun run db:push` |
+| 4 | WebSocket 断连 | 仪表盘数据停止更新 | 微服务离线 | 检查 `pm2 status` → 重启对应服务 |
+| 5 | Hydration mismatch | 控制台 Warning | SSR/Client 时间不同 | 确认使用 `useClientTime()` hook |
+| 6 | CORS 错误 | 浏览器控制台 CORS | 直接连接微服务 | 使用 Caddy `XTransformPort` 网关 |
+| 7 | Stripe Webhook 失败 | 支付状态不更新 | Webhook 签名不匹配 | 检查 `STRIPE_WEBHOOK_SECRET` |
+| 8 | 钱包连接失败 | ConnectKit 不弹出 | WalletConnect ID 缺失 | 检查 `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` |
+| 9 | 构建 OOM | `FATAL ERROR: Reached heap limit` | 内存不足 | `NODE_OPTIONS=--max-old-space-size=4096` |
+| 10 | 502 Bad Gateway | Nginx 返回 502 | App 未启动 | `pm2 restart bb-protocol-app` |
+
+### 21.2 日志查看命令
+
+```bash
+# ── PM2 日志 ─────────────────────────────────────────────
+pm2 logs bb-protocol-app --lines 200
+
+# ── Docker 日志 ──────────────────────────────────────────
+docker compose logs -f app --since 1h
+
+# ── Nginx 日志 ──────────────────────────────────────────
+tail -200 /var/log/nginx/bb-protocol-error.log
+
+# ── 系统日志 ────────────────────────────────────────────
+journalctl -u nginx --since "1 hour ago"
+```
+
+### 21.3 性能诊断
+
+```bash
+# ── Node.js 性能分析 ────────────────────────────────────
+NODE_OPTIONS="--inspect" bun run dev
+# 在 Chrome DevTools → Node.js 中连接
+
+# ── 内存泄漏排查 ────────────────────────────────────────
+pm2 start ecosystem.config.js --node-args="--max-old-space-size=4096"
+pm2 logs bb-protocol-app | rg "memory"
+
+# ── 网络延迟排查 ────────────────────────────────────────
+curl -w "DNS: %{time_namelookup}s\nConnect: %{time_connect}s\nTLS: %{time_appconnect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n" \
+  -o /dev/null -s https://your-domain.com/api/health
+```
+
+---
+
+## 22. 常见问题 (FAQ)
+
+### Q1: 必须启动所有 6 个微服务吗？
+
+**不需要。** 仅 App (3000) 为必须服务。其余微服务根据功能需求按需启动：
+- **推荐启动**: Resonance-Sim (3003) + Monitoring-Sim (3004) — 仪表盘核心数据
+- **可选启动**: IFD-Calculator (3005) ~ MCP-Router (3008) — 高级功能
+- 缺少微服务时，前端自动 fallback 到 mock 数据，不会崩溃
+
+### Q2: 可以用 Node.js 替代 Bun 吗？
+
+**可以。** 项目兼容 Node.js 20+，但推荐使用 Bun：
+- Bun 安装速度约 npm 的 30 倍
+- Bun 运行时启动更快
+- PM2 中 `script: 'bun'` 可改为 `script: 'node'`
+
+### Q3: SQLite 适合生产环境吗？
+
+SQLite 适合中小规模部署（< 100 并发写入）。高并发场景建议迁移到：
+- **Turso** (libSQL，Serverless SQLite 兼容)
+- **Neon** (Serverless PostgreSQL)
+- **RDS PostgreSQL** (AWS 托管)
+
+### Q4: 如何从 SQLite 迁移到 PostgreSQL？
+
+```bash
+# 1. 修改 prisma/schema.prisma
+# datasource db {
+#   provider = "postgresql"
+#   url      = env("DATABASE_URL")
+# }
+
+# 2. 设置新 DATABASE_URL
+# DATABASE_URL="postgresql://user:pass@host:5432/db"
+
+# 3. 推送 Schema
+bunx prisma db push
+
+# 4. 迁移数据（使用 prisma migrate 或手动 SQL 导出/导入）
+```
+
+### Q5: 微服务可以部署到不同服务器吗？
+
+**可以。** 只需确保：
+1. 所有微服务通过统一网关（Caddy/Nginx/ALB）暴露
+2. 前端使用 `XTransformPort` 参数路由
+3. CORS_ORIGIN 配置正确
+
+### Q6: 如何更新微服务而不影响用户？
+
+```bash
+# 滚动更新策略:
+# 1. 启动新版本微服务
+pm2 start bb-resonance-sim-new
+
+# 2. 更新网关路由指向新服务
+
+# 3. 验证新服务健康
+curl http://localhost:3003/health
+
+# 4. 停止旧版本
+pm2 stop bb-resonance-sim-old
+```
+
+### Q7: x402 支付是什么？
+
+x402 是基于 HTTP 402 状态码的微支付协议，允许按使用量付费。与 Stripe 订阅模式互补，适合 API 调用、技能使用等微交易场景。
+
+### Q8: 如何支持多语言？
+
+项目已内置 8 种语言支持 (zh/en/ja/ko/es/fr/de/ar)，使用自定义 `useI18n` hook + `t()` 函数。语言文件位于 `src/lib/messages/` 目录。
+
+### Q9: 合约部署到 Base L2 的费用是多少？
+
+Base L2 Gas 费用极低（通常 < $0.01/交易），10 个合约部署总费用约 $0.5-2.0。
+
+### Q10: 如何监控系统健康状态？
+
+- **开发**: `bash health-check.sh`
+- **生产**: Prometheus + Grafana (Section 17)
+- **AWS**: CloudWatch Alarms + Container Insights
+- **前端**: 页面头部显示 Service Health Indicator (绿/黄点 + 连接数)
+
+---
+
+## 附录
+
+### A. 环境变量完整参考
 
 ```bash
 # =============================================================================
@@ -207,2304 +2899,45 @@ VERSION="5.0.0"
 PORT="3000"
 ```
 
-### 3.3 生成 NEXTAUTH_SECRET
+### B. 生成 NEXTAUTH_SECRET
 
 ```bash
-# 使用 OpenSSL 生成随机密钥
+# OpenSSL
 openssl rand -base64 32
 
-# 或使用 Node.js
+# Node.js
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
-# 或使用 Bun
+# Bun
 bun -e "console.log(Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64'))"
 ```
 
----
-
-## 4. 本地开发部署
-
-### 4.1 克隆仓库
+### C. Docker 常用命令速查
 
 ```bash
-# 通过 HTTPS
-git clone https://github.com/your-org/bb-protocol.git
-cd bb-protocol
-
-# 或通过 SSH
-git clone git@github.com:your-org/bb-protocol.git
-cd bb-protocol
+docker compose up -d                    # 启动所有服务
+docker compose --profile engine up -d   # 启动含引擎服务
+docker compose ps                       # 查看状态
+docker compose logs -f app              # 查看日志
+docker compose restart app              # 重启服务
+docker compose down                     # 停止所有服务
+docker compose down -v                  # 停止并删除卷
+docker compose build --no-cache         # 重新构建
 ```
 
-### 4.2 安装依赖
+### D. PM2 常用命令速查
 
 ```bash
-# 使用 Bun（推荐，速度更快）
-bun install
-
-# 或使用 npm
-npm install
-
-# 或使用 pnpm
-pnpm install
-```
-
-> **提示**: Bun 安装速度约为 npm 的 30 倍，强烈推荐使用 Bun 作为开发运行时。
-
-### 4.3 配置环境变量
-
-```bash
-# 复制环境变量模板
-cp .env.example .env
-
-# 编辑 .env 文件，填写实际值
-# 必须修改: NEXTAUTH_SECRET, NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
-nano .env
-```
-
-### 4.4 初始化数据库
-
-```bash
-# 推送 Prisma Schema 到数据库
-bun run db:push
-
-# 生成 Prisma Client
-bun run db:generate
-```
-
-> **注意**: `db:push` 命令会直接将 schema 推送到数据库，不会创建迁移文件。开发阶段推荐使用 `db:push`，生产环境请使用 `db:migrate`。
-
-### 4.5 种子数据初始化
-
-```bash
-# 通过 API 端点初始化种子数据
-curl -X POST http://localhost:3000/api/seed
-```
-
-种子数据包含：
-- 3 个示例认知分身 (Avatar)
-- 5 个技能包 (Skill)
-- 示例收益记录、委托记录、时间线事件
-- LP 流动性池初始数据
-- 合规模型默认配置
-- 多链部署初始数据
-
-### 4.6 启动开发服务器
-
-```bash
-# 启动 Next.js 主应用（端口 3000）
-bun run dev
-```
-
-服务器启动后，访问 http://localhost:3000 即可看到应用。
-
-### 4.7 启动微服务
-
-每个微服务需要单独启动，请在新的终端窗口中执行：
-
-```bash
-# 情绪共振模拟服务（端口 3003）
-cd mini-services/resonance-sim && bun run dev
-
-# 系统监控模拟服务（端口 3004）
-cd mini-services/monitoring-sim && bun run dev
-
-# IFD 权重计算引擎（端口 3005）
-cd mini-services/ifd-calculator && bun run dev
-
-# ECE 预言机（端口 3006）
-cd mini-services/ece-oracle && bun run dev
-
-# POUE 证明引擎（端口 3007）
-cd mini-services/poue-prover && bun run dev
-
-# MCP 路由引擎（端口 3008）
-cd mini-services/mcp-router && bun run dev
-```
-
-**一键启动所有微服务**（使用项目自带脚本）：
-
-```bash
-# 使用 start-services.sh（启动核心微服务）
-bash start-services.sh
-```
-
-> **注意**: `start-services.sh` 仅启动 IFD-Calculator、ECE-Oracle 和 POUE-Prover 三个核心计算引擎。Resonance-Sim 和 Monitoring-Sim 需要手动启动。
-
-### 4.8 验证服务状态
-
-```bash
-# 检查主应用健康状态
-curl http://localhost:3000/api/health
-
-# 检查各微服务健康状态
-curl http://localhost:3003/health   # Resonance-Sim
-curl http://localhost:3004/health   # Monitoring-Sim
-curl http://localhost:3005/health   # IFD-Calculator
-curl http://localhost:3006/health   # ECE-Oracle
-curl http://localhost:3007/health   # POUE-Prover
-curl http://localhost:3008/health   # MCP-Router
-```
-
-### 4.9 常见开发环境问题排查
-
-#### 问题 1: 端口被占用
-
-```bash
-# 查找占用端口的进程
-lsof -i :3000
-lsof -i :3003
-
-# 终止占用进程
-kill -9 <PID>
-
-# 或使用 killport（需安装）
-npx killport 3000
-```
-
-#### 问题 2: Prisma Client 未生成
-
-```bash
-# 重新生成 Prisma Client
-bun run db:generate
-
-# 如果仍然有问题，清除缓存后重新生成
-rm -rf node_modules/.prisma
-bun run db:generate
-```
-
-#### 问题 3: 数据库文件损坏
-
-```bash
-# 删除现有数据库
-rm -f db/custom.db
-
-# 重新推送 schema
-bun run db:push
-
-# 重新初始化种子数据
-curl -X POST http://localhost:3000/api/seed
-```
-
-#### 问题 4: Bun 安装失败
-
-```bash
-# 清除缓存
-rm -rf node_modules bun.lock
-
-# 重新安装
-bun install
-```
-
-#### 问题 5: WebSocket 连接失败
-
-- 确认微服务已启动
-- 检查 Caddy 网关是否运行
-- 前端必须使用 `io("/?XTransformPort=3003")` 而非 `io("http://localhost:3003")`
-
----
-
-## 5. Docker 部署
-
-### 5.1 Dockerfile 说明
-
-项目使用多阶段构建 Dockerfile，包含三个阶段：
-
-```dockerfile
-# Stage 1: deps — 安装依赖
-# 基于 oven/bun:1.1.38
-# 安装所有 npm 包并生成 Prisma Client
-
-# Stage 2: builder — 构建应用
-# 复制依赖和源码
-# 执行 next build 生成 standalone 输出
-
-# Stage 3: runner — 生产镜像
-# 基于 oven/bun:1.1.38-slim（更小体积）
-# 创建非 root 用户 (nextjs:nodejs)
-# 仅复制必要文件：public, .next/standalone, .next/static, prisma, db
-# 内置健康检查：curl -f http://localhost:3000/api/health
-```
-
-**镜像优化要点**：
-- 多阶段构建减小最终镜像体积
-- 非 root 用户运行，增强安全性
-- 使用 `output: "standalone"` 减少部署文件
-- 内置 HEALTHCHECK 指令
-
-### 5.2 docker-compose.yml 配置
-
-项目提供两套 Docker Compose 配置：
-
-- `docker-compose.yml` — 生产环境配置
-- `docker-compose.dev.yml` — 开发环境覆盖配置
-
-**服务组成**：
-
-| 服务 | 镜像 | 端口 | Profile | 说明 |
-|------|------|------|---------|------|
-| app | 自定义 Dockerfile | 3000 | 默认 | Next.js 主应用 |
-| resonance-sim | 自定义 Dockerfile | 3003 | 默认 | 共振模拟 |
-| monitoring-sim | 自定义 Dockerfile | 3004 | 默认 | 监控模拟 |
-| ifd-calculator | 预构建镜像 | 3005 | engine | IFD 计算 |
-| ece-oracle | 预构建镜像 | 3006 | engine | ECE 预言机 |
-| poue-prover | 预构建镜像 | 3007 | engine | PoUE 证明 |
-| mcp-router | 预构建镜像 | 3008 | engine | MCP 路由 |
-| caddy | caddy:2-alpine | 80/443 | 默认 | 反向代理 |
-
-> **注意**: IFD-Calculator、ECE-Oracle、POUE-Prover、MCP-Router 使用 `engine` profile，需要显式启用。
-
-### 5.3 构建与启动
-
-#### 生产环境
-
-```bash
-# 构建并启动基础服务（App + Resonance + Monitoring + Caddy）
-docker compose up -d
-
-# 启动包含所有引擎服务的完整部署
-docker compose --profile engine up -d
-
-# 查看服务状态
-docker compose ps
-
-# 查看日志
-docker compose logs -f app
-```
-
-#### 开发环境
-
-```bash
-# 使用开发配置启动
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up
-
-# 仅启动主应用开发环境
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up app
-```
-
-### 5.4 数据持久化
-
-Docker Compose 配置以下持久卷：
-
-```yaml
-volumes:
-  app_data:       # 主应用数据库 /app/db
-    driver: local
-  db_data:        # 数据库备份
-    driver: local
-  caddy_data:     # Caddy TLS 证书
-    driver: local
-  caddy_config:   # Caddy 配置
-    driver: local
-```
-
-**数据库备份**：
-
-```bash
-# 从容器中复制数据库文件
-docker compose cp app:/app/db/production.db ./backups/production-$(date +%Y%m%d).db
-
-# 或使用卷挂载直接访问
-# 在 docker-compose.yml 中将 app_data 挂载到宿主机
-```
-
-### 5.5 日志查看
-
-```bash
-# 查看所有服务日志
-docker compose logs
-
-# 查看特定服务日志
-docker compose logs app
-docker compose logs resonance-sim
-
-# 实时跟踪日志
-docker compose logs -f app
-
-# 查看最近 100 行日志
-docker compose logs --tail 100 app
-
-# 查看特定时间段的日志
-docker compose logs --since "2025-01-15T10:00:00" app
+pm2 start ecosystem.config.js   # 启动
+pm2 status                      # 状态
+pm2 logs                        # 日志
+pm2 restart all                 # 重启
+pm2 monit                       # 监控
+pm2 startup                     # 开机自启
+pm2 save                        # 保存进程列表
 ```
 
 ---
 
-## 6. Vercel 部署
-
-### 6.1 Vercel 项目创建
-
-1. 访问 [Vercel Dashboard](https://vercel.com/dashboard)
-2. 点击 **"Add New Project"**
-3. 选择 Git 仓库并导入
-4. 配置项目：
-   - **Framework Preset**: Next.js
-   - **Root Directory**: `./` (默认)
-   - **Build Command**: `bun run build`
-   - **Output Directory**: `.next` (默认)
-
-### 6.2 环境变量配置
-
-在 Vercel 项目设置 → Environment Variables 中添加所有必需变量：
-
-| 变量名 | 值 | 环境 |
-|--------|---|------|
-| `DATABASE_URL` | `file:./db/production.db` 或 Turso URL | Production |
-| `NEXTAUTH_SECRET` | 随机生成的密钥 | Production |
-| `NEXTAUTH_URL` | `https://your-domain.com` | Production |
-| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | WalletConnect 项目 ID | All |
-| `NEXT_PUBLIC_CHAIN_ID` | `8453` | Production |
-| `NEXT_PUBLIC_RPC_URL` | `https://mainnet.base.org` | Production |
-| `STRIPE_SECRET_KEY` | Stripe 生产密钥 | Production |
-| `STRIPE_WEBHOOK_SECRET` | Webhook 签名密钥 | Production |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe 公钥 | All |
-
-### 6.3 Build Settings
-
-在 Vercel 项目设置中配置：
-
-```yaml
-Build & Development Settings:
-  Framework Preset: Next.js
-  Build Command: bun run build
-  Output Directory: .next
-  Install Command: bun install
-
-Node.js Version:
-  Node.js Version: 20.x
-
-Environment:
-  Node.js Options: --max-old-space-size=4096
-```
-
-### 6.4 数据库处理
-
-#### 方案 A: External SQLite (推荐 Turso)
-
-[Vercel 不支持持久化文件系统](https://vercel.com/guides/using-serverless-databases)，因此需要使用外部数据库服务：
-
-**使用 Turso (libSQL)**：
-
-1. 安装 Turso CLI：
-```bash
-curl -sSfL https://get.tur.so/install.sh | bash
-```
-
-2. 创建数据库：
-```bash
-turso db create bb-protocol-prod
-```
-
-3. 获取连接信息：
-```bash
-turso db show bb-protocol-prod --url
-turso db tokens create bb-protocol-prod
-```
-
-4. 更新 Prisma Schema：
-```prisma
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
-```
-
-5. 设置环境变量：
-```
-DATABASE_URL="libsql://bb-protocol-prod-xxx.turso.io?authToken=xxx"
-```
-
-#### 方案 B: PlanetScale (MySQL)
-
-```bash
-# 安装 PlanetScale CLI
-pscale auth login
-
-# 创建数据库
-pscale database create bb-protocol-prod --region ap-southeast
-
-# 获取连接字符串
-pscale connect bb-protocol-prod main --port 3306
-```
-
-### 6.5 自定义域名
-
-1. 在 Vercel Dashboard → Settings → Domains 中添加域名
-2. 配置 DNS 记录：
-
-| 类型 | 名称 | 值 |
-|------|------|---|
-| CNAME | @ | cname.vercel-dns.com |
-| CNAME | www | cname.vercel-dns.com |
-
-3. 等待 SSL 证书自动签发（通常几分钟）
-
-> **重要**: Vercel 部署不支持微服务架构，WebSocket 服务需要单独部署到 VPS 或云服务器。建议仅将 Next.js 主应用部署到 Vercel，微服务部署到其他基础设施。
-
----
-
-## 7. VPS/云服务器部署
-
-### 7.1 服务器准备 (Ubuntu 22.04 LTS)
-
-```bash
-# 更新系统
-sudo apt update && sudo apt upgrade -y
-
-# 安装基础工具
-sudo apt install -y curl git build-essential
-
-# 安装 Bun
-curl -fsSL https://bun.sh/install | bash
-source ~/.bashrc
-
-# 安装 Node.js 20
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-
-# 安装 Docker & Docker Compose
-curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker $USER
-
-# 安装 Nginx
-sudo apt install -y nginx
-
-# 安装 Certbot (Let's Encrypt)
-sudo apt install -y certbot python3-certbot-nginx
-
-# 安装 PM2
-sudo npm install -g pm2
-```
-
-### 7.2 Nginx 反向代理配置
-
-创建 Nginx 配置文件：
-
-```nginx
-# /etc/nginx/sites-available/bb-protocol
-
-# 上游服务定义
-upstream nextjs_app {
-    server 127.0.0.1:3000;
-    keepalive 64;
-}
-
-upstream resonance_sim {
-    server 127.0.0.1:3003;
-}
-
-upstream monitoring_sim {
-    server 127.0.0.1:3004;
-}
-
-upstream ifd_calculator {
-    server 127.0.0.1:3005;
-}
-
-upstream ece_oracle {
-    server 127.0.0.1:3006;
-}
-
-upstream poue_prover {
-    server 127.0.0.1:3007;
-}
-
-upstream mcp_router {
-    server 127.0.0.1:3008;
-}
-
-server {
-    listen 80;
-    server_name your-domain.com www.your-domain.com;
-
-    # 301 重定向到 HTTPS
-    return 301 https://$server_name$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name your-domain.com www.your-domain.com;
-
-    # SSL 证书
-    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
-
-    # SSL 优化
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
-    ssl_prefer_server_ciphers off;
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
-
-    # 安全头部
-    add_header X-Frame-Options "DENY" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' wss: https:;" always;
-
-    # Gzip 压缩
-    gzip on;
-    gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
-    gzip_min_length 1000;
-    gzip_comp_level 6;
-
-    # 文件上传限制
-    client_max_body_size 10M;
-
-    # 主应用代理
-    location / {
-        proxy_pass http://nextjs_app;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-        proxy_read_timeout 86400s;
-        proxy_send_timeout 86400s;
-    }
-
-    # 微服务 WebSocket 代理
-    location /ws/resonance/ {
-        proxy_pass http://resonance_sim/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_read_timeout 86400s;
-    }
-
-    location /ws/monitoring/ {
-        proxy_pass http://monitoring_sim/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_read_timeout 86400s;
-    }
-
-    location /ws/ifd/ {
-        proxy_pass http://ifd_calculator/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_read_timeout 86400s;
-    }
-
-    location /ws/ece/ {
-        proxy_pass http://ece_oracle/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_read_timeout 86400s;
-    }
-
-    location /ws/poue/ {
-        proxy_pass http://poue_prover/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_read_timeout 86400s;
-    }
-
-    location /ws/mcp/ {
-        proxy_pass http://mcp_router/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_read_timeout 86400s;
-    }
-
-    # 健康检查端点（无需认证）
-    location /api/health {
-        proxy_pass http://nextjs_app;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        access_log off;
-    }
-
-    # 静态资源缓存
-    location /_next/static/ {
-        proxy_pass http://nextjs_app;
-        expires 365d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # 日志配置
-    access_log /var/log/nginx/bb-protocol-access.log;
-    error_log /var/log/nginx/bb-protocol-error.log;
-}
-```
-
-启用配置：
-
-```bash
-# 创建软链接
-sudo ln -s /etc/nginx/sites-available/bb-protocol /etc/nginx/sites-enabled/
-
-# 删除默认配置
-sudo rm /etc/nginx/sites-enabled/default
-
-# 测试配置
-sudo nginx -t
-
-# 重载配置
-sudo systemctl reload nginx
-```
-
-### 7.3 SSL 证书 (Let's Encrypt / Certbot)
-
-```bash
-# 获取证书（Nginx 插件自动配置）
-sudo certbot --nginx -d your-domain.com -d www.your-domain.com
-
-# 测试自动续期
-sudo certbot renew --dry-run
-
-# 证书自动续期已内置于 systemd timer
-# 查看续期定时器状态
-sudo systemctl status certbot.timer
-```
-
-**手动续期**：
-
-```bash
-sudo certbot renew
-sudo systemctl reload nginx
-```
-
-### 7.4 PM2 进程管理
-
-创建 PM2 生态系统配置文件：
-
-```javascript
-// ecosystem.config.js
-module.exports = {
-  apps: [
-    {
-      name: 'bb-protocol-app',
-      script: 'bun',
-      args: 'server.js',
-      cwd: '/home/deploy/bb-protocol',
-      instances: 1,
-      exec_mode: 'fork',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3000,
-        DATABASE_URL: 'file:./db/production.db',
-      },
-      max_memory_restart: '1G',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      error_file: '/var/log/pm2/bb-app-error.log',
-      out_file: '/var/log/pm2/bb-app-out.log',
-      merge_logs: true,
-    },
-    {
-      name: 'bb-resonance-sim',
-      script: 'bun',
-      args: 'index.ts',
-      cwd: '/home/deploy/bb-protocol/mini-services/resonance-sim',
-      instances: 1,
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3003,
-      },
-      max_memory_restart: '512M',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      error_file: '/var/log/pm2/bb-resonance-error.log',
-      out_file: '/var/log/pm2/bb-resonance-out.log',
-    },
-    {
-      name: 'bb-monitoring-sim',
-      script: 'bun',
-      args: 'index.ts',
-      cwd: '/home/deploy/bb-protocol/mini-services/monitoring-sim',
-      instances: 1,
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3004,
-      },
-      max_memory_restart: '512M',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      error_file: '/var/log/pm2/bb-monitoring-error.log',
-      out_file: '/var/log/pm2/bb-monitoring-out.log',
-    },
-    {
-      name: 'bb-ifd-calculator',
-      script: 'bun',
-      args: 'index.ts',
-      cwd: '/home/deploy/bb-protocol/mini-services/ifd-calculator',
-      instances: 1,
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3005,
-      },
-      max_memory_restart: '512M',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      error_file: '/var/log/pm2/bb-ifd-error.log',
-      out_file: '/var/log/pm2/bb-ifd-out.log',
-    },
-    {
-      name: 'bb-ece-oracle',
-      script: 'bun',
-      args: 'index.ts',
-      cwd: '/home/deploy/bb-protocol/mini-services/ece-oracle',
-      instances: 1,
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3006,
-      },
-      max_memory_restart: '512M',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      error_file: '/var/log/pm2/bb-ece-error.log',
-      out_file: '/var/log/pm2/bb-ece-out.log',
-    },
-    {
-      name: 'bb-poue-prover',
-      script: 'bun',
-      args: 'index.ts',
-      cwd: '/home/deploy/bb-protocol/mini-services/poue-prover',
-      instances: 1,
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3007,
-      },
-      max_memory_restart: '512M',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      error_file: '/var/log/pm2/bb-poue-error.log',
-      out_file: '/var/log/pm2/bb-poue-out.log',
-    },
-    {
-      name: 'bb-mcp-router',
-      script: 'bun',
-      args: 'index.ts',
-      cwd: '/home/deploy/bb-protocol/mini-services/mcp-router',
-      instances: 1,
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3008,
-      },
-      max_memory_restart: '512M',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      error_file: '/var/log/pm2/bb-mcp-error.log',
-      out_file: '/var/log/pm2/bb-mcp-out.log',
-    },
-  ],
-};
-```
-
-**PM2 常用命令**：
-
-```bash
-# 启动所有服务
-pm2 start ecosystem.config.js
-
-# 查看服务状态
-pm2 status
-
-# 查看日志
-pm2 logs
-
-# 重启单个服务
-pm2 restart bb-protocol-app
-
-# 重启所有服务
-pm2 restart all
-
-# 停止所有服务
-pm2 stop all
-
-# 删除所有服务
-pm2 delete all
-
-# 设置开机自启
-pm2 startup
-pm2 save
-
-# 监控面板
-pm2 monit
-```
-
-### 7.5 防火墙配置 (ufw)
-
-```bash
-# 启用防火墙
-sudo ufw enable
-
-# 允许 SSH
-sudo ufw allow 22/tcp
-
-# 允许 HTTP/HTTPS
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-
-# 拒绝直接访问内部端口
-# 以下端口仅允许本地访问，由 Nginx 代理
-sudo ufw deny 3000/tcp
-sudo ufw deny 3003/tcp
-sudo ufw deny 3004/tcp
-sudo ufw deny 3005/tcp
-sudo ufw deny 3006/tcp
-sudo ufw deny 3007/tcp
-sudo ufw deny 3008/tcp
-
-# 查看防火墙状态
-sudo ufw status verbose
-
-# 如果需要限制 SSH 访问来源 IP
-sudo ufw allow from YOUR_IP_ADDRESS to any port 22
-```
-
-### 7.6 自动化部署脚本
-
-创建自动化部署脚本：
-
-```bash
-#!/bin/bash
-# deploy.sh — BB Protocol 自动化部署脚本
-
-set -e
-
-# ── 配置 ──────────────────────────────────────────────────
-PROJECT_DIR="/home/deploy/bb-protocol"
-BRANCH="main"
-BACKUP_DIR="/home/deploy/backups"
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-
-# ── 颜色输出 ──────────────────────────────────────────────
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-log_info()  { echo -e "${GREEN}[INFO]${NC} $1"; }
-log_warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
-
-# ── 步骤 1: 备份数据库 ────────────────────────────────────
-log_info "备份数据库..."
-mkdir -p $BACKUP_DIR
-cp $PROJECT_DIR/db/production.db $BACKUP_DIR/production-$TIMESTAMP.db
-log_info "数据库已备份到 $BACKUP_DIR/production-$TIMESTAMP.db"
-
-# ── 步骤 2: 拉取最新代码 ──────────────────────────────────
-log_info "拉取最新代码..."
-cd $PROJECT_DIR
-git fetch origin
-git checkout $BRANCH
-git pull origin $BRANCH
-
-# ── 步骤 3: 安装依赖 ──────────────────────────────────────
-log_info "安装依赖..."
-bun install
-
-# ── 步骤 4: 数据库迁移 ────────────────────────────────────
-log_info "推送数据库 Schema..."
-bun run db:push
-
-# ── 步骤 5: 构建应用 ──────────────────────────────────────
-log_info "构建 Next.js 应用..."
-bun run build
-
-# ── 步骤 6: 重启服务 ──────────────────────────────────────
-log_info "重启 PM2 服务..."
-pm2 restart bb-protocol-app
-
-# ── 步骤 7: 健康检查 ──────────────────────────────────────
-log_info "执行健康检查..."
-sleep 10
-
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health)
-
-if [ "$HTTP_STATUS" == "200" ]; then
-    log_info "✅ 部署成功！服务健康状态正常"
-else
-    log_error "❌ 健康检查失败 (HTTP $HTTP_STATUS)，正在回滚..."
-    pm2 restart bb-protocol-app
-    log_warn "请检查日志: pm2 logs bb-protocol-app"
-fi
-
-# ── 步骤 8: 清理旧备份 ────────────────────────────────────
-log_info "清理 30 天前的备份..."
-find $BACKUP_DIR -name "production-*.db" -mtime +30 -delete
-
-log_info "部署流程完成！"
-```
-
-赋予执行权限：
-
-```bash
-chmod +x deploy.sh
-```
-
----
-
-## 8. 微服务部署
-
-### 8.1 各微服务启动命令
-
-| 微服务 | 端口 | 启动命令 | 广播间隔 |
-|--------|------|---------|---------|
-| Resonance-Sim | 3003 | `cd mini-services/resonance-sim && bun --hot index.ts` | 6s (共振更新) / 15-30s (收益事件) |
-| Monitoring-Sim | 3004 | `cd mini-services/monitoring-sim && bun --hot index.ts` | 3s (指标) / 10s (链上事件) |
-| IFD-Calculator | 3005 | `cd mini-services/ifd-calculator && bun --hot index.ts` | 5s (权重更新) |
-| ECE-Oracle | 3006 | `cd mini-services/ece-oracle && bun --hot index.ts` | 3s (价格更新) |
-| POUE-Prover | 3007 | `cd mini-services/poue-prover && bun --hot index.ts` | 8s (证明提交) |
-| MCP-Router | 3008 | `cd mini-services/mcp-router && bun --hot index.ts` | 7s (请求路由) |
-
-**使用 `bun --hot` 参数**：支持文件变更时自动重启，开发环境推荐使用。
-
-**生产环境启动**（不带 `--hot`）：
-
-```bash
-cd mini-services/resonance-sim && NODE_ENV=production bun index.ts &
-cd mini-services/monitoring-sim && NODE_ENV=production bun index.ts &
-cd mini-services/ifd-calculator && NODE_ENV=production bun index.ts &
-cd mini-services/ece-oracle && NODE_ENV=production bun index.ts &
-cd mini-services/poue-prover && NODE_ENV=production bun index.ts &
-cd mini-services/mcp-router && NODE_ENV=production bun index.ts &
-```
-
-### 8.2 微服务健康检查
-
-每个微服务均提供 `/health` 端点：
-
-```bash
-# 批量健康检查脚本
-#!/bin/bash
-services=("3000:App" "3003:Resonance-Sim" "3004:Monitoring-Sim" \
-          "3005:IFD-Calculator" "3006:ECE-Oracle" "3007:POUE-Prover" "3008:MCP-Router")
-
-for service in "${services[@]}"; do
-    IFS=':' read -r port name <<< "$service"
-    status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:$port/health 2>/dev/null || echo "000")
-    if [ "$status" == "200" ]; then
-        echo "✅ $name (:$port) — 在线"
-    else
-        echo "❌ $name (:$port) — 离线 (HTTP $status)"
-    fi
-done
-```
-
-**预期输出**：
-
-```
-✅ App (:3000) — 在线
-✅ Resonance-Sim (:3003) — 在线
-✅ Monitoring-Sim (:3004) — 在线
-✅ IFD-Calculator (:3005) — 在线
-✅ ECE-Oracle (:3006) — 在线
-✅ POUE-Prover (:3007) — 在线
-✅ MCP-Router (:3008) — 在线
-```
-
-### 8.3 Caddy 网关配置 (XTransformPort)
-
-Caddy 网关使用 `XTransformPort` 查询参数将请求路由到对应的微服务。
-
-**路由规则**：
-
-```
-请求 URL                                    → 路由目标
-─────────────────────────────────────────────────────────
-/                                           → localhost:3000 (App)
-/?XTransformPort=3003                       → localhost:3003 (Resonance-Sim)
-/?XTransformPort=3004                       → localhost:3004 (Monitoring-Sim)
-/api/test?XTransformPort=3005               → localhost:3005 (IFD-Calculator)
-/api/data?XTransformPort=3006               → localhost:3006 (ECE-Oracle)
-/ws/connect?XTransformPort=3007             → localhost:3007 (POUE-Prover)
-/ws/route?XTransformPort=3008               → localhost:3008 (MCP-Router)
-```
-
-**前端连接示例**：
-
-```typescript
-// ✅ 正确：通过 Caddy 网关连接微服务
-import { io } from 'socket.io-client';
-
-// 连接共振模拟服务
-const resonanceSocket = io('/?XTransformPort=3003');
-
-// 连接监控服务
-const monitoringSocket = io('/?XTransformPort=3004');
-
-// ❌ 错误：直接连接微服务（绕过网关，CORS 问题）
-const badSocket = io('http://localhost:3003');  // 禁止使用！
-```
-
-**Caddy 配置详解**：
-
-```caddyfile
-:81 {
-    # 带有 XTransformPort 参数的请求 → 路由到指定端口
-    @transform_port_query {
-        query XTransformPort=*
-    }
-    handle @transform_port_query {
-        reverse_proxy localhost:{query.XTransformPort} {
-            header_up Host {host}
-            header_up X-Forwarded-For {remote_host}
-            header_up X-Forwarded-Proto {scheme}
-            header_up X-Real-IP {remote_host}
-        }
-    }
-
-    # 默认请求 → 主应用
-    handle {
-        reverse_proxy localhost:3000 {
-            header_up Host {host}
-            header_up X-Forwarded-For {remote_host}
-            header_up X-Forwarded-Proto {scheme}
-            header_up X-Real-IP {remote_host}
-        }
-    }
-}
-```
-
----
-
-## 9. 数据库管理
-
-### 9.1 Prisma Migrate vs db:push
-
-| 特性 | `db:push` | `migrate dev` / `migrate deploy` |
-|------|-----------|----------------------------------|
-| 创建迁移文件 | ❌ 否 | ✅ 是 |
-| 适用于开发 | ✅ 推荐 | ⚠️ 可用 |
-| 适用于生产 | ❌ 不推荐 | ✅ 推荐 |
-| 数据丢失风险 | ⚠️ 可能 | ✅ 安全（可回滚） |
-| 速度 | ⚡ 快 | 🐢 较慢 |
-| 版本追踪 | ❌ 无 | ✅ 有 |
-
-**推荐使用场景**：
-
-- **开发阶段**：使用 `db:push`，快速迭代 Schema
-- **生产环境**：使用 `migrate deploy`，确保安全迁移
-
-### 9.2 数据备份
-
-#### 自动备份脚本
-
-```bash
-#!/bin/bash
-# backup-db.sh — 数据库自动备份脚本
-
-DB_PATH="/home/deploy/bb-protocol/db/production.db"
-BACKUP_DIR="/home/deploy/backups/db"
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-RETENTION_DAYS=30
-
-mkdir -p $BACKUP_DIR
-
-# 使用 SQLite 内置备份命令
-sqlite3 $DB_PATH ".backup '$BACKUP_DIR/production-$TIMESTAMP.db'"
-
-# 压缩备份
-gzip $BACKUP_DIR/production-$TIMESTAMP.db
-
-echo "[$(date)] 备份完成: production-$TIMESTAMP.db.gz"
-
-# 清理过期备份
-find $BACKUP_DIR -name "production-*.db.gz" -mtime +$RETENTION_DAYS -delete
-echo "[$(date)] 已清理 $RETENTION_DAYS 天前的备份"
-```
-
-#### 设置定时备份
-
-```bash
-# 添加到 crontab
-crontab -e
-
-# 每天凌晨 2 点执行备份
-0 2 * * * /home/deploy/scripts/backup-db.sh >> /var/log/bb-protocol-backup.log 2>&1
-
-# 每 6 小时备份一次
-0 */6 * * * /home/deploy/scripts/backup-db.sh >> /var/log/bb-protocol-backup.log 2>&1
-```
-
-### 9.3 数据恢复
-
-```bash
-# 停止应用
-pm2 stop bb-protocol-app
-
-# 解压备份文件
-gunzip /home/deploy/backups/db/production-20250115_020000.db.gz
-
-# 替换数据库文件
-cp /home/deploy/backups/db/production-20250115_020000.db /home/deploy/bb-protocol/db/production.db
-
-# 重新生成 Prisma Client
-cd /home/deploy/bb-protocol
-bun run db:generate
-
-# 重启应用
-pm2 start bb-protocol-app
-```
-
-### 9.4 数据库迁移流程
-
-#### 开发环境
-
-```bash
-# 1. 修改 prisma/schema.prisma
-
-# 2. 推送变更到数据库
-bun run db:push
-
-# 3. 生成 Prisma Client
-bun run db:generate
-```
-
-#### 生产环境
-
-```bash
-# 1. 在开发环境创建迁移
-bun run db:migrate
-# 这会在 prisma/migrations/ 目录下创建新的迁移文件
-
-# 2. 提交迁移文件到 Git
-git add prisma/migrations/
-git commit -m "feat: add new migration for XXX"
-git push
-
-# 3. 在生产环境应用迁移
-bunx prisma migrate deploy
-```
-
-**迁移回滚**（如果需要）：
-
-```bash
-# Prisma 不原生支持回滚
-# 建议通过恢复数据库备份来"回滚"
-# 或创建新的"反向迁移"
-```
-
----
-
-## 10. Stripe 配置
-
-### 10.1 Stripe 账户创建
-
-1. 访问 [Stripe 官网](https://stripe.com/) 注册账户
-2. 完成邮箱验证
-3. 填写商家信息（公司名称、地址、税务信息等）
-4. 完成身份验证（KYC）
-
-### 10.2 API 密钥获取
-
-1. 登录 [Stripe Dashboard](https://dashboard.stripe.com/)
-2. 进入 **Developers → API Keys**
-3. 获取以下密钥：
-
-| 密钥 | 名称 | 用途 |
-|------|------|------|
-| `pk_test_xxx` | 测试公钥 | 前端测试环境 |
-| `sk_test_xxx` | 测试密钥 | 后端测试环境 |
-| `pk_live_xxx` | 生产公钥 | 前端生产环境 |
-| `sk_live_xxx` | 生产密钥 | 后端生产环境 |
-
-> **安全提醒**: 密钥永远不要提交到 Git 仓库。生产密钥仅存储在服务器环境变量中。
-
-### 10.3 Webhook 配置
-
-1. 进入 **Developers → Webhooks**
-2. 点击 **"Add endpoint"**
-3. 配置端点 URL：`https://your-domain.com/api/stripe/webhook`
-4. 选择监听事件：
-   - `checkout.session.completed`
-   - `customer.subscription.created`
-   - `customer.subscription.updated`
-   - `customer.subscription.deleted`
-   - `invoice.paid`
-   - `invoice.payment_failed`
-   - `payment_intent.succeeded`
-   - `payment_intent.payment_failed`
-
-5. 获取 Webhook 签名密钥：
-   - 点击创建的 Webhook 端点
-   - 点击 **"Reveal"** 获取签名密钥
-   - 设置环境变量：`STRIPE_WEBHOOK_SECRET=whsec_xxx`
-
-**本地测试 Webhook**：
-
-```bash
-# 安装 Stripe CLI
-stripe login
-
-# 转发 Webhook 到本地
-stripe listen --forward-to localhost:3000/api/stripe/webhook
-
-# 触发测试事件
-stripe trigger checkout.session.completed
-```
-
-### 10.4 产品与价格创建
-
-BB Protocol 提供三个订阅层级：
-
-| 层级 | 价格 | Stripe Price ID 变量 | 功能 |
-|------|------|---------------------|------|
-| Starter | $9.99/月 | `STRIPE_STARTER_PRICE_ID` | 5 Avatar calls/天, 基础技能包, 邮件支持 |
-| Pro | $29.99/月 | `STRIPE_PRO_PRICE_ID` | 无限 Avatar calls, 高级技能包, 优先支持, 收益分析 |
-| Enterprise | $99.99/月 | `STRIPE_ENTERPRISE_PRICE_ID` | 无限一切, 自定义技能包, 专属支持, 链上分账, SLA 保障 |
-
-**创建产品和价格**：
-
-1. 进入 **Products → Add product**
-2. 创建 Starter 产品：
-   - 名称：`BB Protocol Starter`
-   - 价格：`$9.99` / Monthly recurring
-   - 复制 Price ID 并设置到 `STRIPE_STARTER_PRICE_ID`
-
-3. 重复以上步骤创建 Pro 和 Enterprise 产品
-
-**使用 Stripe CLI 创建**：
-
-```bash
-# 创建 Starter 产品
-stripe products create --name "BB Protocol Starter" --description "5 Avatar calls/day, Basic skill pack, Email support"
-
-# 创建 Starter 价格
-stripe prices create --product prod_xxx --unit-amount 999 --currency usd --recurring[interval]=month
-
-# 创建 Pro 产品和价格
-stripe products create --name "BB Protocol Pro" --description "Unlimited Avatar calls, Advanced skill pack, Priority support, Revenue analytics"
-stripe prices create --product prod_xxx --unit-amount 2999 --currency usd --recurring[interval]=month
-
-# 创建 Enterprise 产品和价格
-stripe products create --name "BB Protocol Enterprise" --description "Unlimited everything, Custom skill packs, Dedicated support, On-chain revenue split, SLA guarantee"
-stripe prices create --product prod_xxx --unit-amount 9999 --currency usd --recurring[interval]=month
-```
-
-### 10.5 测试模式 vs 生产模式
-
-| 特性 | 测试模式 | 生产模式 |
-|------|---------|---------|
-| 密钥前缀 | `sk_test_` / `pk_test_` | `sk_live_` / `pk_live_` |
-| 交易 | 模拟，不产生真实扣款 | 真实扣款 |
-| Webhook | 需要本地转发 | 直接接收 |
-| 卡号 | `4242 4242 4242 4242` | 真实卡号 |
-| 切换 | Dashboard 左上角开关 | Dashboard 左上角开关 |
-
-**测试信用卡号**：
-
-| 卡号 | 场景 |
-|------|------|
-| `4242 4242 4242 4242` | 成功支付 |
-| `4000 0025 0000 3155` | 需要 3D 验证 |
-| `4000 0000 0000 0002` | 卡被拒绝 |
-| `4000 0000 0000 9995` | 余额不足 |
-
-> **上线前检查清单**：
-> - [ ] 切换到生产密钥
-> - [ ] 配置生产 Webhook 端点
-> - [ ] 完成 Stripe 账户激活
-> - [ ] 测试完整支付流程
-> - [ ] 设置纠纷和退款处理流程
-
----
-
-## 11. Web3 配置
-
-### 11.1 WalletConnect Project ID
-
-WalletConnect 用于连接 Web3 钱包（如 MetaMask、WalletCore 等）。
-
-**获取 Project ID**：
-
-1. 访问 [WalletConnect Cloud](https://cloud.walletconnect.com/)
-2. 注册/登录账户
-3. 点击 **"Create Project"**
-4. 填写项目名称：`BB Protocol`
-5. 选择项目类型：**"App"**
-6. 复制 Project ID
-7. 设置环境变量：`NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=xxx`
-
-> **注意**: `NEXT_PUBLIC_` 前缀表示此变量可在浏览器端访问，是 WalletConnect SDK 所必需的。
-
-### 11.2 合约地址配置
-
-合约地址定义在 `src/lib/web3-config.ts` 中：
-
-```typescript
-export const CONTRACT_ADDRESSES = {
-  avatarCore:      '0x5FbDB2315678afecb367f032d93F642f64180aa3',
-  dynamicSplitter: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
-  circuitGuard:    '0x9fE46736679d2D9a65F0992F2272De9f3c7fa6e0',
-  skillVault:      '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
-  ifdRouter:       '0xDc64a140Aa8C5D5AeB9F8a7E0F1C9b9B9b9b9b9b',
-  tokenVault:      '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707',
-  eceOracle:       '0x0165878A594ca255338adfa4d48449f69242Eb8F',
-  afcToken:        '0xa513E6E4b8f2a923D98304ec87F64353C4D5C853',
-  governance:      '0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6',
-  proxyAdmin:      '0x8A791620dd6260079BF849Dc5567aDC3F2FdC318',
-};
-```
-
-**生产环境部署合约后**，需要更新以上地址为实际部署地址。
-
-**使用 Foundry 部署合约**：
-
-```bash
-# 安装 Foundry
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
-
-# 部署合约到 Base 主网
-cd contracts
-forge script script/Deploy.s.sol --rpc-url $BASE_RPC_URL --broadcast --verify
-
-# 记录部署地址并更新 web3-config.ts
-```
-
-### 11.3 网络切换 (Base Mainnet vs Sepolia)
-
-| 网络 | Chain ID | RPC URL | 区块浏览器 | 用途 |
-|------|----------|---------|-----------|------|
-| Base Mainnet | 8453 | `https://mainnet.base.org` | basescan.org | 生产环境 |
-| Base Sepolia | 84532 | `https://sepolia.base.org` | sepolia.basescan.org | 测试环境 |
-
-**切换到测试网**：
-
-```bash
-# 设置环境变量
-NEXT_PUBLIC_CHAIN_ID=84532
-NEXT_PUBLIC_RPC_URL=https://sepolia.base.org
-```
-
-**切换到主网**：
-
-```bash
-# 设置环境变量
-NEXT_PUBLIC_CHAIN_ID=8453
-NEXT_PUBLIC_RPC_URL=https://mainnet.base.org
-```
-
-**代码中的链配置**：
-
-```typescript
-// src/lib/web3-config.ts
-export const CHAIN_CONFIG = {
-  base: {
-    chainId: 8453,
-    name: 'Base',
-    rpcUrl: 'https://mainnet.base.org',
-    blockExplorer: 'https://basescan.org',
-  },
-  baseSepolia: {
-    chainId: 84532,
-    name: 'Base Sepolia',
-    rpcUrl: 'https://sepolia.base.org',
-    blockExplorer: 'https://sepolia.basescan.org',
-  },
-};
-```
-
-**Gas 常量配置**：
-
-```typescript
-export const GAS_CONSTANTS = {
-  baseL2GasPrice: 0.0000000025,        // 每单位 Gas 的 USD 价格
-  maxPriorityFeePerGas: 1000000000n,    // 1 Gwei
-  maxFeePerGas: 3000000000n,            // 3 Gwei
-};
-```
-
----
-
-## 12. 监控与日志
-
-### 12.1 健康检查端点
-
-主应用提供 `/api/health` 端点，返回以下信息：
-
-```json
-{
-  "status": "ok",
-  "version": "5.0.0",
-  "uptime": "2h 30m 15s",
-  "uptimeSeconds": 9015,
-  "timestamp": "2025-01-15T10:30:15.000Z",
-  "services": {
-    "app":            { "status": "online", "port": 3000 },
-    "resonanceSim":   { "status": "online", "port": 3003 },
-    "monitoringSim":  { "status": "online", "port": 3004 },
-    "ifdCalculator":  { "status": "online", "port": 3005 },
-    "eceOracle":      { "status": "online", "port": 3006 },
-    "poueProver":     { "status": "online", "port": 3007 },
-    "mcpRouter":      { "status": "online", "port": 3008 }
-  },
-  "contracts": {
-    "count": 10,
-    "network": "Base L2",
-    "chainId": 8453,
-    "solidityVersion": "0.8.24"
-  },
-  "infrastructure": {
-    "i18n": { "supported": 8, "locales": ["zh","en","ja","ko","es","fr","de","ar"] },
-    "stateManagement": "Zustand + TanStack Query",
-    "testing": "Playwright E2E",
-    "cicd": "GitHub Actions",
-    "containerization": "Docker Compose"
-  }
-}
-```
-
-**外部健康检查脚本**：
-
-```bash
-#!/bin/bash
-# health-check.sh
-
-DOMAIN=${1:-"localhost:3000"}
-ALERT_WEBHOOK=${SLACK_WEBHOOK_URL:-""}
-
-response=$(curl -s -f http://$DOMAIN/api/health 2>/dev/null)
-status=$?
-
-if [ $status -ne 0 ]; then
-    echo "❌ 健康检查失败: $DOMAIN"
-    if [ -n "$ALERT_WEBHOOK" ]; then
-        curl -s -X POST "$ALERT_WEBHOOK" \
-            -H 'Content-Type: application/json' \
-            -d "{\"text\":\"🚨 BB Protocol 健康检查失败: $DOMAIN\"}"
-    fi
-    exit 1
-else
-    echo "✅ 健康检查通过: $DOMAIN"
-    echo "$response" | jq '.status, .version, .uptime'
-fi
-```
-
-### 12.2 日志配置
-
-#### 应用日志
-
-```bash
-# PM2 日志
-pm2 logs bb-protocol-app
-
-# Nginx 访问日志
-tail -f /var/log/nginx/bb-protocol-access.log
-
-# Nginx 错误日志
-tail -f /var/log/nginx/bb-protocol-error.log
-```
-
-#### 日志轮转
-
-创建 logrotate 配置：
-
-```bash
-# /etc/logrotate.d/bb-protocol
-
-/var/log/pm2/bb-*.log {
-    daily
-    rotate 30
-    compress
-    delaycompress
-    missingok
-    notifempty
-    copytruncate
-}
-
-/var/log/nginx/bb-protocol-*.log {
-    daily
-    rotate 14
-    compress
-    delaycompress
-    missingok
-    notifempty
-    create 0640 www-data adm
-    sharedscripts
-    postrotate
-        [ -f /var/run/nginx.pid ] && kill -USR1 $(cat /var/run/nginx.pid)
-    endpostrotate
-}
-```
-
-### 12.3 告警规则
-
-**推荐告警配置**：
-
-| 告警项 | 阈值 | 级别 | 通知方式 |
-|--------|------|------|---------|
-| 主应用不可用 | HTTP 5xx 连续 3 次 | Critical | Slack + SMS |
-| 响应时间 > 3s | P95 > 3000ms | Warning | Slack |
-| CPU 使用率 | > 85% 持续 5 分钟 | Warning | Slack |
-| 内存使用率 | > 90% 持续 5 分钟 | Critical | Slack + SMS |
-| 磁盘空间 | < 10% 可用 | Critical | Slack + SMS |
-| 数据库连接失败 | 任意 1 次 | Critical | Slack + SMS |
-| SSL 证书过期 | < 7 天 | Warning | Slack + Email |
-| 微服务离线 | 任意 1 个服务 | Warning | Slack |
-
-**使用 Uptime Robot 监控**：
-
-1. 注册 [Uptime Robot](https://uptimerobot.com/)
-2. 添加监控：
-   - URL: `https://your-domain.com/api/health`
-   - 监控类型: HTTP(s)
-   - 检查间隔: 5 分钟
-   - 告警联系方式: Email + Slack
-
-### 12.4 性能监控
-
-**Web Vitals 目标**：
-
-| 指标 | 目标值 | 当前值 | 状态 |
-|------|--------|--------|------|
-| FCP (First Contentful Paint) | < 1.8s | - | 待测量 |
-| LCP (Largest Contentful Paint) | < 2.5s | - | 待测量 |
-| INP (Interaction to Next Paint) | < 200ms | - | 待测量 |
-| CLS (Cumulative Layout Shift) | < 0.1 | - | 待测量 |
-| TTFB (Time to First Byte) | < 800ms | - | 待测量 |
-
-**缓存策略**：
-
-| 缓存类型 | TTL | SWR 间隔 | 适用场景 |
-|----------|-----|---------|---------|
-| SSR Page | 60s | 300s | 动态页面 |
-| API Response | 30s | 120s | API 数据 |
-| Static Asset | 365d | - | `_next/static/` |
-| ISR | 300s | 600s | 增量静态生成 |
-| CDN Edge | 60s | 300s | 边缘缓存 |
-
----
-
-## 13. 安全加固
-
-### 13.1 环境变量安全
-
-```bash
-# 1. 确保 .env 文件权限正确
-chmod 600 .env
-chown deploy:deploy .env
-
-# 2. 确保 .env 在 .gitignore 中
-echo ".env" >> .gitignore
-echo ".env.local" >> .gitignore
-echo ".env.production" >> .gitignore
-
-# 3. 验证 .env 不在版本控制中
-git status .env
-# 应显示: "nothing to commit"
-
-# 4. 使用 secrets 管理工具（推荐）
-# - Docker Secrets
-# - HashiCorp Vault
-# - AWS Secrets Manager
-# - GitHub Secrets (CI/CD)
-```
-
-### 13.2 API Rate Limiting
-
-在 Nginx 层实现速率限制：
-
-```nginx
-# /etc/nginx/conf.d/rate-limit.conf
-
-# 限制区域定义
-limit_req_zone $binary_remote_addr zone=api_limit:10m rate=100r/m;
-limit_req_zone $binary_remote_addr zone=auth_limit:10m rate=10r/m;
-limit_req_zone $binary_remote_addr zone=webhook_limit:10m rate=5r/m;
-
-server {
-    # API 通用限制
-    location /api/ {
-        limit_req zone=api_limit burst=20 nodelay;
-        limit_req_status 429;
-        proxy_pass http://nextjs_app;
-    }
-
-    # 认证接口限制
-    location /api/auth/ {
-        limit_req zone=auth_limit burst=5 nodelay;
-        limit_req_status 429;
-        proxy_pass http://nextjs_app;
-    }
-
-    # Webhook 限制
-    location /api/stripe/webhook {
-        limit_req zone=webhook_limit burst=3 nodelay;
-        limit_req_status 429;
-        proxy_pass http://nextjs_app;
-    }
-}
-```
-
-### 13.3 CORS 配置
-
-```typescript
-// 微服务中的 CORS 配置
-const io = new Server(httpServer, {
-  path: '/',
-  cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
-});
-```
-
-**生产环境 CORS 白名单**：
-
-```typescript
-// 推荐使用白名单而非 '*'
-const ALLOWED_ORIGINS = [
-  'https://your-domain.com',
-  'https://www.your-domain.com',
-];
-
-const io = new Server(httpServer, {
-  cors: {
-    origin: (origin, callback) => {
-      if (!origin || ALLOWED_ORIGINS.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
-});
-```
-
-### 13.4 CSP 头部
-
-```nginx
-# Content Security Policy
-add_header Content-Security-Policy "
-    default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live;
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' data: https: blob:;
-    font-src 'self' data:;
-    connect-src 'self' wss: https: https://*.stripe.com;
-    frame-src https://*.stripe.com https://walletconnect.com;
-    frame-ancestors 'none';
-    base-uri 'self';
-    form-action 'self';
-" always;
-
-# 其他安全头部
-add_header X-Frame-Options "DENY" always;
-add_header X-Content-Type-Options "nosniff" always;
-add_header X-XSS-Protection "1; mode=block" always;
-add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
-add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-```
-
-### 13.5 数据库加密
-
-SQLite 数据库文件级加密方案：
-
-```bash
-# 方案 1: 文件系统级加密 (LUKS)
-sudo cryptsetup luksFormat /dev/sdb1
-sudo cryptsetup luksOpen /dev/sdb1 encrypted_db
-sudo mkfs.ext4 /dev/mapper/encrypted_db
-sudo mount /dev/mapper/encrypted_db /mnt/encrypted_db
-
-# 方案 2: 使用 SQLCipher (加密 SQLite 扩展)
-# 需要替换 Prisma 的 SQLite 引擎
-# 参考: https://github.com/prisma/prisma/issues/7826
-
-# 方案 3: 应用层加密（敏感字段）
-# 对钱包地址、私钥等敏感数据进行 AES-256 加密
-```
-
----
-
-## 14. 备份与灾难恢复
-
-### 14.1 备份策略
-
-| 备份类型 | 频率 | 保留期限 | 存储位置 | 自动化 |
-|----------|------|---------|---------|--------|
-| 数据库全量 | 每日 | 30 天 | 本地 + S3 | ✅ cron |
-| 数据库增量 | 每 6 小时 | 7 天 | 本地 | ✅ cron |
-| 应用代码 | 每次部署 | 无限 | Git | ✅ Git |
-| 配置文件 | 每次变更 | 无限 | Git | ✅ Git |
-| SSL 证书 | 自动续期 | - | Let's Encrypt | ✅ certbot |
-| Docker 镜像 | 每次构建 | 90 天 | Docker Hub / ECR | ✅ CI/CD |
-
-**S3 远程备份脚本**：
-
-```bash
-#!/bin/bash
-# backup-to-s3.sh
-
-DB_PATH="/home/deploy/bb-protocol/db/production.db"
-S3_BUCKET="s3://your-backup-bucket/bb-protocol"
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-
-# 上传数据库到 S3
-aws s3 cp $DB_PATH $S3_BUCKET/db/production-$TIMESTAMP.db
-
-# 上传 PM2 日志
-tar czf /tmp/pm2-logs-$TIMESTAMP.tar.gz /var/log/pm2/
-aws s3 cp /tmp/pm2-logs-$TIMESTAMP.tar.gz $S3_BUCKET/logs/pm2-logs-$TIMESTAMP.tar.gz
-
-# 清理本地临时文件
-rm -f /tmp/pm2-logs-$TIMESTAMP.tar.gz
-
-echo "[$(date)] S3 备份完成"
-```
-
-### 14.2 恢复流程
-
-#### 场景 1: 数据库损坏
-
-```bash
-# 1. 停止应用
-pm2 stop bb-protocol-app
-
-# 2. 评估损坏程度
-sqlite3 /home/deploy/bb-protocol/db/production.db "PRAGMA integrity_check;"
-
-# 3. 如果可修复
-sqlite3 /home/deploy/bb-protocol/db/production.db "REINDEX;"
-
-# 4. 如果不可修复，恢复备份
-cp /home/deploy/backups/db/production-20250115_020000.db /home/deploy/bb-protocol/db/production.db
-
-# 5. 重启应用
-pm2 start bb-protocol-app
-
-# 6. 验证数据完整性
-curl http://localhost:3000/api/health
-```
-
-#### 场景 2: 服务器故障
-
-```bash
-# 1. 准备新服务器
-# 参照第 7.1 节安装所有依赖
-
-# 2. 克隆代码
-git clone https://github.com/your-org/bb-protocol.git
-cd bb-protocol
-bun install
-
-# 3. 配置环境变量
-cp .env.example .env
-nano .env  # 填写所有环境变量
-
-# 4. 恢复数据库
-aws s3 cp s3://your-backup-bucket/bb-protocol/db/production-LATEST.db ./db/production.db
-
-# 5. 初始化
-bun run db:generate
-bun run build
-
-# 6. 启动服务
-pm2 start ecosystem.config.js
-
-# 7. 验证
-curl http://localhost:3000/api/health
-```
-
-#### 场景 3: 误操作数据
-
-```bash
-# 1. 立即停止应用
-pm2 stop bb-protocol-app
-
-# 2. 找到最近的干净备份
-ls -la /home/deploy/backups/db/
-
-# 3. 恢复备份
-cp /home/deploy/backups/db/production-XXXXXX.db /home/deploy/bb-protocol/db/production.db
-
-# 4. 重启应用
-pm2 start bb-protocol-app
-
-# 5. 验证
-curl http://localhost:3000/api/dashboard
-```
-
-### 14.3 灾难恢复计划
-
-| 灾难级别 | RTO (恢复时间) | RPO (数据丢失) | 行动 |
-|----------|---------------|---------------|------|
-| Level 1: 单服务故障 | < 5 分钟 | 0 | PM2 自动重启 |
-| Level 2: 数据库损坏 | < 30 分钟 | < 6 小时 | 恢复最近备份 |
-| Level 3: 服务器宕机 | < 2 小时 | < 6 小时 | 新服务器 + S3 恢复 |
-| Level 4: 区域故障 | < 8 小时 | < 24 小时 | 切换到备用区域 |
-
-**RTO** (Recovery Time Objective): 从故障到恢复服务的目标时间  
-**RPO** (Recovery Point Objective): 可接受的最大数据丢失量
-
----
-
-## 15. 更新与维护
-
-### 15.1 版本更新流程
-
-```bash
-#!/bin/bash
-# update.sh — 版本更新脚本
-
-set -e
-
-PROJECT_DIR="/home/deploy/bb-protocol"
-BRANCH="main"
-
-cd $PROJECT_DIR
-
-# 1. 拉取最新代码
-git fetch origin
-CURRENT_VERSION=$(git describe --tags --always)
-git pull origin $BRANCH
-NEW_VERSION=$(git describe --tags --always)
-
-echo "版本更新: $CURRENT_VERSION → $NEW_VERSION"
-
-# 2. 安装依赖
-bun install
-
-# 3. 推送数据库 Schema 变更
-bun run db:push
-
-# 4. 生成 Prisma Client
-bun run db:generate
-
-# 5. 构建应用
-bun run build
-
-# 6. 重启主应用
-pm2 restart bb-protocol-app
-
-# 7. 重启微服务
-pm2 restart bb-resonance-sim
-pm2 restart bb-monitoring-sim
-pm2 restart bb-ifd-calculator
-pm2 restart bb-ece-oracle
-pm2 restart bb-poue-prover
-pm2 restart bb-mcp-router
-
-# 8. 健康检查
-sleep 10
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health)
-
-if [ "$HTTP_STATUS" == "200" ]; then
-    echo "✅ 更新成功！版本: $NEW_VERSION"
-else
-    echo "❌ 更新后健康检查失败！"
-    echo "请执行回滚: bash rollback.sh"
-    exit 1
-fi
-```
-
-### 15.2 数据库迁移
-
-```bash
-# 查看当前迁移状态
-bunx prisma migrate status
-
-# 应用待执行的迁移
-bunx prisma migrate deploy
-
-# 创建新迁移（开发环境）
-bunx prisma migrate dev --name describe_the_change
-
-# 强制推送 Schema（开发环境，可能丢失数据）
-bun run db:push
-```
-
-### 15.3 回滚操作
-
-```bash
-#!/bin/bash
-# rollback.sh — 回滚到上一个版本
-
-set -e
-
-PROJECT_DIR="/home/deploy/bb-protocol"
-BACKUP_DIR="/home/deploy/backups/db"
-
-cd $PROJECT_DIR
-
-# 1. 回滚代码
-git log --oneline -5
-echo "请输入要回滚到的 commit hash:"
-read COMMIT_HASH
-
-git checkout $COMMIT_HASH
-
-# 2. 安装依赖
-bun install
-
-# 3. 构建应用
-bun run build
-
-# 4. 恢复数据库（可选）
-echo "是否恢复数据库？(y/n)"
-read RESTORE_DB
-
-if [ "$RESTORE_DB" == "y" ]; then
-    echo "可用的备份文件："
-    ls -la $BACKUP_DIR/
-    echo "请输入备份文件名："
-    read BACKUP_FILE
-    pm2 stop bb-protocol-app
-    cp $BACKUP_DIR/$BACKUP_FILE ./db/production.db
-fi
-
-# 5. 重启服务
-bun run db:generate
-pm2 restart bb-protocol-app
-
-# 6. 健康检查
-sleep 10
-curl -s http://localhost:3000/api/health | jq '.status'
-
-echo "回滚完成！"
-```
-
-### 15.4 维护窗口
-
-**计划维护流程**：
-
-1. **提前通知**：至少 48 小时前通过邮件和网站公告通知用户
-2. **设置维护页面**：
-   ```nginx
-   # /etc/nginx/conf.d/maintenance.conf
-   server {
-       listen 80;
-       server_name your-domain.com;
-       
-       location / {
-           return 503;
-           error_page 503 /maintenance.html;
-       }
-       
-       location = /maintenance.html {
-           root /var/www/maintenance;
-           internal;
-       }
-   }
-   ```
-3. **执行维护操作**
-4. **验证服务恢复**
-5. **关闭维护页面**
-6. **发送恢复通知**
-
-**维护页面 HTML**：
-
-```html
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BB Protocol — 系统维护中</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background: #0f172a;
-            color: #e2e8f0;
-        }
-        .container {
-            text-align: center;
-            max-width: 600px;
-            padding: 2rem;
-        }
-        h1 { color: #22d3ee; }
-        .emoji { font-size: 4rem; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="emoji">🔧</div>
-        <h1>系统维护中</h1>
-        <p>BB Protocol 正在进行系统升级维护，预计很快恢复。</p>
-        <p>感谢您的耐心等待！</p>
-    </div>
-</body>
-</html>
-```
-
----
-
-## 16. 常见问题 (FAQ)
-
-### Q1: 启动时报 "Cannot find module '@prisma/client'"
-
-**原因**：Prisma Client 未生成或未安装。
-
-**解决方案**：
-```bash
-bun run db:generate
-bun install
-```
-
-### Q2: WebSocket 连接一直断开重连
-
-**原因**：微服务未启动或 Caddy 网关未正确配置。
-
-**解决方案**：
-1. 确认对应微服务已启动：`curl http://localhost:3003/health`
-2. 检查前端是否使用正确的连接方式：`io("/?XTransformPort=3003")`
-3. 检查 Caddy 配置中的 `XTransformPort` 路由规则
-4. 确认防火墙未阻断 WebSocket 连接
-
-### Q3: 数据库迁移后数据丢失
-
-**原因**：使用 `db:push` 在生产环境，某些 Schema 变更可能导致数据重置。
-
-**解决方案**：
-1. 始终在生产环境使用 `prisma migrate deploy`
-2. 迁移前备份数据库
-3. 如已丢失，从最近的备份恢复
-
-### Q4: Stripe Webhook 收不到事件
-
-**原因**：Webhook 端点不可达或签名密钥不匹配。
-
-**解决方案**：
-1. 确认 Webhook URL 可从公网访问
-2. 检查 `STRIPE_WEBHOOK_SECRET` 是否正确
-3. 使用 Stripe CLI 本地测试：`stripe listen --forward-to localhost:3000/api/stripe/webhook`
-4. 检查 Nginx 日志是否有 4xx/5xx 错误
-
-### Q5: 钱包连接失败 (WalletConnect)
-
-**原因**：WalletConnect Project ID 未配置或无效。
-
-**解决方案**：
-1. 检查 `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` 是否设置
-2. 确认 Project ID 在 WalletConnect Cloud 中处于激活状态
-3. 清除浏览器缓存和 LocalStorage
-4. 检查浏览器是否安装了 Web3 钱包扩展
-
-### Q6: Docker 构建失败 " bun install --frozen-lockfile"
-
-**原因**：`bun.lock` 文件与 `package.json` 不同步。
-
-**解决方案**：
-```bash
-# 本地重新生成 lockfile
-rm bun.lock
-bun install
-git add bun.lock
-git commit -m "chore: update bun.lock"
-```
-
-### Q7: PM2 启动后进程立即退出
-
-**原因**：环境变量缺失或端口冲突。
-
-**解决方案**：
-1. 查看错误日志：`pm2 logs bb-protocol-app --err`
-2. 检查环境变量是否正确设置
-3. 检查端口是否被占用：`lsof -i :3000`
-4. 尝试手动启动确认错误信息：`bun server.js`
-
-### Q8: Nginx 502 Bad Gateway
-
-**原因**：后端应用未启动或 Nginx 无法连接到上游服务。
-
-**解决方案**：
-1. 检查应用是否运行：`pm2 status`
-2. 检查端口是否监听：`ss -tlnp | grep 3000`
-3. 检查 Nginx 上游配置是否正确
-4. 检查 SELinux/AppArmor 是否阻止连接
-
-### Q9: SSL 证书自动续期失败
-
-**原因**：Certbot 无法完成 HTTP-01 验证。
-
-**解决方案**：
-```bash
-# 手动续期并查看详细错误
-sudo certbot renew --verbose
-
-# 确保 80 端口可从外部访问
-sudo ufw allow 80/tcp
-
-# 检查 Nginx 是否正确代理 .well-known 目录
-sudo nginx -t
-```
-
-### Q10: 内存持续增长（内存泄漏）
-
-**原因**：可能存在未释放的 WebSocket 连接或缓存未清理。
-
-**解决方案**：
-1. 设置 PM2 内存限制：`max_memory_restart: '1G'`
-2. 监控内存使用：`pm2 monit`
-3. 生成堆快照分析：
-   ```bash
-   # 在 PM2 配置中添加
-   node_args: '--inspect=0.0.0.0:9229'
-   
-   # 使用 Chrome DevTools 连接分析
-   ```
-4. 检查 Socket.IO 连接是否正确清理
-
-### Q11: 国际化 (i18n) 显示英文而非中文
-
-**原因**：语言包未正确加载或浏览器语言设置问题。
-
-**解决方案**：
-1. 确认 `src/lib/messages/zh.json` 存在且完整
-2. 检查浏览器语言偏好设置
-3. 清除浏览器缓存
-4. 使用语言切换器手动选择中文
-
-### Q12: 共振波形图不显示实时数据
-
-**原因**：Resonance-Sim 微服务未启动或 WebSocket 断开。
-
-**解决方案**：
-1. 确认 Resonance-Sim 运行中：`curl http://localhost:3003/health`
-2. 打开浏览器开发者工具 → Network → WS，查看 WebSocket 连接状态
-3. 检查前端 `use-resonance-stream.ts` hook 的连接 URL
-4. 确认使用 `io("/?XTransformPort=3003")` 而非直连
-
-### Q13: Docker 容器时间不正确
-
-**原因**：容器默认时区为 UTC。
-
-**解决方案**：
-```yaml
-# 在 docker-compose.yml 中添加时区配置
-environment:
-  - TZ=Asia/Shanghai
-volumes:
-  - /etc/localtime:/etc/localtime:ro
-```
-
-### Q14: 构建时 TypeScript 报错但本地开发正常
-
-**原因**：本地开发模式跳过了 TypeScript 检查（`ignoreBuildErrors: true`）。
-
-**解决方案**：
-1. 检查 `next.config.ts` 中的 `typescript.ignoreBuildErrors` 设置
-2. 临时关闭忽略选项，修复所有类型错误
-3. 运行 `npx tsc --noEmit` 检查类型
-
-### Q15: 部署后页面样式错乱
-
-**原因**：Tailwind CSS 类名在构建时被错误清除（purge 问题）。
-
-**解决方案**：
-1. 检查 `tailwind.config.ts` 中的 `content` 配置
-2. 确保所有组件路径都包含在 content 列表中
-3. 清除 `.next` 缓存后重新构建：
-   ```bash
-   rm -rf .next
-   bun run build
-   ```
-
-### Q16: 数据库文件过大导致性能下降
-
-**原因**：SQLite 数据库长时间使用后产生碎片。
-
-**解决方案**：
-```bash
-# 停止应用
-pm2 stop bb-protocol-app
-
-# 执行 VACUUM 压缩数据库
-sqlite3 db/production.db "VACUUM;"
-
-# 重建索引
-sqlite3 db/production.db "REINDEX;"
-
-# 检查完整性
-sqlite3 db/production.db "PRAGMA integrity_check;"
-
-# 重启应用
-pm2 start bb-protocol-app
-```
-
----
-
-## 附录
-
-### A. 端口分配汇总
-
-| 端口 | 服务 | 协议 | 必需 |
-|------|------|------|------|
-| 80 | Nginx / Caddy | HTTP | ✅ |
-| 443 | Nginx / Caddy | HTTPS | ✅ |
-| 81 | Caddy (Docker) | HTTP | ❌ (Docker) |
-| 3000 | Next.js App | HTTP | ✅ |
-| 3003 | Resonance-Sim | WS | ❌ |
-| 3004 | Monitoring-Sim | WS | ❌ |
-| 3005 | IFD-Calculator | WS | ❌ |
-| 3006 | ECE-Oracle | WS | ❌ |
-| 3007 | POUE-Prover | WS | ❌ |
-| 3008 | MCP-Router | WS | ❌ |
-| 9229 | Node.js Debugger | HTTP | ❌ (开发) |
-
-### B. 环境变量快速参考
-
-```bash
-# 最小化生产配置
-DATABASE_URL="file:./db/production.db"
-NEXTAUTH_SECRET="<随机32字符密钥>"
-NEXTAUTH_URL="https://your-domain.com"
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID="<WalletConnect ID>"
-NEXT_PUBLIC_CHAIN_ID="8453"
-NEXT_PUBLIC_RPC_URL="https://mainnet.base.org"
-NODE_ENV="production"
-```
-
-### C. 关键文件路径
-
-| 路径 | 说明 |
-|------|------|
-| `prisma/schema.prisma` | 数据库 Schema 定义 |
-| `src/lib/web3-config.ts` | Web3 链配置和合约地址 |
-| `src/lib/stripe-config.ts` | Stripe 支付配置 |
-| `src/lib/i18n-config.ts` | 国际化配置 |
-| `Caddyfile` | Caddy 网关配置 |
-| `docker-compose.yml` | Docker 编排配置 |
-| `ecosystem.config.js` | PM2 进程管理配置 |
-| `.env` | 环境变量（不提交到 Git） |
-
-### D. 技术栈版本
-
-| 技术 | 版本 |
-|------|------|
-| Next.js | 16.1+ |
-| React | 19.0 |
-| TypeScript | 5.x |
-| Bun | 1.0+ |
-| Prisma | 6.11+ |
-| Socket.IO | 4.8+ |
-| Stripe | 22.1+ |
-| wagmi | 3.6+ |
-| viem | 2.x |
-| Tailwind CSS | 4.x |
-| shadcn/ui | New York style |
-| Zustand | 5.0+ |
-| TanStack Query | 5.100+ |
-| Framer Motion | 12.x |
-| Foundry | latest |
-
----
-
-> **免责声明**: 本文档基于 BB Protocol v5.0.0 编写，部分配置可能随版本更新而变化。部署前请确认当前版本的兼容性。如有问题，请提交 [GitHub Issue](https://github.com/your-org/bb-protocol/issues) 或联系技术团队。
-
----
-
-*文档结束 — BB Protocol 认知分身协议全环境部署指南 v5.0.0*
+> **文档维护**: 如发现文档错误或需要补充内容，请提交 Issue 或 PR 到项目仓库。  
+> **紧急联系**: 生产环境故障请联系 BB Protocol Core Team (ops@bb-protocol.dev)
