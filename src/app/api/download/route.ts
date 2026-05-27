@@ -1,9 +1,10 @@
 import { NextRequest } from 'next/server';
-import { execSync } from 'child_process';
-import { existsSync, readFileSync, unlinkSync, statSync, writeFileSync } from 'fs';
+import { spawn } from 'child_process';
+import { existsSync, readFileSync, writeFileSync, unlinkSync, statSync } from 'fs';
 import { join } from 'path';
+import { Readable } from 'stream';
 
-// Directories to include in the archive
+// Directories to include
 const INCLUDE_DIRS = [
   'src',
   'prisma',
@@ -87,13 +88,11 @@ function pathExists(root: string, relativePath: string): boolean {
   }
 }
 
-// GET /api/download — Serve full project source as tar.gz
+// GET /api/download — Stream full project source as tar.gz
+// Uses streaming so data starts flowing immediately — no timeout
 export async function GET(_request: NextRequest) {
-  const archiveName = 'bb-protocol-source.tar.gz';
-
   try {
     const projectRoot = process.cwd();
-
     const existingDirs = INCLUDE_DIRS.filter(d => pathExists(projectRoot, d));
     const existingFiles = INCLUDE_FILES.filter(f => pathExists(projectRoot, f));
 
@@ -104,9 +103,7 @@ export async function GET(_request: NextRequest) {
       );
     }
 
-    const archivePath = join(projectRoot, archiveName);
-
-    // Create sanitized .env.example
+    // Create sanitized .env.example BEFORE starting tar
     let envExamplePath: string | null = null;
     if (existsSync(join(projectRoot, '.env'))) {
       try {
@@ -128,9 +125,9 @@ export async function GET(_request: NextRequest) {
       }
     }
 
-    // Build tar command
+    // Build tar arguments — output to stdout (-) for streaming
     const tarArgs = [
-      '-czf', archivePath,
+      '-czf', '-',
       '-C', projectRoot,
       ...EXCLUDE_PATTERNS.map(p => `--exclude=${p}`),
     ];
@@ -142,44 +139,61 @@ export async function GET(_request: NextRequest) {
 
     tarArgs.push(...existingDirs, ...existingFiles);
 
-    execSync(`tar ${tarArgs.map(a => `'${a}'`).join(' ')}`, {
+    // Spawn tar process — data starts flowing immediately
+    const tarProcess = spawn('tar', tarArgs, {
       cwd: projectRoot,
-      stdio: 'pipe',
-      timeout: 300_000,
-      maxBuffer: 1024 * 1024 * 1024,
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    // Clean up temp file
-    if (envExamplePath) {
-      try { unlinkSync(envExamplePath); } catch { /* ignore */ }
-    }
+    // Clean up temp file after tar reads it
+    tarProcess.on('close', () => {
+      if (envExamplePath) {
+        try { unlinkSync(envExamplePath); } catch { /* ignore */ }
+      }
+    });
 
-    if (!existsSync(archivePath)) {
-      return new Response(
-        JSON.stringify({ error: 'Failed to create archive' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
+    // Log tar errors but don't block
+    tarProcess.stderr.on('data', (data: Buffer) => {
+      const msg = data.toString().trim();
+      if (msg && !msg.includes('Removing leading')) {
+        console.error('[Download] tar stderr:', msg);
+      }
+    });
 
-    const fileBuffer = readFileSync(archivePath);
+    tarProcess.on('error', (err) => {
+      console.error('[Download] tar process error:', err);
+    });
 
-    // Clean up archive from disk
-    try { unlinkSync(archivePath); } catch { /* ignore */ }
+    // Convert Node.js Readable to Web ReadableStream for Response
+    const nodeReadable = tarProcess.stdout;
+    const webReadable = new ReadableStream({
+      start(controller) {
+        nodeReadable.on('data', (chunk: Buffer) => {
+          controller.enqueue(new Uint8Array(chunk));
+        });
+        nodeReadable.on('end', () => {
+          controller.close();
+        });
+        nodeReadable.on('error', (err) => {
+          console.error('[Download] stream error:', err);
+          controller.error(err);
+        });
+      },
+      cancel() {
+        tarProcess.kill();
+      },
+    });
 
-    const sizeMB = (fileBuffer.length / (1024 * 1024)).toFixed(1);
-    console.log(`[Download] Serving ${archiveName} (${sizeMB} MB)`);
-
-    return new Response(fileBuffer, {
+    return new Response(webReadable, {
       status: 200,
       headers: {
         'Content-Type': 'application/gzip',
-        'Content-Disposition': `attachment; filename="${archiveName}"`,
-        'Content-Length': fileBuffer.length.toString(),
+        'Content-Disposition': 'attachment; filename="bb-protocol-source.tar.gz"',
         'Cache-Control': 'no-cache, no-store',
       },
     });
   } catch (error) {
-    console.error('[Download] Error creating archive:', error);
+    console.error('[Download] Error:', error);
     return new Response(
       JSON.stringify({
         error: 'Failed to create source archive',

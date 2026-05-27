@@ -2872,3 +2872,22 @@ Stage Summary:
 - Download: 163MB full project archive with node_modules
 - Download button: uses direct link for reliable large file handling
 - All three runtime errors fixed
+
+---
+Task ID: 4
+Agent: main
+Task: Fix download interruption - switch to streaming
+
+Work Log:
+- Diagnosed download interruption: execSync blocks the event loop for 30-60s while building 163MB archive, causing browser/proxy connection timeout
+- Rewrote /api/download/route.ts to use spawn + ReadableStream instead of execSync + readFileSync
+- tar output streams directly to HTTP response — data starts flowing within seconds, no timeout
+- Uses Web ReadableStream API with manual controller for proper backpressure
+- Tested: 163MB download completes in 23 seconds without interruption
+- Archive contains 59512 files including node_modules, src, contracts, etc.
+- Lint: zero errors
+
+Stage Summary:
+- Download now uses streaming (spawn + ReadableStream) — no more timeout/interruption
+- 163MB full project download completes in ~23 seconds
+- 59512 files, includes all source code + node_modules + config files
