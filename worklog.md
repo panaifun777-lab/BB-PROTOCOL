@@ -2851,3 +2851,24 @@ Stage Summary:
 - Aave error: suppressed at module-level (before React mount)
 - Date error: formatSafeDate() handles undefined/invalid dates gracefully
 - All API endpoints responding correctly
+
+---
+Task ID: 3
+Agent: main
+Task: Fix Aave error at root cause + increase download size to include full project
+
+Work Log:
+- Root cause of Aave error: ConnectKit's getDefaultConfig defaults enableAaveAccount=true, which initializes AaveAccountSdk and causes the "Aave Account is not connected" error
+- Fixed by adding enableAaveAccount: false to the ConnectKit config in web3-provider.tsx
+- Kept ErrorBoundary and global guards as safety net
+- Updated download route to include node_modules (pruned: removed caches, other-platform binaries, docs, tests, source maps)
+- Changed download button from fetch+blob to direct <a> link for reliable large file download
+- Download size now ~163MB (59512 files) including all source code and dependencies
+- Archive includes: src, prisma, contracts, mini-services, db, e2e, examples, node_modules, all config files, .env.example (sanitized)
+- Lint: zero errors
+
+Stage Summary:
+- Aave error: fixed at root cause (enableAaveAccount: false) — SDK no longer initializes
+- Download: 163MB full project archive with node_modules
+- Download button: uses direct link for reliable large file handling
+- All three runtime errors fixed

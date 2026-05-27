@@ -39,9 +39,8 @@ const INCLUDE_FILES = [
   'DEPLOYMENT-GUIDE.md',
 ];
 
-// Patterns to exclude (sensible pruning for smaller download)
+// Patterns to exclude
 const EXCLUDE_PATTERNS = [
-  // Build artifacts & caches
   '.next',
   '.git',
   'bb-project-source.tar.gz',
@@ -55,9 +54,7 @@ const EXCLUDE_PATTERNS = [
   'cache',
   '.cache',
   'tmp',
-  // Mini-services have their own node_modules (install separately)
   'mini-services/*/node_modules',
-  // node_modules pruning: remove unnecessary files
   'node_modules/.cache',
   'node_modules/**/prebuilds',
   'node_modules/**/darwin-*',
@@ -74,7 +71,6 @@ const EXCLUDE_PATTERNS = [
   'node_modules/**/docs',
   'node_modules/**/*.map',
   'node_modules/**/README*',
-  // Heavy packages not needed for runtime
   'node_modules/@next/swc-*',
   'node_modules/@img',
   'node_modules/@codesandbox',
@@ -82,7 +78,6 @@ const EXCLUDE_PATTERNS = [
   'node_modules/date-fns-jalali',
 ];
 
-// Check if a path exists
 function pathExists(root: string, relativePath: string): boolean {
   try {
     statSync(join(root, relativePath));
@@ -92,14 +87,13 @@ function pathExists(root: string, relativePath: string): boolean {
   }
 }
 
-// GET /api/download — Serve full project source as tar.gz (includes node_modules)
+// GET /api/download — Serve full project source as tar.gz
 export async function GET(_request: NextRequest) {
   const archiveName = 'bb-protocol-source.tar.gz';
 
   try {
     const projectRoot = process.cwd();
 
-    // Filter to only existing paths
     const existingDirs = INCLUDE_DIRS.filter(d => pathExists(projectRoot, d));
     const existingFiles = INCLUDE_FILES.filter(f => pathExists(projectRoot, f));
 
@@ -112,7 +106,7 @@ export async function GET(_request: NextRequest) {
 
     const archivePath = join(projectRoot, archiveName);
 
-    // Create sanitized .env.example from .env
+    // Create sanitized .env.example
     let envExamplePath: string | null = null;
     if (existsSync(join(projectRoot, '.env'))) {
       try {
@@ -134,14 +128,13 @@ export async function GET(_request: NextRequest) {
       }
     }
 
-    // Build tar arguments
+    // Build tar command
     const tarArgs = [
       '-czf', archivePath,
       '-C', projectRoot,
       ...EXCLUDE_PATTERNS.map(p => `--exclude=${p}`),
     ];
 
-    // Add .env.example with rename transform
     if (envExamplePath) {
       tarArgs.push('--transform', 's/\\.env\\.example\\.tmp/.env.example/');
       tarArgs.push('.env.example.tmp');
@@ -152,16 +145,15 @@ export async function GET(_request: NextRequest) {
     execSync(`tar ${tarArgs.map(a => `'${a}'`).join(' ')}`, {
       cwd: projectRoot,
       stdio: 'pipe',
-      timeout: 180_000,
-      maxBuffer: 512 * 1024 * 1024,
+      timeout: 300_000,
+      maxBuffer: 1024 * 1024 * 1024,
     });
 
-    // Clean up temp .env.example.tmp
+    // Clean up temp file
     if (envExamplePath) {
       try { unlinkSync(envExamplePath); } catch { /* ignore */ }
     }
 
-    // Verify archive was created
     if (!existsSync(archivePath)) {
       return new Response(
         JSON.stringify({ error: 'Failed to create archive' }),
@@ -169,7 +161,6 @@ export async function GET(_request: NextRequest) {
       );
     }
 
-    // Read and serve
     const fileBuffer = readFileSync(archivePath);
 
     // Clean up archive from disk
