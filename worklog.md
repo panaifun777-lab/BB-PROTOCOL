@@ -2795,3 +2795,24 @@ Stage Summary:
 - Prisma: schema valid
 - Page: 10/10 rendering checks passed
 - Dev server running stably on port 3000
+
+---
+Task ID: download-fix
+Agent: main
+Task: Fix download button "Failed to fetch" error
+
+Work Log:
+- Investigated download button error: API route was reading a non-existent pre-built bb-project-source.tar.gz file
+- Rewrote /api/download/route.ts to dynamically create tar.gz archive using system tar command with streaming
+- Added proper excludes: node_modules, .next, .git, upload, dev.log, agent-ctx, etc.
+- Includes: src, prisma, public, contracts, mini-services, db, e2e, rust-engine, examples, all config files
+- Fixed lint error (require imports) by using proper fs/statSync imports
+- Added download success toast notification to the frontend button
+- Changed download filename from 'bb-project-source.tar.gz' to 'bb-protocol-source.tar.gz'
+
+Stage Summary:
+- Download API now returns 200 OK with 736KB tar.gz archive (358 files/dirs)
+- node_modules correctly excluded (0 entries)
+- upload directory correctly excluded (user data privacy)
+- All key source directories and config files present in archive
+- Lint: zero errors

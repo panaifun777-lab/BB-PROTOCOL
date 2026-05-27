@@ -346,12 +346,16 @@ export default function Home() {
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = 'bb-project-source.tar.gz';
+                  a.download = 'bb-protocol-source.tar.gz';
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
-                } catch {
+                  toast({
+                    title: t('dashboard.downloadSuccess') || '下载成功',
+                    description: t('dashboard.downloadSuccessDesc') || '源代码已开始下载 (bb-protocol-source.tar.gz)',
+                  });
+                } catch (err) {
                   // fallback: open in new tab
                   window.open('/api/download', '_blank');
                 } finally {
