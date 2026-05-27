@@ -1,25 +1,26 @@
-import { NextRequest } from 'next/server';
-import { readFileSync } from 'fs';
+import { NextRequest, NextResponse } from 'next/server';
+import { readFile } from 'fs/promises';
 import { join } from 'path';
 
-// GET /api/docs/download-deployment — Download deployment guide
 export async function GET(_request: NextRequest) {
   try {
-    const filePath = join(process.cwd(), 'docs', 'BB-PROTOCOL-DEPLOYMENT-GUIDE.md');
-    const content = readFileSync(filePath, 'utf-8');
+    const filePath = join(process.cwd(), 'BB-PROTOCOL-DEPLOYMENT-GUIDE.md');
+    const fileBuffer = await readFile(filePath);
 
-    return new Response(content, {
+    return new NextResponse(fileBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'text/markdown; charset=utf-8',
         'Content-Disposition': 'attachment; filename="BB-PROTOCOL-DEPLOYMENT-GUIDE.md"',
-        'Cache-Control': 'no-cache',
+        'Content-Length': fileBuffer.length.toString(),
+        'Cache-Control': 'public, max-age=3600',
       },
     });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: 'Deployment guide file not found' }),
-      { status: 404, headers: { 'Content-Type': 'application/json' } }
+    console.error('[download-deployment] Error:', error);
+    return NextResponse.json(
+      { error: 'Deployment guide file not found' },
+      { status: 404 }
     );
   }
 }
