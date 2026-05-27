@@ -2891,3 +2891,97 @@ Stage Summary:
 - Download now uses streaming (spawn + ReadableStream) — no more timeout/interruption
 - 163MB full project download completes in ~23 seconds
 - 59512 files, includes all source code + node_modules + config files
+
+---
+Task ID: 1
+Agent: Documentation Writer
+Task: Create comprehensive system feature introduction and 10-point rating report (BB-PROTOCOL-SYSTEM-REPORT.md)
+
+Work Log:
+- Explored full project structure: 33 Dashboard components, 51 API routes, 39 Prisma models, 6 microservices, 10 Solidity contracts, 16 custom hooks, 8 i18n languages
+- Read key source files: prisma/schema.prisma, package.json, web3-config.ts, stripe-config.ts, types.ts, AvatarCore.sol, resonance-sim/index.ts
+- Analyzed contract architecture: 10 main contracts + 12 interfaces + 2 libraries (Foundry toolchain)
+- Created /home/z/my-project/docs/BB-PROTOCOL-SYSTEM-REPORT.md (~870 lines):
+  - Section 1: Project overview (name, version, framework, chain, Solidity, i18n)
+  - Section 2: Technical architecture (7 layers: Frontend, API, Service, Data, Blockchain, DevOps)
+  - Section 3: 7-phase feature checklist (Phase 0-6) with status
+  - Section 4: 33 Dashboard components cataloged by domain (core, payment, security, infra, governance, web3)
+  - Section 5: 51 API endpoints cataloged by category (core, payment, stripe, security, infra, ecosystem, system)
+  - Section 6: 39 Prisma models cataloged by domain (16 categories)
+  - Section 7: 6 microservices with architecture diagram, port assignments, algorithm details
+  - Section 8: 10 smart contracts + 12 interfaces + 2 libraries, with AvatarCore deep-dive
+  - Section 9: Dual-track payment system (Stripe fiat + x402 on-chain), split logic, multi-currency
+  - Section 10: 16 custom hooks with descriptions
+  - Section 11: 8-language i18n coverage analysis
+  - Section 12: 10-dimension rating with weighted scoring:
+    - 功能完整度: 7.5/10, 代码质量: 6.5/10, 架构设计: 7.0/10, UI/UX: 7.0/10
+    - 安全性: 4.5/10, 性能优化: 6.0/10, 测试覆盖: 3.0/10, 文档: 5.5/10
+    - 可维护性: 6.0/10, 部署就绪度: 4.0/10
+    - 综合评分: 5.8/10 (weighted)
+  - Section 13: Top 10 improvement suggestions with priority (P0-P3), expected score impact, and implementation roadmap
+  - Appendix: Tech stack versions, file statistics, key configuration files
+- Ran `bun run lint` → zero errors
+
+Stage Summary:
+- Comprehensive 870-line Chinese markdown report created at docs/BB-PROTOCOL-SYSTEM-REPORT.md
+- Honest and rigorous 10-dimension rating: overall 5.8/10 (prototype stage)
+- Key strengths: feature coverage, modern tech stack, dual-payment, i18n
+- Key weaknesses: no auth, no rate limiting, no real contract deployment, test coverage near zero, Stripe placeholder keys
+- 10 actionable improvement suggestions with priority levels and expected score impact
+- Files created:
+  - docs/BB-PROTOCOL-SYSTEM-REPORT.md (new - 870 lines, comprehensive system report)
+
+---
+Task ID: 2
+Agent: Documentation Writer
+Task: Create comprehensive deployment guide document at /home/z/my-project/docs/BB-PROTOCOL-DEPLOYMENT-GUIDE.md
+
+Work Log:
+- Explored project structure: package.json, Caddyfile, Dockerfile, docker-compose.yml, prisma/schema.prisma, mini-services, web3-config.ts, stripe-config.ts, next.config.ts, health API route
+- Identified all 7 services (App:3000, Resonance-Sim:3003, Monitoring-Sim:3004, IFD-Calculator:3005, ECE-Oracle:3006, POUE-Prover:3007, MCP-Router:3008) and their configurations
+- Created comprehensive deployment guide in Chinese (Simplified) covering all 16 required sections:
+  1. 部署概述 — System architecture, minimum requirements, service dependency map
+  2. 环境要求 — Hardware (dev/prod), software (Node.js, Bun, Docker, Git, SQLite)
+  3. 环境变量配置 — Complete variable table (18 vars), .env.example template, NEXTAUTH_SECRET generation
+  4. 本地开发部署 — Step-by-step from clone to running, troubleshooting 5 common issues
+  5. Docker 部署 — Dockerfile explanation, docker-compose.yml config, build/start/persist/logs
+  6. Vercel 部署 — Project creation, env vars, build settings, Turso/PlanetScale DB, custom domain
+  7. VPS/云服务器部署 — Ubuntu setup, Nginx config (full), SSL/Certbot, PM2 ecosystem.config.js, ufw, deploy script
+  8. 微服务部署 — Start commands, health checks, Caddy XTransformPort routing
+  9. 数据库管理 — db:push vs migrate, backup scripts, restore, migration flow
+  10. Stripe 配置 — Account, API keys, Webhook, products/prices, test vs production
+  11. Web3 配置 — WalletConnect, contract addresses, Base vs Sepolia network switching
+  12. 监控与日志 — Health endpoints, log config/logrotate, alert rules, performance/Web Vitals
+  13. 安全加固 — Env var security, API rate limiting (Nginx), CORS, CSP headers, DB encryption
+  14. 备份与灾难恢复 — Backup strategy, restore scenarios, DR plan with RTO/RPO
+  15. 更新与维护 — Version update flow, DB migration, rollback script, maintenance windows
+  16. 常见问题 (FAQ) — 16 common problems with solutions
+- Document includes 4 appendices: port allocation, env var quick reference, key file paths, tech stack versions
+- Total: 2510 lines, professional markdown with tables, code blocks (bash/nginx/yaml/typescript), architecture diagrams
+- Ran `bun run lint` → zero errors (docs folder does not affect lint)
+
+Stage Summary:
+- Comprehensive deployment guide created: docs/BB-PROTOCOL-DEPLOYMENT-GUIDE.md (2510 lines)
+- Covers all 16 required sections with detailed instructions, code examples, and troubleshooting
+- Written entirely in Chinese (Simplified) as requested
+- Files created:
+  - docs/BB-PROTOCOL-DEPLOYMENT-GUIDE.md (new — comprehensive deployment guide)
+
+---
+Task ID: 5
+Agent: main
+Task: Create two professional .md documents with separate download links
+
+Work Log:
+- Created /docs/BB-PROTOCOL-SYSTEM-REPORT.md (1381 lines, 57KB) — system feature introduction & 10-point rating report
+- Created /docs/BB-PROTOCOL-DEPLOYMENT-GUIDE.md (2510 lines, 70KB) — comprehensive deployment guide for all environments
+- Created /api/docs/download-report/route.ts — dedicated download endpoint for system report
+- Created /api/docs/download-deployment/route.ts — dedicated download endpoint for deployment guide
+- Added two download buttons in page.tsx header: "评级报告" (violet FileText icon) and "部署指南" (cyan BookOpen icon)
+- Both document downloads tested: 200 OK
+- Lint: zero errors
+
+Stage Summary:
+- System Report: 1381 lines covering 13 sections (architecture, 7 phases, 33 components, 51 APIs, 39 models, 6 services, 10 contracts, dual-payment, 16 hooks, i18n, rating 5.8/10, top 10 improvements)
+- Deployment Guide: 2510 lines covering 16 sections (local, Docker, Vercel, VPS, microservices, DB, Stripe, Web3, monitoring, security, backup, maintenance, FAQ)
+- Three download buttons in header: 评级报告, 部署指南, 源码

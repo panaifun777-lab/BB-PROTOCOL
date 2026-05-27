@@ -34,6 +34,8 @@ import {
   Receipt,
   BarChart3,
   Crown,
+  FileText,
+  BookOpen,
 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -333,14 +335,34 @@ export default function Home() {
             {/* Wallet Connect */}
             <Web3ConnectButton />
 
+            {/* Download: System Report */}
+            <a
+              href="/api/docs/download-report"
+              download="BB-PROTOCOL-SYSTEM-REPORT.md"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-violet-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium"
+              title="系统功能介绍与评级报告"
+            >
+              <FileText className="w-3.5 h-3.5 text-violet-400" />
+              <span className="hidden lg:inline text-slate-300">评级报告</span>
+            </a>
+
+            {/* Download: Deployment Guide */}
+            <a
+              href="/api/docs/download-deployment"
+              download="BB-PROTOCOL-DEPLOYMENT-GUIDE.md"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-cyan-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium"
+              title="全环境部署指南"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden lg:inline text-slate-300">部署指南</span>
+            </a>
+
             {/* Download Source Code */}
             <button
               aria-label="Download source code"
               onClick={() => {
                 if (downloading) return;
                 setDownloading(true);
-                // Use direct link for large file download (avoids loading entire blob into JS memory)
-                // The browser's native download handler streams the file efficiently
                 const a = document.createElement('a');
                 a.href = '/api/download';
                 a.download = 'bb-protocol-source.tar.gz';
@@ -351,13 +373,12 @@ export default function Home() {
                   title: t('dashboard.downloadSuccess') || '下载已开始',
                   description: t('dashboard.downloadSuccessDesc') || 'bb-protocol-source.tar.gz 正在下载（含依赖，约160MB）',
                 });
-                // Reset downloading state after a reasonable delay
                 setTimeout(() => setDownloading(false), 3000);
               }}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-emerald-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-emerald-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
             >
               <Download className={cn('w-3.5 h-3.5 text-emerald-400', downloading && 'animate-bounce')} />
-              <span className="hidden sm:inline text-slate-300">{downloading ? t('dashboard.downloading') || 'Downloading...' : t('dashboard.download') || '下载'}</span>
+              <span className="hidden sm:inline text-slate-300">{downloading ? t('dashboard.downloading') || 'Downloading...' : t('dashboard.download') || '源码'}</span>
             </button>
 
             {/* Notification Center */}
