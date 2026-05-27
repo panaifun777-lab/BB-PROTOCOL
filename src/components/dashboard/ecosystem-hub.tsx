@@ -954,7 +954,6 @@ function NotificationCenterTab({
       <Card className="border-slate-700 bg-slate-800/60 backdrop-blur-sm overflow-hidden">
         <ScrollArea className="max-h-[400px]">
           <div className="divide-y divide-slate-700/30">
-            <AnimatePresence>
               {filtered.map((notif) => {
                 const priorityConfig = PRIORITY_CONFIG[notif.priority];
                 const TypeIcon = NOTIFICATION_TYPE_ICON[notif.type];
@@ -963,7 +962,6 @@ function NotificationCenterTab({
                     key={notif.id}
                     initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 8, height: 0 }}
                     transition={{ duration: 0.2 }}
                     className={cn(
                       'flex items-start gap-3 px-4 py-3 border-l-4 transition-colors',
@@ -1030,7 +1028,6 @@ function NotificationCenterTab({
                   </motion.div>
                 );
               })}
-            </AnimatePresence>
           </div>
         </ScrollArea>
       </Card>
@@ -1165,59 +1162,47 @@ export default function EcosystemHub() {
             </TabsList>
 
             <TabsContent value="protocols">
-              <AnimatePresence mode="wait">
                 <motion.div
                   key="protocols"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
                 >
                   <ProtocolIntegrationTab protocols={data.protocols} metrics={data.ecosystemMetrics} />
                 </motion.div>
-              </AnimatePresence>
             </TabsContent>
 
             <TabsContent value="wallets">
-              <AnimatePresence mode="wait">
                 <motion.div
                   key="wallets"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
                 >
                   <WalletEcosystemTab wallets={data.wallets} />
                 </motion.div>
-              </AnimatePresence>
             </TabsContent>
 
             <TabsContent value="data">
-              <AnimatePresence mode="wait">
                 <motion.div
                   key="data"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
                 >
                   <DataAggregationTab dataAggregation={data.dataAggregation} activityFeed={data.activityFeed} />
                 </motion.div>
-              </AnimatePresence>
             </TabsContent>
 
             <TabsContent value="notifications">
-              <AnimatePresence mode="wait">
                 <motion.div
                   key="notifications"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
                 >
                   <NotificationCenterTab notifications={data.notifications} partnerProgram={data.partnerProgram} />
                 </motion.div>
-              </AnimatePresence>
             </TabsContent>
           </Tabs>
         </CardContent>

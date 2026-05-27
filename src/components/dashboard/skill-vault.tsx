@@ -118,7 +118,6 @@ function SkillCard({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
       whileHover={{ scale: 1.01 }}
       className={cn(
@@ -335,7 +334,6 @@ export default function SkillVault({
 
           {/* Single content area, filtered by state */}
           <div className="space-y-3">
-            <AnimatePresence mode="popLayout">
               {filteredSkills.map((avatarSkill) => {
                 const status = getSkillStatus(
                   avatarSkill,
@@ -353,8 +351,6 @@ export default function SkillVault({
                   />
                 );
               })}
-            </AnimatePresence>
-
             {filteredSkills.length === 0 && (
               <motion.div
                 initial={{ opacity: 0 }}

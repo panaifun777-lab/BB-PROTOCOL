@@ -350,15 +350,12 @@ export default function MonitoringCenter() {
               {t('monitoring.anomalyDetectionTab')}
             </TabsTrigger>
           </TabsList>
-
-          <AnimatePresence mode="wait">
             {/* ═══════════ Tab 1: System Monitoring ═══════════ */}
             {activeTab === 'system' && (
               <motion.div
                 key="system"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
                 className="mt-4 space-y-4"
               >
@@ -579,7 +576,6 @@ export default function MonitoringCenter() {
                 key="chain"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
                 className="mt-4 space-y-4"
               >
@@ -680,7 +676,6 @@ export default function MonitoringCenter() {
                 key="alerts"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
                 className="mt-4 space-y-4"
               >
@@ -785,7 +780,6 @@ export default function MonitoringCenter() {
                 key="anomaly"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
                 className="mt-4 space-y-4"
               >
@@ -949,7 +943,6 @@ export default function MonitoringCenter() {
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
         </Tabs>
       </CardContent>
     </Card>

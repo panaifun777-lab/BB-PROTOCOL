@@ -896,13 +896,11 @@ export default function ContractSimulation() {
               )}
 
               {/* Simulation Result */}
-              <AnimatePresence mode="wait">
                 {simulationResult && (
                   <motion.div
                     key="sim-result"
                     initial={{ opacity: 0, y: 10, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.98 }}
                     transition={{ duration: 0.3 }}
                     className="space-y-3"
                   >
@@ -1081,7 +1079,6 @@ export default function ContractSimulation() {
                     )}
                   </motion.div>
                 )}
-              </AnimatePresence>
             </TabsContent>
 
             {/* ====== VERIFY TAB ====== */}
@@ -1173,13 +1170,11 @@ export default function ContractSimulation() {
               </div>
 
               {/* Verification Result */}
-              <AnimatePresence mode="wait">
                 {splitVerificationResult && (
                   <motion.div
                     key="split-verify"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3 }}
                     className="space-y-3"
                   >
@@ -1246,7 +1241,6 @@ export default function ContractSimulation() {
                     </div>
                   </motion.div>
                 )}
-              </AnimatePresence>
             </TabsContent>
 
             {/* ====== HISTORY TAB ====== */}

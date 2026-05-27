@@ -242,13 +242,10 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
                   <p className="text-xs font-medium text-slate-400">
                     {t('delegation.currentWeight')}
                   </p>
-
-                  <AnimatePresence mode="wait">
                     <motion.div
                       key={activeDomain + JSON.stringify(weightEntries)}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
                       className="space-y-2"
                     >
                       {weightEntries.map((entry) => (
@@ -286,7 +283,6 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
                         </div>
                       ))}
                     </motion.div>
-                  </AnimatePresence>
                 </div>
 
                 {/* ── Available sub-avatars ────────────────── */}
@@ -432,12 +428,10 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
           </Tabs>
 
           {/* ── Confirmation dialog ────────────────────────── */}
-          <AnimatePresence>
             {confirmAction && confirmDomain && (
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
                 className="rounded-lg border border-slate-600 bg-slate-900 p-4"
               >
                 <p className="mb-3 text-sm text-slate-200">
@@ -472,7 +466,6 @@ export default function IFDDelegation({ delegations }: IFDDelegationProps) {
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
         </CardContent>
       </Card>
     </motion.div>

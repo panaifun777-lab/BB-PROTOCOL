@@ -1281,13 +1281,11 @@ export default function DataInfra() {
             </TabsList>
 
             <div className="mt-4">
-              <AnimatePresence mode="wait">
                 <TabsContent value="subgraph" className="mt-0">
                   <motion.div
                     key="subgraph"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 10 }}
                     transition={{ duration: 0.2 }}
                   >
                     <SubgraphTab subgraph={data.subgraph} t={t} />
@@ -1298,7 +1296,6 @@ export default function DataInfra() {
                     key="ipfs"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 10 }}
                     transition={{ duration: 0.2 }}
                   >
                     <IpfsTab ipfs={data.ipfs} t={t} />
@@ -1309,7 +1306,6 @@ export default function DataInfra() {
                     key="sync"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 10 }}
                     transition={{ duration: 0.2 }}
                   >
                     <StateSyncTab stateSync={data.stateSync} zustandStores={data.zustandStores} superset={data.superset} t={t} />
@@ -1320,13 +1316,11 @@ export default function DataInfra() {
                     key="pipeline"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 10 }}
                     transition={{ duration: 0.2 }}
                   >
                     <DataPipelineTab superset={data.superset} t={t} />
                   </motion.div>
                 </TabsContent>
-              </AnimatePresence>
             </div>
           </Tabs>
         </CardContent>

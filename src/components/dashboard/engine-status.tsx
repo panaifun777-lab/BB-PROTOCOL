@@ -136,6 +136,7 @@ function metricColor(color?: string): string {
 // ── Module Card ──────────────────────────────────────────────
 
 function ModuleCard({ module, index }: { module: EngineModuleStatus; index: number }) {
+  const { t } = useI18n()
   const icon = MODULE_ICONS[module.name] || <Server className="h-5 w-5" />
   const gradient = MODULE_COLORS[module.name] || 'from-slate-500/20 to-slate-500/10'
   const accent = MODULE_ACCENT[module.name] || 'border-slate-500/40'

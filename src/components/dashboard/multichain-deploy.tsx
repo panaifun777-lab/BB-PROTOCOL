@@ -222,7 +222,9 @@ function formatNumber(value: number): string {
   return value.toLocaleString();
 }
 
-function getRelativeTime(timestamp: string, now?: Date | null): string {
+type I18nFn = (key: string, params?: Record<string, string>) => string;
+
+function getRelativeTime(timestamp: string, now: Date | null | undefined, t: I18nFn): string {
   if (!timestamp) return '—';
   const currentDate = now ?? new Date('2026-03-04');
   const date = new Date(timestamp);
@@ -369,7 +371,7 @@ function ChainManagementTab({ chains }: { chains: SupportedChain[] }) {
               {/* Last Sync */}
               <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mb-3">
                 <Clock className="size-3" />
-                <span suppressHydrationWarning> {t('multichain.lastSync')}: {getRelativeTime(chain.lastSync, now)}</span>
+                <span suppressHydrationWarning> {t('multichain.lastSync')}: {getRelativeTime(chain.lastSync, now, t)}</span>
               </div>
 
               {/* Action Button */}
@@ -608,7 +610,7 @@ function StateSyncTab({
                 <div className="flex items-center gap-4 sm:gap-6">
                   <div className="text-center">
                     <span className="text-[9px] text-slate-500 block">{t('multichain.recentSync')}</span>
-                    <span className="text-[10px] text-slate-400" suppressHydrationWarning>{getRelativeTime(entry.lastSync, now)}</span>
+                    <span className="text-[10px] text-slate-400" suppressHydrationWarning>{getRelativeTime(entry.lastSync, now, t)}</span>
                   </div>
                   <div className="text-center">
                     <span className="text-[9px] text-slate-500 block">{t('multichain.latency')}</span>
@@ -930,7 +932,7 @@ function ChainSwitchTab({
 
                   <div className="flex items-center gap-1.5 mt-2 text-[10px] text-slate-500">
                     <Clock className="size-2.5" />
-                    <span suppressHydrationWarning>{getRelativeTime(entry.timestamp, now)}</span>
+                    <span suppressHydrationWarning>{getRelativeTime(entry.timestamp, now, t)}</span>
                   </div>
                 </motion.div>
               );
@@ -1033,63 +1035,57 @@ export default function MultiChainDeploy() {
               </TabsTrigger>
             </TabsList>
 
-            <AnimatePresence mode="wait">
-              <TabsContent value="chains" className="mt-4">
-                <motion.div
-                  key="chains"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <ChainManagementTab chains={data.supportedChains} />
-                </motion.div>
-              </TabsContent>
+            <TabsContent value="chains" className="mt-4">
+              <motion.div
+                key="chains"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChainManagementTab chains={data.supportedChains} />
+              </motion.div>
+            </TabsContent>
 
-              <TabsContent value="bridges" className="mt-4">
-                <motion.div
-                  key="bridges"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <CrossChainBridgeTab bridges={data.crossChainBridges} chains={data.supportedChains} />
-                </motion.div>
-              </TabsContent>
+            <TabsContent value="bridges" className="mt-4">
+              <motion.div
+                key="bridges"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <CrossChainBridgeTab bridges={data.crossChainBridges} chains={data.supportedChains} />
+              </motion.div>
+            </TabsContent>
 
-              <TabsContent value="sync" className="mt-4">
-                <motion.div
-                  key="sync"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <StateSyncTab
-                    stateSync={data.stateSync}
-                    deploymentPipeline={data.deploymentPipeline}
-                    tvlHistory={data.tvlHistory}
-                    chains={data.supportedChains}
-                  />
-                </motion.div>
-              </TabsContent>
+            <TabsContent value="sync" className="mt-4">
+              <motion.div
+                key="sync"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <StateSyncTab
+                  stateSync={data.stateSync}
+                  deploymentPipeline={data.deploymentPipeline}
+                  tvlHistory={data.tvlHistory}
+                  chains={data.supportedChains}
+                />
+              </motion.div>
+            </TabsContent>
 
-              <TabsContent value="switch" className="mt-4">
-                <motion.div
-                  key="switch"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <ChainSwitchTab
-                    chains={data.supportedChains}
-                    switchHistory={data.chainSwitchHistory}
-                  />
-                </motion.div>
-              </TabsContent>
-            </AnimatePresence>
+            <TabsContent value="switch" className="mt-4">
+              <motion.div
+                key="switch"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChainSwitchTab
+                  chains={data.supportedChains}
+                  switchHistory={data.chainSwitchHistory}
+                />
+              </motion.div>
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>

@@ -121,6 +121,74 @@ model ResonanceHistory {
   createdAt DateTime @default(now())
 }
 
+// ===== 订阅模型 =====
+
+model Subscription {
+  id               String   @id @default(cuid())
+  avatarId         String
+  tier             String                              // starter | pro | enterprise
+  stripePriceId    String                              // Stripe Price ID
+  stripeSubId      String?                             // Stripe Subscription ID
+  status           String   @default("active")         // active | past_due | canceled | trialing
+  currentPeriodStart DateTime @default(now())
+  currentPeriodEnd   DateTime @default(now())
+  cancelAtPeriodEnd Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// ===== 用量记录模型 =====
+
+model UsageRecord {
+  id           String   @id @default(cuid())
+  avatarId     String
+  serviceType  String                              // skill_call | rag_query | multimodal | collaboration
+  quantity     Int                                 // 调用次数/单位量
+  unitPrice    Float                               // 单价 (USD cents)
+  totalAmount  Float                               // 总金额
+  billingPeriod String                              // 2024-01 format
+  status       String   @default("unbilled")       // unbilled | billed | paid
+  stripeReportId String?                           // Stripe Usage Record ID
+  createdAt    DateTime @default(now())
+}
+
+// ===== 发票模型 =====
+
+model Invoice {
+  id              String   @id @default(cuid())
+  avatarId        String
+  paymentId       String?                             // 关联Payment
+  subscriptionId  String?                             // 关联Subscription
+  invoiceNumber   String   @unique                    // INV-YYYYMM-XXXX
+  amount          Float                               // 总金额
+  currency        String   @default("usd")
+  tax             Float    @default(0)                // 税额
+  discount        Float    @default(0)                // 折扣
+  totalAmount     Float                               // 含税含折扣总额
+  status          String   @default("draft")          // draft | issued | paid | void | uncollectible
+  dueDate         DateTime
+  issuedAt        DateTime?
+  paidAt          DateTime?
+  lineItems       String                              // JSON: [{description, quantity, unitPrice, amount}]
+  metadata        String?                             // JSON: additional metadata
+  pdfUrl          String?                             // 生成的PDF URL
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ===== 多币种汇率模型 =====
+
+model CurrencyRate {
+  id         String   @id @default(cuid())
+  base       String                              // USD
+  target     String                              // EUR | GBP | JPY | CNY | KRW
+  rate       Float                               // 汇率
+  source     String   @default("stripe")         // stripe | manual | api
+  updatedAt  DateTime @updatedAt
+
+  @@unique([base, target])
+}
+
 // ===== x402支付记录 =====
 
 model Payment {

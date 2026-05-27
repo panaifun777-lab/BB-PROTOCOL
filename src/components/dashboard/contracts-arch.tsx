@@ -386,7 +386,6 @@ export default function ContractsArch() {
 
               {/* Contract Cards */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <AnimatePresence mode="popLayout">
                   {filteredContracts.map((contract, idx) => {
                     const catColor = CATEGORY_COLORS[contract.category];
                     const isExpanded = expandedContracts.has(contract.id);
@@ -397,7 +396,6 @@ export default function ContractsArch() {
                         layout
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.3, delay: idx * 0.05 }}
                         className={cn(
                           'rounded-lg border bg-slate-900/40 p-4 space-y-3',
@@ -521,12 +519,10 @@ export default function ContractsArch() {
                         </Button>
 
                         {/* Expanded: Functions Table */}
-                        <AnimatePresence>
                           {isExpanded && (
                             <motion.div
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
                               transition={{ duration: 0.3 }}
                               className="overflow-hidden"
                             >
@@ -622,11 +618,9 @@ export default function ContractsArch() {
                               </div>
                             </motion.div>
                           )}
-                        </AnimatePresence>
                       </motion.div>
                     );
                   })}
-                </AnimatePresence>
               </div>
             </TabsContent>
 

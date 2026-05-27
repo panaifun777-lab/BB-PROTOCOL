@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import {
   Brain,
@@ -29,7 +30,13 @@ import {
   Database,
   ChevronsLeft,
   ChevronsRight,
+  Download,
+  Receipt,
+  BarChart3,
+  Crown,
 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { DashboardState } from '@/lib/types';
 import {
@@ -47,35 +54,42 @@ import { useI18n } from '@/hooks/use-i18n';
 import { useDashboardData } from '@/hooks/use-dashboard-data';
 import { useEngineStatus } from '@/hooks/use-engine-status';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import { LazySection } from '@/components/ui/lazy-section';
 
-import CognitiveCard from '@/components/dashboard/cognitive-card';
-import SplitDashboard from '@/components/dashboard/split-dashboard';
-import ResonanceWave from '@/components/dashboard/resonance-wave';
-import CircuitPanel from '@/components/dashboard/circuit-panel';
-import IFDDelegation from '@/components/dashboard/ifd-delegation';
-import SkillVault from '@/components/dashboard/skill-vault';
-import CognitiveTimeline from '@/components/dashboard/cognitive-timeline';
-import X402Payment from '@/components/dashboard/x402-payment';
-import AvatarMarketplace from '@/components/dashboard/avatar-marketplace';
-import NotificationCenter from '@/components/dashboard/notification-center';
-import CompliancePanel from '@/components/dashboard/compliance-panel';
-import SecurityAudit from '@/components/dashboard/security-audit';
-import LPLiquidity from '@/components/dashboard/lp-liquidity';
-import ContractSimulation from '@/components/dashboard/contract-simulation';
-import PerformanceDashboard from '@/components/dashboard/performance-dashboard';
-import DeploymentCenter from '@/components/dashboard/deployment-center';
-import MonitoringCenter from '@/components/dashboard/monitoring-center';
-import FeatureFlags from '@/components/dashboard/feature-flags';
-import MultichainDeploy from '@/components/dashboard/multichain-deploy';
-import SdkPlatform from '@/components/dashboard/sdk-platform';
-import DaoGovernance from '@/components/dashboard/dao-governance';
-import EcosystemHub from '@/components/dashboard/ecosystem-hub';
-import ContractsArch from '@/components/dashboard/contracts-arch';
-import EngineArch from '@/components/dashboard/engine-arch';
-import Web3Integration from '@/components/dashboard/web3-integration';
-import DataInfra from '@/components/dashboard/data-infra';
-import EngineStatusDashboard from '@/components/dashboard/engine-status';
-import Web3Wallet from '@/components/dashboard/web3-wallet';
+// ── Dynamic imports for heavy dashboard components ────────────
+const CognitiveCard = dynamic(() => import('@/components/dashboard/cognitive-card'), { ssr: false });
+const SplitDashboard = dynamic(() => import('@/components/dashboard/split-dashboard'), { ssr: false });
+const ResonanceWave = dynamic(() => import('@/components/dashboard/resonance-wave'), { ssr: false });
+const CircuitPanel = dynamic(() => import('@/components/dashboard/circuit-panel'), { ssr: false });
+const IFDDelegation = dynamic(() => import('@/components/dashboard/ifd-delegation'), { ssr: false });
+const SkillVault = dynamic(() => import('@/components/dashboard/skill-vault'), { ssr: false });
+const CognitiveTimeline = dynamic(() => import('@/components/dashboard/cognitive-timeline'), { ssr: false });
+const X402Payment = dynamic(() => import('@/components/dashboard/x402-payment'), { ssr: false });
+const AvatarMarketplace = dynamic(() => import('@/components/dashboard/avatar-marketplace'), { ssr: false });
+const NotificationCenter = dynamic(() => import('@/components/dashboard/notification-center'), { ssr: false });
+const CompliancePanel = dynamic(() => import('@/components/dashboard/compliance-panel'), { ssr: false });
+const SecurityAudit = dynamic(() => import('@/components/dashboard/security-audit'), { ssr: false });
+const LPLiquidity = dynamic(() => import('@/components/dashboard/lp-liquidity'), { ssr: false });
+const ContractSimulation = dynamic(() => import('@/components/dashboard/contract-simulation'), { ssr: false });
+const PerformanceDashboard = dynamic(() => import('@/components/dashboard/performance-dashboard'), { ssr: false });
+const DeploymentCenter = dynamic(() => import('@/components/dashboard/deployment-center'), { ssr: false });
+const MonitoringCenter = dynamic(() => import('@/components/dashboard/monitoring-center'), { ssr: false });
+const FeatureFlags = dynamic(() => import('@/components/dashboard/feature-flags'), { ssr: false });
+const MultichainDeploy = dynamic(() => import('@/components/dashboard/multichain-deploy'), { ssr: false });
+const SdkPlatform = dynamic(() => import('@/components/dashboard/sdk-platform'), { ssr: false });
+const DaoGovernance = dynamic(() => import('@/components/dashboard/dao-governance'), { ssr: false });
+const EcosystemHub = dynamic(() => import('@/components/dashboard/ecosystem-hub'), { ssr: false });
+const ContractsArch = dynamic(() => import('@/components/dashboard/contracts-arch'), { ssr: false });
+const EngineArch = dynamic(() => import('@/components/dashboard/engine-arch'), { ssr: false });
+const Web3Integration = dynamic(() => import('@/components/dashboard/web3-integration'), { ssr: false });
+const DataInfra = dynamic(() => import('@/components/dashboard/data-infra'), { ssr: false });
+const EngineStatusDashboard = dynamic(() => import('@/components/dashboard/engine-status'), { ssr: false });
+const Web3Wallet = dynamic(() => import('@/components/dashboard/web3-wallet'), { ssr: false });
+const PaymentHistory = dynamic(() => import('@/components/dashboard/payment-history'), { ssr: false });
+const SubscriptionPanel = dynamic(() => import('@/components/dashboard/subscription-panel'), { ssr: false });
+const InvoiceList = dynamic(() => import('@/components/dashboard/invoice-list'), { ssr: false });
+const MeteredUsage = dynamic(() => import('@/components/dashboard/metered-usage'), { ssr: false });
+const PaymentAnalytics = dynamic(() => import('@/components/dashboard/payment-analytics'), { ssr: false });
 
 // ── Navigation Items ──────────────────────────────────────────
 const NAV_ITEMS = [
@@ -102,6 +116,10 @@ const NAV_ITEMS = [
   { id: 'engine', navKey: 'nav.engine', icon: Cog },
   { id: 'web3', navKey: 'nav.web3', icon: Wallet },
   { id: 'data', navKey: 'nav.data', icon: Database },
+  { id: 'payment-history', navKey: 'nav.paymentHistory', icon: DollarSign },
+  { id: 'subscription', navKey: 'nav.subscription', icon: Crown },
+  { id: 'usage', navKey: 'nav.usage', icon: BarChart3 },
+  { id: 'invoices', navKey: 'nav.invoices', icon: Receipt },
 ];
 
 // ── Mobile Bottom Nav Items ───────────────────────────────────
@@ -120,6 +138,37 @@ const INITIAL_DATA: DashboardState = {
   delegations: MOCK_DELEGATIONS,
   timeline: MOCK_TIMELINE,
   resonanceHistory: MOCK_RESONANCE_HISTORY,
+};
+
+// ── Maps nav section IDs to their LazySection row ID ──────────
+const SECTION_TO_ROW: Record<string, string> = {
+  overview: 'overview',
+  revenue: 'overview',
+  resonance: 'resonance',
+  skills: 'skills',
+  governance: 'skills',
+  marketplace: 'marketplace',
+  liquidity: 'liquidity',
+  simulation: 'simulation',
+  timeline: 'timeline',
+  security: 'security',
+  compliance: 'security',
+  performance: 'performance',
+  deployment: 'deployment',
+  monitoring: 'deployment',
+  flags: 'flags',
+  multichain: 'multichain',
+  sdk: 'sdk',
+  dao: 'sdk',
+  ecosystem: 'ecosystem',
+  contracts: 'contracts',
+  engine: 'engine',
+  web3: 'web3',
+  data: 'data',
+  'payment-history': 'payment-history',
+  subscription: 'subscription',
+  usage: 'usage',
+  invoices: 'usage',
 };
 
 // ── Web3 Connect Button (using Web3Store) ────────────────────
@@ -150,6 +199,60 @@ function Web3ConnectButton() {
   );
 }
 
+// ── Stripe Return URL Handler (needs Suspense for useSearchParams) ──
+function StripeReturnHandler() {
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
+
+  const handleStripeReturn = useCallback(() => {
+    const successId = searchParams.get('stripe_success');
+    const cancelId = searchParams.get('stripe_cancel');
+
+    if (successId) {
+      // Fetch payment status and show success toast
+      fetch(`/api/payment/${successId}`)
+        .then((res) => res.ok ? res.json() : null)
+        .then((payment) => {
+          if (payment) {
+            toast({
+              title: 'Payment Successful',
+              description: `${payment.serviceName || 'Payment'} — $${Number(payment.amount).toFixed(2)} ${payment.currency || 'USD'}`,
+            });
+          } else {
+            toast({
+              title: 'Payment Successful',
+              description: 'Your Stripe payment has been processed.',
+            });
+          }
+        })
+        .catch(() => {
+          toast({
+            title: 'Payment Successful',
+            description: 'Your Stripe payment has been processed.',
+          });
+        });
+
+      // Clean URL params
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (cancelId) {
+      toast({
+        title: 'Payment Cancelled',
+        description: 'You cancelled the Stripe payment. No charges were made.',
+        variant: 'destructive',
+      });
+
+      // Clean URL params
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [searchParams, toast]);
+
+  useEffect(() => {
+    handleStripeReturn();
+  }, [handleStripeReturn]);
+
+  return null; // This component renders nothing
+}
+
 export default function Home() {
   const { activeSection, setActiveSection, sidebarCollapsed, toggleSidebar } = useDashboardStore();
   const { t } = useI18n();
@@ -162,8 +265,8 @@ export default function Home() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [paymentService, setPaymentService] = useState('GPT-4o 文本生成');
   const [paymentAmount, setPaymentAmount] = useState(0.02);
+  const [downloading, setDownloading] = useState(false);
 
-  // Construct DashboardState from store data, falling back to mock
   const dashboardData: DashboardState = (avatar && revenueSummary)
     ? { avatar, skills, revenueSummary, recentRevenues, delegations, timeline, resonanceHistory }
     : INITIAL_DATA;
@@ -186,7 +289,8 @@ export default function Home() {
   const scrollTo = (id: string) => {
     setActiveSection(id);
     setMobileMenuOpen(false);
-    const el = document.getElementById(`section-${id}`);
+    const rowId = SECTION_TO_ROW[id] || id;
+    const el = document.getElementById(`section-${rowId}`);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
@@ -228,6 +332,37 @@ export default function Home() {
 
             {/* Wallet Connect */}
             <Web3ConnectButton />
+
+            {/* Download Source Code */}
+            <button
+              aria-label="Download source code"
+              onClick={async () => {
+                if (downloading) return;
+                setDownloading(true);
+                try {
+                  const res = await fetch('/api/download');
+                  if (!res.ok) throw new Error('Download failed');
+                  const blob = await res.blob();
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = 'bb-project-source.tar.gz';
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                } catch {
+                  // fallback: open in new tab
+                  window.open('/api/download', '_blank');
+                } finally {
+                  setDownloading(false);
+                }
+              }}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-emerald-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+            >
+              <Download className={cn('w-3.5 h-3.5 text-emerald-400', downloading && 'animate-bounce')} />
+              <span className="hidden sm:inline text-slate-300">{downloading ? t('dashboard.downloading') || 'Downloading...' : t('dashboard.download') || '下载'}</span>
+            </button>
 
             {/* Notification Center */}
             <NotificationCenter />
@@ -344,275 +479,202 @@ export default function Home() {
           </motion.div>
         )}
 
-        {/* ── Dashboard Grid ─────────────────────── */}
+        {/* ── Dashboard Grid with Lazy Rendering ── */}
         <main className="flex-1 p-4 lg:p-6 space-y-6 pb-24 lg:pb-6 overflow-y-auto">
-          {/* Row 1: Identity + Revenue */}
-          <div id="section-overview" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
+          {/* Row 1: Identity + Revenue — EAGER (above the fold) */}
+          <LazySection id="section-overview" className="grid grid-cols-1 xl:grid-cols-2 gap-6" eager>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <CognitiveCard avatar={dashboardData.avatar} skills={dashboardData.skills} />
             </motion.div>
-            <motion.div
-              id="section-revenue"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <SplitDashboard summary={dashboardData.revenueSummary} recentRevenues={dashboardData.recentRevenues} />
             </motion.div>
-          </div>
+          </LazySection>
 
           {/* Row 2: Resonance + Circuit */}
-          <div id="section-resonance" className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <motion.div
-              className="xl:col-span-2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
+          <LazySection id="section-resonance" className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <motion.div className="xl:col-span-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <ResonanceWave
                 data={dashboardData.resonanceHistory}
                 currentScore={dashboardData.avatar.resonanceScore}
                 circuitState={dashboardData.avatar.circuitState}
               />
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <CircuitPanel avatar={dashboardData.avatar} />
             </motion.div>
-          </div>
+          </LazySection>
 
           {/* Row 3: Skills + IFD */}
-          <div id="section-skills" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
+          <LazySection id="section-skills" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <SkillVault
                 skills={dashboardData.skills}
                 cumulativeRevenue={dashboardData.revenueSummary.totalRevenue}
                 currentTier={dashboardData.avatar.tier}
               />
             </motion.div>
-            <motion.div
-              id="section-governance"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <IFDDelegation delegations={dashboardData.delegations} />
             </motion.div>
-          </div>
+          </LazySection>
 
           {/* Row 4: Marketplace (full width) */}
-          <motion.div
-            id="section-marketplace"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-          >
-            <AvatarMarketplace
-              onRent={(avatar) => {
-                setPaymentService(`${t('dashboard.rentAvatar')} ${avatar.name}`);
-                setPaymentAmount(avatar.hourlyRate * 0.01);
-                setPaymentOpen(true);
-              }}
-            />
-          </motion.div>
+          <LazySection id="section-marketplace">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <AvatarMarketplace
+                onRent={(avatar: { name: string; hourlyRate: number }) => {
+                  setPaymentService(`${t('dashboard.rentAvatar')} ${avatar.name}`);
+                  setPaymentAmount(avatar.hourlyRate * 0.01);
+                  setPaymentOpen(true);
+                }}
+              />
+            </motion.div>
+          </LazySection>
 
           {/* Row 5: LP Liquidity (full width) */}
-          <motion.div
-            id="section-liquidity"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-          >
-            <LPLiquidity />
-          </motion.div>
+          <LazySection id="section-liquidity">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <LPLiquidity />
+            </motion.div>
+          </LazySection>
 
           {/* Row 6: Contract Simulation (full width) */}
-          <motion.div
-            id="section-simulation"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.85 }}
-          >
-            <ContractSimulation />
-          </motion.div>
+          <LazySection id="section-simulation">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <ContractSimulation />
+            </motion.div>
+          </LazySection>
 
           {/* Row 7: Timeline (full width) */}
-          <motion.div
-            id="section-timeline"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
-          >
-            <CognitiveTimeline events={dashboardData.timeline} />
-          </motion.div>
+          <LazySection id="section-timeline">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <CognitiveTimeline events={dashboardData.timeline} />
+            </motion.div>
+          </LazySection>
 
           {/* Row 8: Security + Compliance */}
-          <div id="section-security" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.0 }}
-            >
+          <LazySection id="section-security" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <SecurityAudit />
             </motion.div>
-            <motion.div
-              id="section-compliance"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.1 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <CompliancePanel />
             </motion.div>
-          </div>
+          </LazySection>
 
           {/* Row 9: Performance Dashboard (full width) */}
-          <motion.div
-            id="section-performance"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.15 }}
-          >
-            <PerformanceDashboard />
-          </motion.div>
+          <LazySection id="section-performance">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <PerformanceDashboard />
+            </motion.div>
+          </LazySection>
 
           {/* Row 10: Deployment + Monitoring */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <motion.div
-              id="section-deployment"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.2 }}
-            >
+          <LazySection id="section-deployment" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <DeploymentCenter />
             </motion.div>
-            <motion.div
-              id="section-monitoring"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.25 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <MonitoringCenter />
             </motion.div>
-          </div>
+          </LazySection>
 
           {/* Row 11: Feature Flags (full width) */}
-          <motion.div
-            id="section-flags"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.3 }}
-          >
-            <FeatureFlags />
-          </motion.div>
+          <LazySection id="section-flags">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <FeatureFlags />
+            </motion.div>
+          </LazySection>
 
           {/* Row 12: Multichain Deploy (full width) */}
-          <motion.div
-            id="section-multichain"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.35 }}
-          >
-            <MultichainDeploy />
-          </motion.div>
+          <LazySection id="section-multichain">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <MultichainDeploy />
+            </motion.div>
+          </LazySection>
 
           {/* Row 13: SDK Platform + DAO Governance */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <motion.div
-              id="section-sdk"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.4 }}
-            >
+          <LazySection id="section-sdk" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <SdkPlatform />
             </motion.div>
-            <motion.div
-              id="section-dao"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.45 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <DaoGovernance />
             </motion.div>
-          </div>
+          </LazySection>
 
           {/* Row 14: Ecosystem Hub (full width) */}
-          <motion.div
-            id="section-ecosystem"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.5 }}
-          >
-            <EcosystemHub />
-          </motion.div>
+          <LazySection id="section-ecosystem">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <EcosystemHub />
+            </motion.div>
+          </LazySection>
 
           {/* Row 15: Contracts Arch (full width) */}
-          <motion.div
-            id="section-contracts"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.55 }}
-          >
-            <ContractsArch />
-          </motion.div>
+          <LazySection id="section-contracts">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <ContractsArch />
+            </motion.div>
+          </LazySection>
 
           {/* Row 16: Engine Arch + Engine Status */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <motion.div
-              id="section-engine"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.6 }}
-            >
+          <LazySection id="section-engine" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <EngineArch />
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.65 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <EngineStatusDashboard engineStatus={engineStatus} />
             </motion.div>
-          </div>
+          </LazySection>
 
           {/* Row 17: Web3 Integration + Web3 Wallet */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <motion.div
-              id="section-web3"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.7 }}
-            >
+          <LazySection id="section-web3" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <Web3Integration />
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.75 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <Web3Wallet />
             </motion.div>
-          </div>
+          </LazySection>
 
           {/* Row 18: Data Infra (full width) */}
-          <motion.div
-            id="section-data"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.8 }}
-          >
-            <DataInfra />
-          </motion.div>
+          <LazySection id="section-data">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <DataInfra />
+            </motion.div>
+          </LazySection>
+
+          {/* Row 19: Payment History */}
+          <LazySection id="section-payment-history">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <PaymentHistory />
+            </motion.div>
+          </LazySection>
+
+          {/* Row 20: Subscription Panel (full width) */}
+          <LazySection id="section-subscription">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <SubscriptionPanel />
+            </motion.div>
+          </LazySection>
+
+          {/* Row 21: Metered Usage + Invoice List */}
+          <LazySection id="section-usage" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <MeteredUsage />
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+              <InvoiceList />
+            </motion.div>
+          </LazySection>
+
+          {/* Row 22: Payment Analytics (full width) */}
+          <LazySection id="section-analytics">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <PaymentAnalytics />
+            </motion.div>
+          </LazySection>
         </main>
       </div>
 
@@ -649,11 +711,16 @@ export default function Home() {
         amount={paymentAmount}
       />
 
+      {/* ── Stripe Return Handler (Suspense required for useSearchParams) ── */}
+      <Suspense fallback={null}>
+        <StripeReturnHandler />
+      </Suspense>
+
       {/* ── Footer ────────────────────────────────── */}
       <footer className="hidden lg:block border-t border-slate-800/50 bg-[#0F172A] mt-auto">
         <div className="max-w-[1600px] mx-auto px-6 h-10 flex items-center justify-between text-[10px] text-slate-600">
           <span>{t('dashboard.footer')}</span>
-          <span>{t('dashboard.migration')} · 6 Microservices · 8 i18n</span>
+          <span>{t('dashboard.migration')} · 6 Microservices · 8 i18n · Stripe + x402</span>
         </div>
       </footer>
     </div>

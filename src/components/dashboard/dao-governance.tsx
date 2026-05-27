@@ -632,7 +632,6 @@ export default function DAOGovernance() {
 
               {/* Proposal list */}
               <ScrollArea className="max-h-[500px] pr-1">
-                <AnimatePresence>
                   <div className="space-y-3">
                     {filteredProposals.map((proposal) => (
                       <ProposalCard
@@ -644,7 +643,6 @@ export default function DAOGovernance() {
                       />
                     ))}
                   </div>
-                </AnimatePresence>
               </ScrollArea>
             </TabsContent>
 

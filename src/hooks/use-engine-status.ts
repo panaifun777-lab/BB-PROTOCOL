@@ -173,10 +173,18 @@ export function useEngineStatus() {
         }
       });
 
-      socket.on('connect_error', (error) => {
-        console.error(`[EngineStatus] ${config.name} connection error:`, error.message);
+      socket.on('connect_error', () => {
+        // Silently handle connection errors — microservices may not be running
+        // in sandbox/offline environments. We still track attempts for internal logic.
         const attempts = (reconnectAttemptsRef.current.get(config.name) ?? 0) + 1;
         reconnectAttemptsRef.current.set(config.name, attempts);
+
+        // After max attempts, stop reconnecting and mark as disconnected
+        if (attempts >= maxReconnectAttempts) {
+          socket.disconnect();
+          socketsRef.current.delete(config.name);
+          setConnected((prev) => ({ ...prev, [config.name]: false }));
+        }
       });
 
       // ── Status Event ─────────────────────────────────

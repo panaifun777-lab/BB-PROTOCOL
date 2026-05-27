@@ -601,13 +601,10 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
             )}
             {simulating ? t('web3.simulating') : t('web3.executeSimRead')}
           </Button>
-
-          <AnimatePresence>
             {simResult && (
               <motion.div
                 initial={{ opacity: 0, y: 8, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -8, height: 0 }}
                 className="mt-3"
               >
                 <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
@@ -621,7 +618,6 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
         </div>
 
         {/* Gas Estimate */}
@@ -1031,13 +1027,10 @@ export default function Web3Wallet() {
                 {t('web3.gasTab')}
               </TabsTrigger>
             </TabsList>
-
-            <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.2 }}
                 className="mt-4"
               >
@@ -1054,7 +1047,6 @@ export default function Web3Wallet() {
                   <GasTrackerTab data={data} />
                 </TabsContent>
               </motion.div>
-            </AnimatePresence>
           </Tabs>
         </CardContent>
       </Card>

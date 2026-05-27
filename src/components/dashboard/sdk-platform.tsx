@@ -265,12 +265,10 @@ function EndpointRow({ endpoint, expanded, onToggle }: { endpoint: ApiEndpoint; 
         </Badge>
         {expanded ? <ChevronDown className="size-3.5 text-slate-500 shrink-0" /> : <ChevronRight className="size-3.5 text-slate-500 shrink-0" />}
       </button>
-      <AnimatePresence>
         {expanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
@@ -300,7 +298,6 @@ function EndpointRow({ endpoint, expanded, onToggle }: { endpoint: ApiEndpoint; 
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
     </motion.div>
   );
 }
@@ -983,12 +980,10 @@ export default function SdkPlatform() {
           </TabsList>
 
           <div className="mt-4">
-            <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.2 }}
               >
                 {activeTab === 'docs' && renderDocs()}
@@ -996,7 +991,6 @@ export default function SdkPlatform() {
                 {activeTab === 'downloads' && renderDownloads()}
                 {activeTab === 'webhooks' && renderWebhooks()}
               </motion.div>
-            </AnimatePresence>
           </div>
         </Tabs>
       </CardContent>

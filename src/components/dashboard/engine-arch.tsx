@@ -277,12 +277,10 @@ function ModuleCard({ mod }: { mod: Module }) {
           <span className="font-medium">{t('engine.functionList')}</span>
           <span className="text-slate-600">({mod.functions.length})</span>
         </button>
-        <AnimatePresence>
           {functionsExpanded && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
@@ -299,7 +297,6 @@ function ModuleCard({ mod }: { mod: Module }) {
               </div>
             </motion.div>
           )}
-        </AnimatePresence>
       </div>
 
       {/* Math Model Button */}
@@ -319,12 +316,10 @@ function ModuleCard({ mod }: { mod: Module }) {
       </Button>
 
       {/* Math Model (Expandable) */}
-      <AnimatePresence>
         {mathExpanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
@@ -358,7 +353,6 @@ function ModuleCard({ mod }: { mod: Module }) {
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
     </motion.div>
   );
 }
@@ -587,11 +581,9 @@ export default function EngineArch() {
 
       {/* Module Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <AnimatePresence mode="popLayout">
           {filteredModules.map((mod) => (
             <ModuleCard key={mod.id} mod={mod} />
           ))}
-        </AnimatePresence>
       </div>
 
       {filteredModules.length === 0 && (
@@ -1004,59 +996,47 @@ export default function EngineArch() {
           </TabsList>
 
           <TabsContent value="modules" className="mt-4">
-            <AnimatePresence mode="wait">
               <motion.div
                 key="modules"
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.2 }}
               >
                 {renderModules()}
               </motion.div>
-            </AnimatePresence>
           </TabsContent>
 
           <TabsContent value="dataflow" className="mt-4">
-            <AnimatePresence mode="wait">
               <motion.div
                 key="dataflow"
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.2 }}
               >
                 {renderDataFlow()}
               </motion.div>
-            </AnimatePresence>
           </TabsContent>
 
           <TabsContent value="benchmarks" className="mt-4">
-            <AnimatePresence mode="wait">
               <motion.div
                 key="benchmarks"
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.2 }}
               >
                 {renderBenchmarks()}
               </motion.div>
-            </AnimatePresence>
           </TabsContent>
 
           <TabsContent value="mathmodels" className="mt-4">
-            <AnimatePresence mode="wait">
               <motion.div
                 key="mathmodels"
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.2 }}
               >
                 {renderMathModels()}
               </motion.div>
-            </AnimatePresence>
           </TabsContent>
         </Tabs>
       </CardContent>

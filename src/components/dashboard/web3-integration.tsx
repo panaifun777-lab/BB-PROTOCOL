@@ -233,6 +233,7 @@ function GasHistoryTooltip({ active, payload, label }: { active?: boolean; paylo
 
 // ── Tab 1: Wallet Connection ───────────────────────────
 function WalletConnectionTab({ data }: { data: Web3IntegrationData }) {
+  const { t } = useI18n();
   const connected = data.walletConnections.filter((w) => w.status === 'connected');
   const available = data.walletConnections.filter((w) => w.status === 'available');
 
@@ -253,7 +254,7 @@ function WalletConnectionTab({ data }: { data: Web3IntegrationData }) {
       {/* Connected Wallets */}
       {connected.map((wallet, idx) => (
         <motion.div
-          key={wallet.wallet}
+          key={wallet.wallet || `connected-${idx}`}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: idx * 0.1 }}
@@ -321,7 +322,7 @@ function WalletConnectionTab({ data }: { data: Web3IntegrationData }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {available.map((wallet, idx) => (
             <motion.div
-              key={wallet.wallet}
+              key={wallet.wallet || `available-${idx}`}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + idx * 0.05 }}
@@ -894,13 +895,10 @@ export default function Web3Integration() {
                 {t('web3.tabGas')}
               </TabsTrigger>
             </TabsList>
-
-            <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.2 }}
                 className="mt-4"
               >
@@ -917,7 +915,6 @@ export default function Web3Integration() {
                   <GasTrackerTab data={data} />
                 </TabsContent>
               </motion.div>
-            </AnimatePresence>
           </Tabs>
         </CardContent>
       </Card>
