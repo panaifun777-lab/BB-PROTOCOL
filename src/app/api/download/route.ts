@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server';
-import { spawn } from 'child_process';
-import { Readable } from 'stream';
-import { statSync } from 'fs';
+import { execSync } from 'child_process';
+import { existsSync, readFileSync, unlinkSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 // Directories to include in the archive
@@ -15,6 +14,7 @@ const INCLUDE_DIRS = [
   'e2e',
   'rust-engine',
   'examples',
+  'node_modules',
 ];
 
 // Individual files to include
@@ -39,18 +39,47 @@ const INCLUDE_FILES = [
   'DEPLOYMENT-GUIDE.md',
 ];
 
-// Patterns to exclude
+// Patterns to exclude (sensible pruning for smaller download)
 const EXCLUDE_PATTERNS = [
-  'node_modules',
+  // Build artifacts & caches
   '.next',
   '.git',
   'bb-project-source.tar.gz',
+  'bb-protocol-source.tar.gz',
   'dev.log',
   'agent-ctx',
   'download',
   'upload',
   'playwright-report',
   'test-results',
+  'cache',
+  '.cache',
+  'tmp',
+  // Mini-services have their own node_modules (install separately)
+  'mini-services/*/node_modules',
+  // node_modules pruning: remove unnecessary files
+  'node_modules/.cache',
+  'node_modules/**/prebuilds',
+  'node_modules/**/darwin-*',
+  'node_modules/**/win32-*',
+  'node_modules/**/android-*',
+  'node_modules/**/ia32',
+  'node_modules/**/*.md',
+  'node_modules/**/LICENSE*',
+  'node_modules/**/CHANGELOG*',
+  'node_modules/**/.github',
+  'node_modules/**/test',
+  'node_modules/**/tests',
+  'node_modules/**/__tests__',
+  'node_modules/**/docs',
+  'node_modules/**/*.map',
+  'node_modules/**/README*',
+  // Heavy packages not needed for runtime
+  'node_modules/@next/swc-*',
+  'node_modules/@img',
+  'node_modules/@codesandbox',
+  'node_modules/playwright-core',
+  'node_modules/date-fns-jalali',
 ];
 
 // Check if a path exists
@@ -63,8 +92,10 @@ function pathExists(root: string, relativePath: string): boolean {
   }
 }
 
-// GET /api/download — Stream project source as tar.gz
+// GET /api/download — Serve full project source as tar.gz (includes node_modules)
 export async function GET(_request: NextRequest) {
+  const archiveName = 'bb-protocol-source.tar.gz';
+
   try {
     const projectRoot = process.cwd();
 
@@ -79,60 +110,81 @@ export async function GET(_request: NextRequest) {
       );
     }
 
+    const archivePath = join(projectRoot, archiveName);
+
+    // Create sanitized .env.example from .env
+    let envExamplePath: string | null = null;
+    if (existsSync(join(projectRoot, '.env'))) {
+      try {
+        const envContent = readFileSync(join(projectRoot, '.env'), 'utf-8');
+        const sanitized = envContent
+          .split('\n')
+          .map(line => {
+            const match = line.match(/^(\s*[A-Za-z_][A-Za-z0-9_]*\s*=\s*)/);
+            if (match && !line.startsWith('#')) {
+              return `${match[1]}your-value-here`;
+            }
+            return line;
+          })
+          .join('\n');
+        envExamplePath = join(projectRoot, '.env.example.tmp');
+        writeFileSync(envExamplePath, sanitized);
+      } catch {
+        envExamplePath = null;
+      }
+    }
+
     // Build tar arguments
     const tarArgs = [
-      '-czf', '-',           // Compress to stdout
-      '-C', projectRoot,     // Change to project dir
+      '-czf', archivePath,
+      '-C', projectRoot,
       ...EXCLUDE_PATTERNS.map(p => `--exclude=${p}`),
-      ...existingDirs,
-      ...existingFiles,
     ];
 
-    const tarProcess = spawn('tar', tarArgs, {
-      stdio: ['ignore', 'pipe', 'pipe'],
+    // Add .env.example with rename transform
+    if (envExamplePath) {
+      tarArgs.push('--transform', 's/\\.env\\.example\\.tmp/.env.example/');
+      tarArgs.push('.env.example.tmp');
+    }
+
+    tarArgs.push(...existingDirs, ...existingFiles);
+
+    execSync(`tar ${tarArgs.map(a => `'${a}'`).join(' ')}`, {
+      cwd: projectRoot,
+      stdio: 'pipe',
+      timeout: 180_000,
+      maxBuffer: 512 * 1024 * 1024,
     });
 
-    // Convert Node.js Readable to Web ReadableStream
-    const readable = Readable.toWeb(tarProcess.stdout) as ReadableStream<Uint8Array>;
+    // Clean up temp .env.example.tmp
+    if (envExamplePath) {
+      try { unlinkSync(envExamplePath); } catch { /* ignore */ }
+    }
 
-    // Log stderr but don't block
-    tarProcess.stderr.on('data', (data: Buffer) => {
-      console.error('[Download] tar stderr:', data.toString());
-    });
+    // Verify archive was created
+    if (!existsSync(archivePath)) {
+      return new Response(
+        JSON.stringify({ error: 'Failed to create archive' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
-    tarProcess.on('error', (err) => {
-      console.error('[Download] tar process error:', err);
-    });
+    // Read and serve
+    const fileBuffer = readFileSync(archivePath);
 
-    // Create a TransformStream to handle streaming
-    const { readable: outputReadable, writable } = new TransformStream<Uint8Array, Uint8Array>();
+    // Clean up archive from disk
+    try { unlinkSync(archivePath); } catch { /* ignore */ }
 
-    // Pipe the tar output through
-    const reader = readable.getReader();
-    const writer = writable.getWriter();
+    const sizeMB = (fileBuffer.length / (1024 * 1024)).toFixed(1);
+    console.log(`[Download] Serving ${archiveName} (${sizeMB} MB)`);
 
-    // Stream data asynchronously
-    (async () => {
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          await writer.write(value);
-        }
-      } catch {
-        // Stream may be cancelled if client disconnects
-      } finally {
-        try { await writer.close(); } catch { /* already closed */ }
-      }
-    })();
-
-    return new Response(outputReadable, {
+    return new Response(fileBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/gzip',
-        'Content-Disposition': 'attachment; filename="bb-protocol-source.tar.gz"',
+        'Content-Disposition': `attachment; filename="${archiveName}"`,
+        'Content-Length': fileBuffer.length.toString(),
         'Cache-Control': 'no-cache, no-store',
-        'Transfer-Encoding': 'chunked',
       },
     });
   } catch (error) {

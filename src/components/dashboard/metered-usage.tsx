@@ -26,6 +26,43 @@ import { cn } from '@/lib/utils';
 import { useI18n } from '@/hooks/use-i18n';
 import { format } from 'date-fns';
 
+// ── Safe date formatting helper ────────────────────────
+// Handles undefined/null periodStart/periodEnd from the API,
+// generating reasonable defaults from the billingPeriod string.
+function formatSafeDate(
+  dateStr: string | undefined | null,
+  fmt: string,
+  billingPeriod?: string,
+): string {
+  try {
+    if (dateStr) {
+      const d = new Date(dateStr);
+      if (!isNaN(d.getTime())) {
+        return format(d, fmt);
+      }
+    }
+    // Fallback: derive from billingPeriod (e.g. "2026-05")
+    if (billingPeriod && billingPeriod !== 'all') {
+      const [yearStr, monthStr] = billingPeriod.split('-');
+      const year = parseInt(yearStr, 10);
+      const month = parseInt(monthStr, 10);
+      if (!isNaN(year) && !isNaN(month)) {
+        // For start date, use 1st of the month; for end date, use last day
+        const isEndFormat = fmt.includes('yyyy');
+        const d = isEndFormat
+          ? new Date(year, month, 0) // last day of month
+          : new Date(year, month - 1, 1); // first day of month
+        if (!isNaN(d.getTime())) {
+          return format(d, fmt);
+        }
+      }
+    }
+    return '—';
+  } catch {
+    return '—';
+  }
+}
+
 // ── Types ──────────────────────────────────────────────
 interface UsageRecord {
   serviceType: string;
@@ -173,7 +210,7 @@ export default function MeteredUsage() {
           <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
             <span>{t('usage.billingPeriod')}:</span>
             <span>
-              {format(new Date(usageSummary.periodStart), 'MMM d')} – {format(new Date(usageSummary.periodEnd), 'MMM d, yyyy')}
+              {formatSafeDate(usageSummary.periodStart, 'MMM d')} – {formatSafeDate(usageSummary.periodEnd, 'MMM d, yyyy', usageSummary.billingPeriod)}
             </span>
           </div>
         )}

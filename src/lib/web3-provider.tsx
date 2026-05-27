@@ -9,6 +9,13 @@ import { ConnectKitProvider, getDefaultConfig } from 'connectkit';
 import { useWeb3Sync } from '@/hooks/use-web3-sync';
 
 // ── Wagmi Config ────────────────────────────────────────
+// NOTE: enableAaveAccount is explicitly set to false.
+// ConnectKit bundles @aave/account SDK which defaults to enabled.
+// In sandbox/offline environments the Aave Account SDK fails to
+// establish a lazy connection and throws:
+//   "Aave Account is not connected. Make sure to call AaveAccountSdk.connect() first."
+// Disabling it at the config level prevents the SDK from initializing at all,
+// eliminating the error at its source while keeping wallet connect working.
 const config = createConfig(
   getDefaultConfig({
     chains: [base, baseSepolia],
@@ -19,17 +26,13 @@ const config = createConfig(
     walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
     appName: 'AI Avatar DeFi — BB Platform',
     appDescription: 'AI分身去中心化金融系统 on Base L2',
+    enableAaveAccount: false,
   } as Record<string, unknown>),
 );
 
-// ── Aave Account SDK Error Boundary ─────────────────────
-// ConnectKit is built by Aave and bundles @aave/account SDK.
-// This SDK attempts a "lazy connection" to Aave's auth servers on mount,
-// which fails in sandboxed/offline environments and throws:
-//   "Aave Account is not connected. Make sure to call AaveAccountSdk.connect() first."
-//   "[Aave Account] Failed to establish lazy connection" + EIP1193 timeout
-// This is non-critical — wallet connection still works via Wagmi/ConnectKit.
-// We catch and suppress these errors via ErrorBoundary so the app renders normally.
+// ── Aave Account SDK Error Boundary (safety net) ────────────
+// Even with enableAaveAccount:false, we keep a boundary as a safety net
+// in case any residual Aave SDK code throws during React rendering.
 function isAaveSdkError(error: Error): boolean {
   const msg = error.message || '';
   return (
@@ -54,42 +57,32 @@ class AaveErrorBoundary extends Component<
   }
 
   static getDerivedStateFromError(error: Error): AaveErrorBoundaryState {
-    // Only set hasError for Aave SDK errors — other errors should propagate
     if (isAaveSdkError(error)) {
       return { hasError: true };
     }
-    // Re-throw non-Aave errors so they're caught by higher boundaries
     throw error;
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     if (isAaveSdkError(error)) {
-      // Silently swallow Aave SDK errors — they are non-critical
-      // Wallet connection still works via Wagmi/ConnectKit without Aave Account
+      // Silently swallow Aave SDK errors
       return;
     }
-    // For non-Aave errors, log them normally
     console.error('[Web3Provider] Unhandled error:', error, errorInfo);
   }
 
   render() {
-    // Even if an Aave error was caught, we still render children
-    // The error is non-critical and the UI should work normally
     return this.props.children;
   }
 }
 
 // ── Web3 Sync Wrapper ──────────────────────────────────
-/** Calls useWeb3Sync() inside the wagmi provider tree so the Zustand store stays in sync. */
 function Web3SyncWrapper({ children }: { children: ReactNode }) {
   useWeb3Sync();
   return <>{children}</>;
 }
 
 // ── Provider Component ──────────────────────────────────
-// NOTE: QueryClientProvider is provided by QueryProvider in providers.tsx.
-// Do NOT add a second QueryClientProvider here — that would create two
-// separate QueryClient instances causing stale data and cache misses.
 export function Web3Provider({ children }: { children: ReactNode }) {
   return (
     <AaveErrorBoundary>

@@ -336,31 +336,23 @@ export default function Home() {
             {/* Download Source Code */}
             <button
               aria-label="Download source code"
-              onClick={async () => {
+              onClick={() => {
                 if (downloading) return;
                 setDownloading(true);
-                try {
-                  const res = await fetch('/api/download');
-                  if (!res.ok) throw new Error('Download failed');
-                  const blob = await res.blob();
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = 'bb-protocol-source.tar.gz';
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                  toast({
-                    title: t('dashboard.downloadSuccess') || '下载成功',
-                    description: t('dashboard.downloadSuccessDesc') || '源代码已开始下载 (bb-protocol-source.tar.gz)',
-                  });
-                } catch (err) {
-                  // fallback: open in new tab
-                  window.open('/api/download', '_blank');
-                } finally {
-                  setDownloading(false);
-                }
+                // Use direct link for large file download (avoids loading entire blob into JS memory)
+                // The browser's native download handler streams the file efficiently
+                const a = document.createElement('a');
+                a.href = '/api/download';
+                a.download = 'bb-protocol-source.tar.gz';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                toast({
+                  title: t('dashboard.downloadSuccess') || '下载已开始',
+                  description: t('dashboard.downloadSuccessDesc') || 'bb-protocol-source.tar.gz 正在下载（含依赖，约160MB）',
+                });
+                // Reset downloading state after a reasonable delay
+                setTimeout(() => setDownloading(false), 3000);
               }}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-emerald-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
             >

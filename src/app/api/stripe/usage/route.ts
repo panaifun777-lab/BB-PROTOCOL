@@ -148,9 +148,35 @@ export async function GET(request: NextRequest) {
       };
     }
 
+    // Compute periodStart/periodEnd from billingPeriod string (e.g. "2026-05")
+    const effectivePeriod = billingPeriod || 'all';
+    let periodStart: string | null = null;
+    let periodEnd: string | null = null;
+
+    if (effectivePeriod !== 'all') {
+      const [yearStr, monthStr] = effectivePeriod.split('-');
+      const year = parseInt(yearStr, 10);
+      const month = parseInt(monthStr, 10);
+      if (!isNaN(year) && !isNaN(month) && month >= 1 && month <= 12) {
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 0); // last day of month
+        periodStart = startDate.toISOString();
+        periodEnd = endDate.toISOString();
+      }
+    } else {
+      // For "all" period, use current month as default
+      const now = new Date();
+      const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      periodStart = startDate.toISOString();
+      periodEnd = endDate.toISOString();
+    }
+
     return NextResponse.json({
       avatarId,
-      billingPeriod: billingPeriod || 'all',
+      billingPeriod: effectivePeriod,
+      periodStart,
+      periodEnd,
       summary,
       grandTotal,
       totalRecords: usageRecords.length,
