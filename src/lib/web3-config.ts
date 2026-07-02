@@ -26,16 +26,16 @@ export const CHAIN_CONFIG = {
 
 // ── Contract Addresses (Deployed on Base Sepolia Testnet) ──
 export const CONTRACT_ADDRESSES = {
-  avatarCore: '0x521109f047742Cb178b6dAEb885B24BDB1A58f2E' as Address,
-  dynamicSplitter: '0x725aeb5c0e0A115a2C92ed5e0C38B3A93029f2B8' as Address,
-  circuitGuard: '0xBDEbe9ce46F2f4D75f14778537d8b23baA9f2a6B' as Address,
-  skillVault: '0x72F1de8C97fdc3AA8Ec027Abe405d10E5739ccAc' as Address,
-  ifdRouter: '0x5cA3a41138AD21D00e3C71725Fd4A3C285f92a12' as Address,
-  tokenVault: '0x79DE3DF928Dd0B98110B6D8fDE63C4F7134071C6' as Address,
-  eceOracle: '0x93bca6E51a5c597f86563aC320977427e5df669D' as Address,
-  poueVerifier: '0xfbADf35642A1A5Ec92411358ac7735cD766b9Ff6' as Address,
-  mcpRouter: '0x9923B7CB6B509991b3250f53b386c53C56abbDbF' as Address,
-  governanceToken: '0xC742381FBb85e6c7e76233a37bD90c1Ffd502536' as Address,
+  avatarCore: '0xe0D246C09d7a3097Bab3148f89201157Dd531eea' as Address,
+  dynamicSplitter: '0x325982fFA5e0311645c17c6bE9140C2647A703F3' as Address,
+  circuitGuard: '0x2D4AEBbd5d3e318C0DeB91F927019835eCd9A120' as Address,
+  skillVault: '0x82fb06fE790559855E4203EA08219136A449Eb4a' as Address,
+  ifdRouter: '0xE98705A67759179489DfEd1782c65E4Be2366b22' as Address,
+  tokenVault: '0xc8309eEf52C658e4b42A47B16fcF809dFB933E0D' as Address,
+  eceOracle: '0xa1D911F3D4E2F9cF6DdbF309643623b1F6e9FFcf' as Address,
+  poueVerifier: '0xEfb40235D26B7cfEe2cD3493989622AF8a23AcE9' as Address,
+  mcpRouter: '0x33f890eCe5417613a4Af51B767FF61Fc6dFda627' as Address,
+  governanceToken: '0xbE05f556898c59b25F20eF062D94197F9A153d5D' as Address,
 } as const;
 
 export type ContractName = keyof typeof CONTRACT_ADDRESSES;

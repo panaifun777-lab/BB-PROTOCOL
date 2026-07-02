@@ -55,7 +55,8 @@ server.log
 # Foundry cache & broadcast (contains sensitive data)
 contracts/cache/
 contracts/broadcast/
-contracts/lib/
+contracts/out/
+# Do NOT ignore contracts/lib/ — submodules must be trackable
 # Database
 db/*.db
 db/*.db-journal
