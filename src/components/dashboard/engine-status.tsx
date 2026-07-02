@@ -115,8 +115,7 @@ function StatusBadge({ status }: { status: string }) {
 
 // ── Relative Time ────────────────────────────────────────────
 
-function relativeTime(isoString: string): string {
-  const { t } = useI18n()
+function relativeTime(isoString: string, t: (key: string, params?: Record<string, unknown>) => string): string {
   const now = Date.now()
   const then = new Date(isoString).getTime()
   const diff = Math.max(0, Math.floor((now - then) / 1000))
@@ -203,7 +202,7 @@ function ModuleCard({ module, index }: { module: EngineModuleStatus; index: numb
             </div>
             <div className="flex items-center gap-1.5">
               <Wifi className="h-3 w-3" />
-            <span>{t('engineStatus.updated')} {relativeTime(module.lastUpdate)}</span>
+            <span>{t('engineStatus.updated')} {relativeTime(module.lastUpdate, t)}</span>
             </div>
           </div>
 
@@ -367,7 +366,7 @@ export default function EngineStatusDashboard({ engineStatus }: EngineStatusDash
         <div className="flex items-center justify-between mt-1.5">
           <span className="text-[9px] text-slate-500">{summary.totalEvents} {t('engineStatus.eventTypesRegistered')}</span>
           <span className="text-[9px] text-slate-500">
-            {t('engineStatus.lastUpdate')}: {relativeTime(summary.lastGlobalUpdate)}
+            {t('engineStatus.lastUpdate')}: {relativeTime(summary.lastGlobalUpdate, t)}
           </span>
         </div>
       </motion.div>
