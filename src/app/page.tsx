@@ -260,6 +260,7 @@ function StripeReturnHandler() {
 export default function Home() {
   const { activeSection, setActiveSection, sidebarCollapsed, toggleSidebar } = useDashboardStore();
   const { t } = useI18n();
+  const { toast } = useToast();
   const {
     avatar, skills, revenueSummary, recentRevenues,
     delegations, timeline, resonanceHistory, isLoading,
@@ -500,6 +501,31 @@ export default function Home() {
 
         {/* ── Dashboard Grid with Lazy Rendering ── */}
         <main className="flex-1 p-4 lg:p-6 space-y-6 pb-24 lg:pb-6 overflow-y-auto">
+          {/* ── Hero Banner ── */}
+          <LazySection id="section-hero" eager>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="text-center py-4 px-2"
+            >
+              <div className="overflow-hidden whitespace-nowrap">
+                <motion.div
+                  className="inline-block"
+                  animate={{ x: ['100%', '-100%'] }}
+                  transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+                >
+                  <span className="text-lg font-bold bg-gradient-to-r from-violet-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    Behavior as Contract — 行为即合约&nbsp;&nbsp;|&nbsp;&nbsp;
+                    将人的行为模式映射到区块链上的智能合约，形成不可篡改的"数字分身"&nbsp;&nbsp;|&nbsp;&nbsp;
+                    🌐 www.bbprotocol.xyz&nbsp;&nbsp;|&nbsp;&nbsp;
+                    ⚡ Base L2 · Web4.0 · Cognitive Ownership
+                  </span>
+                </motion.div>
+              </div>
+            </motion.div>
+          </LazySection>
+
           {/* Row 1: Identity + Revenue — EAGER (above the fold) */}
           <LazySection id="section-overview" className="grid grid-cols-1 xl:grid-cols-2 gap-6" eager>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
