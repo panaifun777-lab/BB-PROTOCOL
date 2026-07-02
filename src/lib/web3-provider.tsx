@@ -27,7 +27,7 @@ const config = createConfig(
     appName: 'AI Avatar DeFi — BB Platform',
     appDescription: 'AI分身去中心化金融系统 on Base L2',
     enableAaveAccount: false,
-  } as Record<string, unknown>),
+  } as any),
 );
 
 // ── Aave Account SDK Error Boundary (safety net) ────────────

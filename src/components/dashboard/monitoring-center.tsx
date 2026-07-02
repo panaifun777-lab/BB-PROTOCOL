@@ -275,7 +275,7 @@ export default function MonitoringCenter() {
   // Filter chain events
   const allChainEvents = chainEvents.length > 0
     ? chainEvents
-    : (apiData ? (apiData as Record<string, unknown>).chainEvents as ChainEventPayload[] : []);
+    : (apiData ? (apiData as unknown as Record<string, unknown>).chainEvents as ChainEventPayload[] : []);
   const filteredEvents = eventFilter === 'all'
     ? allChainEvents
     : allChainEvents.filter((e) => getEventCategory(e.eventName) === eventFilter);
@@ -655,7 +655,7 @@ export default function MonitoringCenter() {
 
                         {/* Timestamp */}
                         <span className="text-[10px] text-slate-500 shrink-0">
-                          {event.timestamp ? format(parseISO(event.timestamp), 'HH:mm:ss') : '--:--'}
+                          {event.timestamp ? format(parseISO(String(event.timestamp)), 'HH:mm:ss') : '--:--'}
                         </span>
                       </motion.div>
                     ))}

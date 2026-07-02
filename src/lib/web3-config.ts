@@ -498,6 +498,6 @@ export function getBlockExplorerUrl(
 // ── Gas Price Constants (Base L2) ────────────────────────
 export const GAS_CONSTANTS = {
   baseL2GasPrice: 0.0000000025, // USD per gas unit on Base L2
-  maxPriorityFeePerGas: 1000000000n, // 1 Gwei
-  maxFeePerGas: 3000000000n, // 3 Gwei
+  maxPriorityFeePerGas: BigInt(1000000000), // 1 Gwei
+  maxFeePerGas: BigInt(3000000000), // 3 Gwei
 } as const;

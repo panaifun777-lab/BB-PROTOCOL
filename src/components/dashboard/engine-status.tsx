@@ -115,7 +115,7 @@ function StatusBadge({ status }: { status: string }) {
 
 // ── Relative Time ────────────────────────────────────────────
 
-function relativeTime(isoString: string, t: (key: string, params?: Record<string, unknown>) => string): string {
+function relativeTime(isoString: string, t: (key: string, params?: Record<string, string | number>) => string): string {
   const now = Date.now()
   const then = new Date(isoString).getTime()
   const diff = Math.max(0, Math.floor((now - then) / 1000))

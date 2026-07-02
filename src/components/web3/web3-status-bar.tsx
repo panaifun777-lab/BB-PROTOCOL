@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import {
   Wifi,
   WifiOff,
-  Cube,
+  Box,
   Fuel,
   Zap,
 } from 'lucide-react';
@@ -87,7 +87,7 @@ export default function Web3StatusBar() {
 
       {/* Block Number */}
       <div className="hidden md:flex items-center gap-1.5">
-        <Cube className="w-3 h-3 text-violet-400" />
+        <Box className="w-3 h-3 text-violet-400" />
         <span className="text-[10px] text-slate-300 font-mono tabular-nums">
           #{animBlock > 0 ? animBlock.toLocaleString() : '--'}
         </span>

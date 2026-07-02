@@ -174,7 +174,7 @@ function TimelineEventCard({ event, index, t }: { event: TimelineEvent; index: n
 
         {/* Description */}
         <p className={cn('text-sm font-medium', config.color)}>
-          {event.emoji ?? ''} {event.details}
+          {(event as any).emoji ?? ''} {event.details}
         </p>
 
         {/* Amount (for revenue events) */}

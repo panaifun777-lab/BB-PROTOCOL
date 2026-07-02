@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 // In production, use environment variable STRIPE_SECRET_KEY
 // For development/demo, use a test key placeholder
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2024-12-18.acacia' as any,
   typescript: true,
 });
 

@@ -1169,7 +1169,7 @@ export default function ContractsArch() {
                           <span className="text-[10px] font-mono text-slate-300">{entry.contract}</span>
                           <div className="flex items-center gap-1.5">
                             <CheckCircle className="w-3 h-3 text-emerald-400" />
-                            <span className="text-[9px] text-emerald-400">{t('contracts.invariantsCount', { count: entry.invariants })}</span>
+                            <span className="text-[9px] text-emerald-400">{t('contracts.invariantsCount', { count: entry.invariants ?? 0 })}</span>
                           </div>
                         </div>
                       ))}
@@ -1197,7 +1197,7 @@ export default function ContractsArch() {
                           <div className="flex items-center gap-1.5">
                             <CheckCircle className="w-3 h-3 text-blue-400" />
                             <span className="text-[9px] text-blue-400">
-                              {entry.findings === 0 ? t('contracts.noFindings') : t('contracts.findingsCount', { count: entry.findings })}
+                              {entry.findings === 0 ? t('contracts.noFindings') : t('contracts.findingsCount', { count: entry.findings ?? 0 })}
                             </span>
                           </div>
                         </div>

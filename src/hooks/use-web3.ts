@@ -193,7 +193,7 @@ export function useDynamicSplitter() {
     address: CONTRACT_ADDRESSES.dynamicSplitter,
     abi: DYNAMIC_SPLITTER_ABI,
     functionName: 'getSplitConfig',
-    args: [1n],
+    args: [BigInt(1)],
     query: {
       enabled: isConnected,
     },
@@ -564,7 +564,7 @@ export function useNetworkInfo() {
   return {
     blockNumber: blockNumber ? Number(blockNumber) : 0,
     gasPrice: gasPrice ? formatGwei(gasPrice) : '0',
-    gasPriceWei: gasPrice || 0n,
+    gasPriceWei: gasPrice || BigInt(0),
     chainId,
     chainName: CHAIN_NAMES[chainId] || `Chain ${chainId}`,
     isConnected,

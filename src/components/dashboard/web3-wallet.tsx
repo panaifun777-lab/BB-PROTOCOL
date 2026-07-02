@@ -459,12 +459,16 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
 
   const readFunctions = useMemo(() => {
     if (!abi) return [];
-    return abi.filter((item) => item.type === 'function' && item.stateMutability === 'view');
+    return abi.filter((item): item is Extract<typeof item, { type: 'function'; name: string }> =>
+      item.type === 'function' && item.stateMutability === 'view'
+    );
   }, [abi]);
 
   const writeFunctions = useMemo(() => {
     if (!abi) return [];
-    return abi.filter((item) => item.type === 'function' && item.stateMutability === 'nonpayable');
+    return abi.filter((item): item is Extract<typeof item, { type: 'function'; name: string }> =>
+      item.type === 'function' && item.stateMutability === 'nonpayable'
+    );
   }, [abi]);
 
   const handleSimulate = useCallback(() => {
@@ -552,7 +556,7 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
                     <Badge variant="outline" className="text-[8px] bg-emerald-500/10 text-emerald-300 border-emerald-500/20">view</Badge>
                     <code className="text-xs font-mono text-slate-200">{fn.name}</code>
                     <span className="text-[10px] text-slate-500">
-                      ({(fn as { inputs?: Array<{ name: string; type: string }> }).inputs?.map((i) => `${i.name}: ${i.type}`).join(', ') || ''})
+                      ({(fn as any).inputs?.map((i: any) => `${i.name}: ${i.type}`).join(', ') || ''})
                     </span>
                   </div>
                 </div>
@@ -574,7 +578,7 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
                     <Badge variant="outline" className="text-[8px] bg-amber-500/10 text-amber-300 border-amber-500/20">write</Badge>
                     <code className="text-xs font-mono text-slate-200">{fn.name}</code>
                     <span className="text-[10px] text-slate-500">
-                      ({(fn as { inputs?: Array<{ name: string; type: string }> }).inputs?.map((i) => `${i.name}: ${i.type}`).join(', ') || ''})
+                      ({(fn as any).inputs?.map((i: any) => `${i.name}: ${i.type}`).join(', ') || ''})
                     </span>
                   </div>
                 </div>

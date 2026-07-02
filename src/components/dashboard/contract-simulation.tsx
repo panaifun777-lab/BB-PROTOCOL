@@ -916,7 +916,7 @@ export default function ContractSimulation() {
                       <span className="text-sm font-medium text-slate-200">
                         {t('simulation.simResult')}
                       </span>
-                      {simulationResult.status && (
+                      {!!simulationResult.status && (
                         <Badge
                           variant="outline"
                           className={cn(
@@ -939,7 +939,7 @@ export default function ContractSimulation() {
                     </div>
 
                     {/* Split visualization (DynamicSplitter only) */}
-                    {selectedContractId === 'DynamicSplitter' && selectedFunctionName === 'executeSplit' && simulationResult.split && (
+                    {selectedContractId === 'DynamicSplitter' && selectedFunctionName === 'executeSplit' && !!simulationResult.split && (
                       <div className="space-y-2">
                         <div className="text-[11px] text-slate-400 font-medium">{t('simulation.splitVisualization')}</div>
                         {(() => {

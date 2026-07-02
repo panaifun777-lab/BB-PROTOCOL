@@ -323,7 +323,7 @@ export default function X402Payment({
     resetRetry();
     trackEvent('payment_submitted', { method: 'x402', amount });
 
-    let createdPaymentId: string | null = null;
+    let createdPaymentId: string = '';
 
     try {
       // 1. Create payment record via API

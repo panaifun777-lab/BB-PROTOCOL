@@ -282,7 +282,7 @@ const TABS: TabConfig[] = [
 ];
 
 // ── Status Configs ─────────────────────────────────────
-const DEPLOY_STATUS_CONFIG: Record<DeployStatus, { label: string; color: string; badge: string }> = {
+const DEPLOY_STATUS_CONFIG: Record<DeployStatus, { label: string; color: string; badge: string; dotColor?: string }> = {
   live: { label: 'deployment.deployLive', color: 'text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
   deploying: { label: 'deployment.deployDeploying', color: 'text-violet-400', badge: 'bg-violet-500/20 text-violet-300 border-violet-500/30' },
   paused: { label: 'deployment.deployPaused', color: 'text-amber-400', badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },

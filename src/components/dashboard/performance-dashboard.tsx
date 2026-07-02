@@ -388,6 +388,7 @@ function RadialGauge({ metric, sparkline }: { metric: PerformanceMetric; sparkli
 
 // ── Cache Strategy Card ────────────────────────────────
 function CacheStrategyCard({ entry }: { entry: CacheStrategyEntry }) {
+  const { t } = useI18n();
   const Icon = CACHE_TYPE_ICON[entry.type] || Server;
   const hitColor = entry.hitRate >= 90 ? 'text-emerald-400' : entry.hitRate >= 80 ? 'text-amber-400' : 'text-red-400';
   const barColor = entry.hitRate >= 90 ? '[&>div]:bg-emerald-500' : entry.hitRate >= 80 ? '[&>div]:bg-amber-500' : '[&>div]:bg-red-500';

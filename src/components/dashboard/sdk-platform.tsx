@@ -150,7 +150,7 @@ function formatNumber(num: number): string {
   return num.toString();
 }
 
-function getRelativeTime(iso: string): string {
+function getRelativeTime(iso: string, t: (key: string, params?: Record<string, string | number>) => string): string {
   const now = new Date('2026-03-10T15:00:00Z');
   const then = new Date(iso);
   const diffMs = now.getTime() - then.getTime();
@@ -229,6 +229,7 @@ function CopyButton({ text, className }: { text: string; className?: string }) {
 
 // ── Endpoint Row ───────────────────────────────────────
 function EndpointRow({ endpoint, expanded, onToggle }: { endpoint: ApiEndpoint; expanded: boolean; onToggle: () => void }) {
+  const { t } = useI18n();
   const methodConf = METHOD_COLORS[endpoint.method] || METHOD_COLORS.GET;
   const statusConf = STATUS_COLORS[endpoint.status] || STATUS_COLORS.stable;
 
@@ -382,6 +383,7 @@ function ApiKeyCard({ apiKey }: { apiKey: ApiKeyEntry }) {
 
 // ── SDK Package Card ───────────────────────────────────
 function SdkPackageCard({ pkg }: { pkg: SdkPackage }) {
+  const { t } = useI18n();
   const langConf = LANGUAGE_COLORS[pkg.language] || LANGUAGE_COLORS.TypeScript;
   const statusConf = STATUS_COLORS[pkg.status] || STATUS_COLORS.stable;
   const installCmd = getInstallCommand(pkg);
@@ -498,6 +500,7 @@ function WebhookCard({ webhook }: { webhook: WebhookEntry }) {
 
 // ── Tier Card ──────────────────────────────────────────
 function TierCard({ quota, isCurrent }: { quota: RateLimitQuota; isCurrent: boolean }) {
+  const { t } = useI18n();
   const tierColors: Record<string, { border: string; bg: string; accent: string; icon: React.ElementType }> = {
     Free: { border: 'border-slate-600', bg: 'bg-slate-800/60', accent: 'text-slate-300', icon: Zap },
     Pro: { border: isCurrent ? 'border-emerald-500/40' : 'border-slate-600', bg: isCurrent ? 'bg-emerald-500/5' : 'bg-slate-800/60', accent: 'text-emerald-400', icon: Shield },

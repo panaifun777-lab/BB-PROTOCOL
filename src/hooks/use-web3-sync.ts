@@ -21,7 +21,7 @@ export function useWeb3Sync() {
       setAddress(address);
       setChainId(chainId ?? null);
       setConnected(true);
-      setBalance(balanceData?.formatted ?? '0');
+      setBalance(balanceData?.value?.toString() ?? '0');
     } else {
       reset();
     }
