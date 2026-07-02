@@ -1,0 +1,3021 @@
+- generic
+  - banner
+    - StaticText "Cognitive Avatar Protocol"
+    - StaticText "Phase"
+    - StaticText " 6"
+    - StaticText "72"
+    - StaticText "0"
+    - StaticText "/"
+    - StaticText "6"
+    - button "Language" [expanded=false, ref=e2]
+      - StaticText "🇺🇸"
+      - StaticText " "
+      - StaticText "English"
+    - button "Connect Wallet" [ref=e3]
+      - StaticText "Connect"
+    - link "Rating Report" [ref=e4]
+      - StaticText "Rating Report"
+    - link "Deploy Guide" [ref=e5]
+      - StaticText "Deploy Guide"
+    - button "Download source code" [ref=e6]
+      - StaticText "Source"
+    - button "2" [expanded=false, ref=e7]
+      - StaticText "2"
+    - button "Quick payment" [ref=e8]
+      - StaticText "Payment"
+  - complementary
+    - navigation
+      - button "Overview" [ref=e10]
+      - button "Revenue" [ref=e11]
+      - button "Resonance" [ref=e12]
+      - button "Skills" [ref=e13]
+      - button "Marketplace" [ref=e14]
+      - button "Liquidity" [ref=e15]
+      - button "Simulation" [ref=e16]
+      - button "Governance" [ref=e17]
+      - button "Timeline" [ref=e18]
+      - button "Security" [ref=e19]
+      - button "Compliance" [ref=e20]
+      - button "Performance" [ref=e21]
+      - button "Deployment" [ref=e22]
+      - button "Monitoring" [ref=e23]
+      - button "Feature Flags" [ref=e24]
+      - button "Multi-chain" [ref=e25]
+      - button "SDK" [ref=e26]
+      - button "DAO" [ref=e27]
+      - button "Ecosystem" [ref=e28]
+      - button "Contracts" [ref=e29]
+      - button "Engine" [ref=e30]
+      - button "Web3" [ref=e31]
+      - button "Data" [ref=e32]
+      - button "Payment History" [ref=e33]
+      - button "Subscription" [ref=e34]
+      - button "Usage" [ref=e35]
+      - button "Invoices" [ref=e36]
+    - button "Collapse sidebar" [ref=e9]
+    - StaticText "CURRENT PLAN"
+    - StaticText "Pro"
+    - StaticText "3 Avatars · Priority Compute"
+  - main
+    - generic
+      - StaticText "飘叔.soul"
+      - StaticText "0x7a3f...9b2c"
+      - StaticText "|"
+      - StaticText "Cognition Root"
+      - StaticText ":"
+      - StaticText "QmX7...6oP8"
+      - generic [ref=e37] clickable [onclick]
+        - StaticText "Resonance Score 72"
+      - StaticText "Pro"
+      - StaticText "Skill Pack"
+      - StaticText "("
+      - StaticText "5"
+      - StaticText "/"
+      - StaticText "9"
+      - StaticText ")"
+      - generic [ref=e38] clickable [onclick]
+        - StaticText "✍️"
+        - StaticText "GPT-4o 文本生成"
+      - generic [ref=e39] clickable [onclick]
+        - StaticText "🎯"
+        - StaticText "智能客服"
+      - generic [ref=e40] clickable [onclick]
+        - StaticText "📊"
+        - StaticText "数据分析"
+      - generic [ref=e41] clickable [onclick]
+        - StaticText "🔍"
+        - StaticText "高级RAG检索"
+      - generic [ref=e42] clickable [onclick]
+        - StaticText "🧠"
+        - StaticText "知识图谱构建"
+      - generic [ref=e43] clickable [onclick]
+        - StaticText "🎨"
+        - StaticText "DALL·E 3 图像生成"
+      - generic [ref=e44] clickable [onclick]
+        - StaticText "🎬"
+        - StaticText "视频分身生成"
+      - generic [ref=e45] clickable [onclick]
+        - StaticText "🤝"
+        - StaticText "跨分身协作"
+      - generic [ref=e46] clickable [onclick]
+        - StaticText "⚡"
+        - StaticText "联合推理引擎"
+      - StaticText "Annual Revenue"
+      - StaticText "$"
+      - StaticText "12,458"
+      - StaticText "Human"
+      - StaticText " "
+      - StaticText "70"
+      - StaticText "%"
+      - StaticText "Vault"
+      - StaticText " "
+      - StaticText "20"
+      - StaticText "%"
+      - StaticText "LP"
+      - StaticText " "
+      - StaticText "10"
+      - StaticText "%"
+      - StaticText "Circuit State"
+      - StaticText ":"
+      - StaticText "NORMAL"
+      - button "View Timeline" [ref=e47]
+      - button "Adjust Delegation" [ref=e48]
+      - button "Circuit Settings" [ref=e49]
+      - StaticText "Dynamic Split Dashboard"
+      - StaticText "This Month's Revenue & Split Details"
+      - paragraph
+        - StaticText "$2,040"
+      - StaticText "-37"
+      - StaticText "%"
+      - StaticText "vs Last Month"
+      - StaticText "Human Share"
+      - StaticText "70"
+      - StaticText "% "
+      - StaticText "($"
+      - StaticText "8,715"
+      - StaticText ")"
+      - StaticText "Avatar Vault"
+      - StaticText "20"
+      - StaticText "% "
+      - StaticText "($"
+      - StaticText "2,490"
+      - StaticText ")"
+      - StaticText "Protocol LP"
+      - StaticText "10"
+      - StaticText "% "
+      - StaticText "($"
+      - StaticText "1,245"
+      - StaticText ")"
+      - StaticText "Dynamic Adjustment"
+      - paragraph
+        - StaticText "共振分72 → 人类份额+2%"
+      - paragraph
+        - StaticText "Higher resonance score → larger human share; below 50 triggers hard pause"
+      - paragraph
+        - StaticText "Monthly Revenue Trend"
+      - SvgRoot
+        - StaticText "10"
+        - StaticText "11"
+        - StaticText "12"
+        - StaticText "01"
+        - StaticText "02"
+        - StaticText "03"
+        - StaticText "$0.0k"
+        - StaticText "$0.8k"
+        - StaticText "$1.7k"
+        - StaticText "$2.5k"
+        - StaticText "$3.4k"
+      - paragraph
+        - StaticText "Recent Splits"
+      - generic
+        - StaticText "Skill Call"
+        - StaticText "0xab12...cd34"
+        - StaticText "+$"
+        - StaticText "45.20"
+        - StaticText "Avatar Rental"
+        - StaticText "0xef56...gh78"
+        - StaticText "+$"
+        - StaticText "128.00"
+        - StaticText "Skill Call"
+        - StaticText "0xij90...kl12"
+        - StaticText "+$"
+        - StaticText "12.50"
+        - StaticText "Cross-Avatar Collaboration"
+        - StaticText "0xmn34...op56"
+        - StaticText "+$"
+        - StaticText "256.00"
+        - StaticText "Skill Call"
+        - StaticText "0xqr78...st90"
+        - StaticText "+$"
+        - StaticText "67.80"
+      - button "View Detailed Split Log" [ref=e50]
+    - generic
+      - StaticText "Emotional Resonance Waveform"
+      - StaticText "24-Hour Resonance Intensity Monitoring"
+      - StaticText "Normal Operation"
+      - StaticText "72"
+      - StaticText "0%"
+      - StaticText "(6h)"
+      - StaticText "Soft Limit"
+      - StaticText " 70"
+      - StaticText "Hard Pause"
+      - StaticText " 50"
+      - generic
+        - SvgRoot
+          - StaticText "00:00"
+          - StaticText "02:00"
+          - StaticText "04:00"
+          - StaticText "06:00"
+          - StaticText "08:00"
+          - StaticText "10:00"
+          - StaticText "12:00"
+          - StaticText "14:00"
+          - StaticText "16:00"
+          - StaticText "18:00"
+          - StaticText "20:00"
+          - StaticText "22:00"
+          - StaticText "00:00"
+          - StaticText "0"
+          - StaticText "25"
+          - StaticText "50"
+          - StaticText "70"
+          - StaticText "100"
+          - StaticText "Soft Limit"
+          - StaticText "Hard Pause"
+        - StaticText "Danger Zone"
+        - StaticText " <50"
+        - StaticText "Warning Zone"
+        - StaticText " 50-70"
+      - paragraph
+        - StaticText "Safe Zone"
+      - paragraph
+        - StaticText "≥70"
+      - paragraph
+        - StaticText "Normal Operation"
+      - paragraph
+        - StaticText "Warning Zone"
+      - paragraph
+        - StaticText "50-69"
+      - paragraph
+        - StaticText "Soft Limit Active"
+      - paragraph
+        - StaticText "Danger Zone"
+      - paragraph
+        - StaticText "<50"
+      - paragraph
+        - StaticText "Hard Pause Triggered"
+      - generic
+        - StaticText "Cognitive Circuit Panel"
+        - StaticText "Cognition State"
+        - StaticText ":"
+        - StaticText "🟢"
+        - StaticText " "
+        - StaticText "Normal Operation"
+        - generic
+          - StaticText "Last Action: Generate Marketing Copy (Low Risk)"
+        - StaticText "Resonance Score"
+        - StaticText "72"
+        - StaticText "/100"
+        - StaticText "Hard Threshold"
+        - StaticText " "
+        - StaticText "50"
+        - StaticText "Soft Threshold"
+        - StaticText " "
+        - StaticText "70"
+        - button "View Detailed Log" [ref=e108]
+        - button "Manual Pause" [ref=e109]
+        - paragraph
+          - StaticText "Demo: Switch Circuit State"
+        - button "🟢 Normal Operation" [ref=e110]
+          - StaticText "🟢 Normal Operation"
+        - button "🟡 Degraded Operation" [ref=e111]
+          - StaticText "🟡 Degraded Operation"
+        - button "🔴 Paused" [ref=e112]
+          - StaticText "🔴 Paused"
+    - generic
+      - StaticText "Skill Vault"
+      - StaticText "5/9 Unlocked"
+      - tablist [ref=e51] focusable [tabindex]
+        - tab "All" [selected, ref=e113]
+        - tab "Basic" [ref=e114]
+        - tab "Advanced RAG" [ref=e115]
+        - tab "Multimodal" [ref=e116]
+        - tab "Collaboration" [ref=e117]
+      - generic
+        - generic
+          - heading "GPT-4o 文本生成" [level=4, ref=e356]
+          - StaticText "Unlocked"
+          - paragraph
+          - StaticText "Usage Count"
+          - StaticText ":"
+          - StaticText " "
+          - StaticText "142"
+          - StaticText "Avg Cost"
+          - StaticText ":"
+          - StaticText " "
+          - StaticText "$"
+          - StaticText "0.018"
+          - StaticText "94"
+          - StaticText "%"
+      - generic
+        - generic
+          - heading "智能客服" [level=4, ref=e357]
+          - StaticText "Unlocked"
+          - paragraph
+          - StaticText "Usage Count"
+          - StaticText ":"
+          - StaticText " "
+          - StaticText "87"
+          - StaticText "Avg Cost"
+          - StaticText ":"
+          - StaticText " "
+          - StaticText "$"
+          - StaticText "0.012"
+          - StaticText "91"
+          - StaticText "%"
+      - generic
+        - generic
+          - heading "数据分析" [level=4, ref=e358]
+          - StaticText "Unlocked"
+          - paragraph
+          - StaticText "Usage Count"
+          - StaticText ":"
+          - StaticText " "
+          - StaticText "56"
+          - StaticText "Avg Cost"
+          - StaticText ":"
+          - StaticText " "
+          - StaticText "$"
+          - StaticText "0.025"
+          - StaticText "88"
+          - StaticText "%"
+      - generic
+        - generic
+          - heading "高级RAG检索" [level=4, ref=e359]
+          - StaticText "Unlocked"
+          - paragraph
+          - StaticText "Usage Count"
+          - StaticText ":"
+          - StaticText " "
+          - StaticText "34"
+          - StaticText "Avg Cost"
+          - StaticText ":"
+          - StaticText " "
+          - StaticText "$"
+          - StaticText "0.035"
+          - StaticText "92"
+          - StaticText "%"
+      - generic
+        - generic
+          - heading "知识图谱构建" [level=4, ref=e360]
+          - StaticText "Unlocked"
+          - paragraph
+          - StaticText "Usage Count"
+          - StaticText ":"
+          - StaticText " "
+          - StaticText "18"
+          - StaticText "Avg Cost"
+          - StaticText ":"
+          - StaticText " "
+          - StaticText "$"
+          - StaticText "0.040"
+          - StaticText "85"
+          - StaticText "%"
+      - generic
+        - heading "DALL·E 3 图像生成" [level=4, ref=e361]
+        - paragraph
+          - StaticText "营销海报、产品图、社交媒体图"
+        - button "Unlock Now" [ref=e377]
+      - generic
+        - heading "视频分身生成" [level=4, ref=e362]
+        - paragraph
+          - StaticText "基于HeyGen的数字人视频"
+        - button "Unlock Now" [ref=e378]
+      - generic
+        - heading "跨分身协作" [level=4, ref=e363]
+        - paragraph
+          - StaticText "多分身联合推理与任务协同"
+        - button "Unlock Now" [ref=e379]
+      - generic
+        - heading "联合推理引擎" [level=4, ref=e364]
+        - paragraph
+          - StaticText "多分身共识决策与复杂任务拆解"
+        - button "Unlock Now" [ref=e380]
+      - StaticText "Cumulative Revenue"
+      - StaticText "$"
+      - StaticText "12,450"
+      - StaticText "All revenue-gated skills unlocked"
+      - StaticText "Fluid Democracy Delegation"
+      - tablist [ref=e52] focusable [tabindex]
+        - tab "Content Creation" [selected, ref=e118]
+          - StaticText "Content Creation"
+        - tab "Business Negotiation" [ref=e119]
+          - StaticText "Business Negotiation"
+        - tab "Data Analysis" [ref=e120]
+          - StaticText "Data Analysis"
+        - tab "Customer Service" [ref=e121]
+          - StaticText "Customer Service"
+      - tabpanel "Content Creation" [ref=e53] focusable [tabindex]
+        - paragraph
+          - StaticText "Current Weight Distribution"
+        - StaticText "Uncle Soul (Primary)"
+        - StaticText "60"
+        - StaticText "%"
+        - StaticText "Copy Avatar.soul"
+        - StaticText "40"
+        - StaticText "%"
+        - paragraph
+          - StaticText "Available Delegates"
+        - checkbox [checked=true, ref=e122]
+        - StaticText "Copy Avatar.soul"
+        - StaticText "Cognitive Match"
+        - StaticText ": "
+        - StaticText "85"
+        - StaticText "%"
+        - checkbox [checked=false, ref=e123]
+        - StaticText "Video Avatar.soul"
+        - StaticText "Cognitive Match"
+        - StaticText ": "
+        - StaticText "78"
+        - StaticText "%"
+        - StaticText "Primary Weight"
+        - StaticText "60"
+        - StaticText "%"
+        - generic
+          - slider [ref=e365]: 60
+        - StaticText "10%"
+        - StaticText "90%"
+        - button "Save Delegation" [ref=e124]
+        - button "Revoke Delegation" [ref=e125]
+    - StaticText "Avatar Marketplace"
+    - textbox "Search skills/domain/price..." [ref=e126]
+    - combobox [expanded=false, ref=e54]: All Domains
+      - generic [ref=e127] clickable [onclick]
+        - StaticText "All Domains"
+    - combobox [expanded=false, ref=e55]: Default
+      - generic [ref=e128] clickable [onclick]
+        - StaticText "Default"
+    - StaticText "6 avatars"
+    - generic
+      - StaticText "Content Creation"
+      - StaticText "85"
+      - heading "Copywriting Master.soul" [level=3, ref=e129]
+      - paragraph
+        - StaticText "0xa1b2...c3d4"
+      - StaticText "$"
+      - StaticText "5"
+      - StaticText "/hour"
+      - StaticText "Copy Generation"
+      - StaticText "SEO Optimization"
+      - StaticText "Content Planning"
+      - button "Rent" [ref=e130]
+    - generic
+      - StaticText "Data Analysis"
+      - StaticText "68"
+      - heading "Data Hunter.soul" [level=3, ref=e131]
+      - paragraph
+        - StaticText "0xe5f6...g7h8"
+      - StaticText "$"
+      - StaticText "8"
+      - StaticText "/hour"
+      - StaticText "Data Analysis"
+      - StaticText "BI Reports"
+      - StaticText "Predictive Modeling"
+      - button "Rent" [ref=e132]
+    - generic
+      - StaticText "Business Negotiation"
+      - StaticText "92"
+      - heading "Negotiator.soul" [level=3, ref=e133]
+      - paragraph
+        - StaticText "0xi9j0...k1l2"
+      - StaticText "$"
+      - StaticText "12"
+      - StaticText "/hour"
+      - StaticText "Business Negotiation"
+      - StaticText "Contract Review"
+      - StaticText "Risk Assessment"
+      - button "Rent" [ref=e134]
+    - generic
+      - StaticText "Content Creation"
+      - StaticText "78"
+      - heading "Visual Artisan.soul" [level=3, ref=e135]
+      - paragraph
+        - StaticText "0xm3n4...o5p6"
+      - StaticText "$"
+      - StaticText "6"
+      - StaticText "/hour"
+      - StaticText "Image Generation"
+      - StaticText "Video Editing"
+      - StaticText "UI Design"
+      - button "Rent" [ref=e136]
+    - generic
+      - StaticText "Customer Service"
+      - StaticText "88"
+      - heading "Service Elf.soul" [level=3, ref=e137]
+      - paragraph
+        - StaticText "0xq7r8...s9t0"
+      - StaticText "$"
+      - StaticText "3"
+      - StaticText "/hour"
+      - StaticText "Customer Service"
+      - StaticText "FAQ Generation"
+      - StaticText "Ticket Processing"
+      - button "Rent" [ref=e138]
+    - generic
+      - StaticText "Tech Development"
+      - StaticText "75"
+      - heading "Full-Stack Architect.soul" [level=3, ref=e139]
+      - paragraph
+        - StaticText "0xu1v2...w3x4"
+      - StaticText "$"
+      - StaticText "15"
+      - StaticText "/hour"
+      - StaticText "Code Generation"
+      - StaticText "Architecture Design"
+      - StaticText "Code Review"
+      - button "Rent" [ref=e140]
+    - StaticText "liquidity.title"
+    - StaticText "liquidity.subtitle"
+    - StaticText "liquidity.active"
+    - tablist [ref=e56] focusable [tabindex]
+      - tab "liquidity.tabOverview" [selected, ref=e141]
+        - StaticText "liquidity.tabOverview"
+      - tab "liquidity.tabDepth" [ref=e142]
+        - StaticText "liquidity.tabDepth"
+      - tab "liquidity.tabTokenomics" [ref=e143]
+        - StaticText "liquidity.tabTokenomics"
+      - tab "liquidity.tabStaking" [ref=e144]
+        - StaticText "liquidity.tabStaking"
+    - tabpanel "liquidity.tabOverview" [ref=e57] focusable [tabindex]
+      - StaticText "LIQUIDITY.TOTALLIQUIDITY"
+      - paragraph
+        - StaticText "$52.8K"
+      - paragraph
+        - StaticText "264.2M AFC"
+      - StaticText "LIQUIDITY.AFCPRICE"
+      - paragraph
+        - StaticText "$0.10"
+      - paragraph
+        - StaticText "+2.5% 24h"
+      - StaticText "LIQUIDITY.VOLUME24H"
+      - paragraph
+        - StaticText "$12.4K"
+      - paragraph
+        - StaticText "liquidity.feeRate 0.3%"
+      - StaticText "LIQUIDITY.FEES24H"
+      - paragraph
+        - StaticText "$62.25"
+      - paragraph
+        - StaticText "liquidity.lpRevenueSource"
+      - StaticText "liquidity.revenueFlow"
+      - StaticText "liquidity.flowUserPay"
+      - StaticText "liquidity.autoSplit"
+      - StaticText "liquidity.flowHuman70"
+      - StaticText "liquidity.flowTreasury20"
+      - StaticText "liquidity.flowProtocolLP10"
+      - StaticText "liquidity.treasuryBuyback"
+      - StaticText "liquidity.afcBuyback"
+      - StaticText "liquidity.deflationPressure"
+      - StaticText "liquidity.protocolLPInjection"
+      - StaticText "liquidity.increaseDepth"
+      - StaticText "liquidity.stabilizePrice"
+      - StaticText "liquidity.recentLiquidityEvents"
+      - StaticText "liquidity.txCount"
+      - generic
+        - StaticText "liquidity.addLiquidity"
+        - paragraph
+          - StaticText "0xlp01...ab12"
+        - paragraph
+          - StaticText "50K AFC"
+        - StaticText "liquidity.daysAgo"
+        - StaticText "liquidity.swap"
+        - StaticText "liquidity.buy"
+        - paragraph
+          - StaticText "0xlp02...cd34"
+        - paragraph
+          - StaticText "10K AFC"
+        - StaticText "liquidity.daysAgo"
+        - StaticText "liquidity.removeLiquidity"
+        - paragraph
+          - StaticText "0xlp03...ef56"
+        - paragraph
+          - StaticText "20K AFC"
+        - StaticText "liquidity.daysAgo"
+        - StaticText "liquidity.swap"
+        - StaticText "liquidity.sell"
+        - paragraph
+          - StaticText "0xlp04...gh78"
+        - paragraph
+          - StaticText "5K AFC"
+        - StaticText "liquidity.daysAgo"
+        - StaticText "liquidity.addLiquidity"
+        - paragraph
+          - StaticText "0xlp05...ij90"
+        - paragraph
+          - StaticText "100K AFC"
+        - StaticText "liquidity.daysAgo"
+    - button "liquidity.viewBaseL2" [ref=e58]
+    - StaticText "Contract Simulator"
+    - StaticText "Off-chain Contract Simulation · Gas Estimation · Split Verification"
+    - StaticText "Base L2"
+    - tablist [ref=e59] focusable [tabindex]
+      - tab "Function Simulation" [selected, ref=e145]
+        - StaticText "Function Simulation"
+      - tab "Split Verification" [ref=e146]
+        - StaticText "Split Verification"
+      - tab "History" [ref=e147]
+        - StaticText "History"
+    - tabpanel "Function Simulation" [ref=e60] focusable [tabindex]
+      - LabelText
+        - StaticText "Contract Select"
+      - combobox [expanded=false, ref=e148]: DynamicSplitter — Dynamic Split Contract
+        - generic [ref=e366] clickable [onclick]
+          - StaticText "DynamicSplitter"
+          - StaticText "— "
+          - StaticText "Dynamic Split Contract"
+      - LabelText
+        - StaticText "Function Select"
+      - combobox [expanded=false, ref=e149]: executeSplit (amount, resonanceScore, complexity)
+        - generic [ref=e367] clickable [onclick]
+          - StaticText "executeSplit"
+          - StaticText "("
+          - StaticText "amount, resonanceScore, complexity"
+          - StaticText ")"
+      - StaticText "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+      - button [ref=e150]
+      - StaticText "Function Parameters"
+      - StaticText "3 params"
+      - LabelText
+        - StaticText "amount (uint256)"
+      - textbox "0" [ref=e151]: 100
+        - StaticText "100"
+      - LabelText
+        - StaticText "resonanceScore (uint256)"
+      - textbox "0" [ref=e152]: 72
+        - StaticText "72"
+      - LabelText
+        - StaticText "complexity (uint8)"
+      - textbox "0" [ref=e153]: 1
+        - StaticText "1"
+      - button "Execute Simulation" [ref=e154]
+      - StaticText "65,000"
+      - StaticText " gas"
+      - StaticText "~$"
+      - StaticText "0.000162"
+      - StaticText "Gas Estimation Details"
+      - StaticText "Estimated Gas Units"
+      - paragraph
+        - StaticText "65,000"
+      - StaticText "Estimated Cost (USD)"
+      - paragraph
+        - StaticText "$0.00016250"
+      - StaticText "Optimization Tips"
+      - StaticText "Multi-parameter function — Can use multicall to merge calls"
+    - StaticText "Cognitive Timeline"
+    - StaticText "10 records"
+    - tablist [ref=e61] focusable [tabindex]
+      - tab "All" [selected, ref=e155]
+      - tab "💰 Revenue" [ref=e156]
+        - StaticText "💰 Revenue"
+      - tab "🧠 Skill" [ref=e157]
+        - StaticText "🧠 Skill"
+      - tab "🔄 Delegation" [ref=e158]
+        - StaticText "🔄 Delegation"
+      - tab "⚠️ Circuit" [ref=e159]
+        - StaticText "⚠️ Circuit"
+    - LayoutTable
+      - generic
+        - StaticText "2026-03-04 14:32:18 UTC"
+        - StaticText "💰"
+        - StaticText " "
+        - StaticText "Revenue"
+        - paragraph
+          - StaticText "收到收益 $45.20 — 分账: $31.64(人类) | $9.04(金库) | $4.52(协议)"
+        - paragraph
+          - StaticText "Amount: $45.20"
+        - button "0xab12...cd34" [ref=e381]
+          - StaticText "0xab12...cd34"
+      - generic
+        - StaticText "2026-03-04 12:15:42 UTC"
+        - StaticText "🧠"
+        - StaticText " "
+        - StaticText "Skill"
+        - paragraph
+          - StaticText "调用 GPT-4o 生成营销文案 — 成本: $0.02 | 满意度: 96%"
+        - paragraph
+          - StaticText "Amount: $0.02"
+        - button "QmX7...9kL" [ref=e382]
+          - StaticText "QmX7...9kL"
+      - generic
+        - StaticText "2026-03-04 09:08:11 UTC"
+        - StaticText "📊"
+        - StaticText " "
+        - StaticText "Resonance"
+        - paragraph
+          - StaticText "共振分更新: 68 → 72 (+4)"
+        - button "0x9f2a...3b4c" [ref=e383]
+          - StaticText "0x9f2a...3b4c"
+      - generic
+        - StaticText "2026-03-03 18:30:22 UTC"
+        - StaticText "🔄"
+        - StaticText " "
+        - StaticText "Delegation"
+        - paragraph
+          - StaticText "委托变更: 数据分析领域权重 5000→7000 (数据分身.soul)"
+        - button "0x5d6e...7f8g" [ref=e384]
+          - StaticText "0x5d6e...7f8g"
+      - generic
+        - StaticText "2026-03-03 10:15:42 UTC"
+        - StaticText "💰"
+        - StaticText " "
+        - StaticText "Revenue"
+        - paragraph
+          - StaticText "收到收益 $128.00 — 来源: 分身租赁"
+        - paragraph
+          - StaticText "Amount: $128.00"
+        - button "0xef56...gh78" [ref=e385]
+          - StaticText "0xef56...gh78"
+      - generic
+        - StaticText "2026-03-02 16:45:30 UTC"
+        - StaticText "🧠"
+        - StaticText " "
+        - StaticText "Skill"
+        - paragraph
+          - StaticText "调用 高级RAG检索 生成行业报告 — 成本: $0.035 | 满意度: 93%"
+        - paragraph
+          - StaticText "Amount: $0.04"
+        - button "QmP3...5rS" [ref=e386]
+          - StaticText "QmP3...5rS"
+      - generic
+        - StaticText "2026-03-02 08:00:00 UTC"
+        - StaticText "⚠️"
+        - StaticText " "
+        - StaticText "Circuit"
+        - paragraph
+          - StaticText "认知状态: SOFT_LIMIT → NORMAL (共振分恢复72)"
+        - button "0xl5m6...n7o8" [ref=e387]
+          - StaticText "0xl5m6...n7o8"
+      - generic
+        - StaticText "2026-03-01 22:10:00 UTC"
+        - StaticText "⚠️"
+        - StaticText " "
+        - StaticText "Circuit"
+        - paragraph
+          - StaticText "认知状态: NORMAL → SOFT_LIMIT (共振分降至58)"
+        - button "0xh1i2...j3k4" [ref=e388]
+          - StaticText "0xh1i2...j3k4"
+      - generic
+        - StaticText "2026-03-01 14:20:00 UTC"
+        - StaticText "💰"
+        - StaticText " "
+        - StaticText "Revenue"
+        - paragraph
+          - StaticText "收到协作收益 $256.00 — 来源: 跨分身协作"
+        - paragraph
+          - StaticText "Amount: $256.00"
+        - button "0xmn34...op56" [ref=e389]
+          - StaticText "0xmn34...op56"
+      - generic
+        - StaticText "2026-02-28 11:30:00 UTC"
+        - StaticText "🧠"
+        - StaticText " "
+        - StaticText "Skill"
+        - paragraph
+          - StaticText "调用 智能客服 处理用户咨询 23条 — 成本: $0.28"
+        - paragraph
+          - StaticText "Amount: $0.28"
+        - button "QmA1...bC2" [ref=e390]
+          - StaticText "QmA1...bC2"
+    - button "Export All Records" [ref=e62]
+    - button "Subscribe Updates" [ref=e63]
+    - generic
+      - generic
+        - StaticText "Security Audit Panel"
+        - button "security.tabOverview" [ref=e160]
+          - StaticText "security.tabOverview"
+        - button "security.tabInvariants" [ref=e161]
+          - StaticText "security.tabInvariants"
+        - button "security.tabFindings" [ref=e162]
+          - StaticText "security.tabFindings"
+        - button "security.tabLog" [ref=e163]
+          - StaticText "security.tabLog"
+        - generic
+          - image
+          - generic
+        - paragraph
+          - StaticText "security.scoreExcellent"
+        - paragraph
+          - StaticText "security.lastFullAudit Mar 4"
+        - heading "security.certoraFormalVerification" [level=4, ref=e164]
+        - StaticText "4"
+        - StaticText "/"
+        - StaticText "4"
+        - StaticText "security.invariantPassed"
+        - progressbar: 100
+        - paragraph
+          - StaticText "security.allInvariantPass"
+        - heading "security.slitherStaticAnalysis" [level=4, ref=e165]
+        - StaticText "0"
+        - StaticText "CRITICAL"
+        - StaticText "1"
+        - StaticText "HIGH"
+        - StaticText "1"
+        - StaticText "MEDIUM"
+        - StaticText "2"
+        - StaticText "LOW"
+        - StaticText "security.fixedLabel"
+        - StaticText ": "
+        - StaticText "2"
+        - StaticText "security.pendingLabel"
+        - StaticText ": "
+        - StaticText "1"
+        - StaticText "security.acceptedRiskLabel"
+        - StaticText ": "
+        - StaticText "1"
+        - heading "security.coreInvariantQuickView" [level=4, ref=e166]
+        - button "security.viewDetails" [ref=e167]
+        - StaticText "security.invSplitConservation"
+        - StaticText "humanAmt + avatarAmt + protoco..."
+        - StaticText "security.invWeightNormalized"
+        - StaticText "Σ W_normalized == 10000 BPS"
+        - StaticText "security.invCircuitIntercept"
+        - StaticText "State == HARD_PAUSE ⇒ !allowHi..."
+        - StaticText "security.invSybilDecay"
+        - StaticText "dS/dt ≤ 0 (no new participatio..."
+        - heading "security.recentSecurityEvents" [level=4, ref=e168]
+        - button "security.fullLog" [ref=e169]
+        - StaticText "security.logTypeInvariant"
+        - StaticText "Mar 4"
+        - paragraph
+          - StaticText "security.logCertoraComplete"
+        - StaticText "0xcert1...001"
+        - StaticText "security.logTypeVulnerability"
+        - StaticText "Mar 4"
+        - paragraph
+          - StaticText "security.logSlitherReentrancy"
+        - StaticText "0xslit1...002"
+        - StaticText "security.logTypeCircuit"
+        - StaticText "Mar 3"
+        - paragraph
+          - StaticText "security.logCircuitTrigger"
+        - StaticText "0xcirc1...003"
+        - alert
+          - StaticText "security.nextAudit"
+          - StaticText "security.scheduledAuditMessage"
+      - StaticText "Compliance Interface"
+      - StaticText "1"
+      - StaticText "/"
+      - StaticText "5"
+      - StaticText " "
+      - StaticText "compliance.activated"
+      - tablist [ref=e64] focusable [tabindex]
+        - tab "compliance.pluginsTab" [selected, ref=e170]
+          - StaticText "compliance.pluginsTab"
+        - tab "compliance.jurisdictionTab" [ref=e171]
+          - StaticText "compliance.jurisdictionTab"
+        - tab "compliance.riskTab" [ref=e172]
+          - StaticText "compliance.riskTab"
+      - tabpanel "compliance.pluginsTab" [ref=e65] focusable [tabindex]
+        - StaticText "🪪"
+        - StaticText "compliance.pluginKycLabel"
+        - StaticText "OFF"
+        - paragraph
+          - StaticText "KYCPlugin"
+        - switch [checked=false, ref=e173]
+        - paragraph
+          - StaticText "compliance.pluginKycDesc"
+        - button "compliance.viewDetails" [ref=e174]
+        - StaticText "📋"
+        - StaticText "compliance.pluginTaxLabel"
+        - StaticText "OFF"
+        - paragraph
+          - StaticText "TaxLabelPlugin"
+        - switch [checked=false, ref=e175]
+        - paragraph
+          - StaticText "compliance.pluginTaxDesc"
+        - button "compliance.viewDetails" [ref=e176]
+        - StaticText "🔐"
+        - StaticText "compliance.pluginZkLabel"
+        - StaticText "ACTIVE"
+        - paragraph
+          - StaticText "ZKPrivacyPlugin"
+        - switch [checked=true, ref=e177]
+        - paragraph
+          - StaticText "compliance.pluginZkDesc"
+        - button "compliance.viewDetails" [ref=e178]
+        - StaticText "🌍"
+        - StaticText "compliance.pluginGeoLabel"
+        - StaticText "OFF"
+        - paragraph
+          - StaticText "GeoCompliancePlugin"
+        - switch [checked=false, ref=e179]
+        - paragraph
+          - StaticText "compliance.pluginGeoDesc"
+        - button "compliance.viewDetails" [ref=e180]
+        - StaticText "⚖️"
+        - StaticText "compliance.pluginArbLabel"
+        - StaticText "OFF"
+        - paragraph
+          - StaticText "ArbitrationPlugin"
+        - switch [checked=false, ref=e181]
+        - paragraph
+          - StaticText "compliance.pluginArbDesc"
+        - button "compliance.viewDetails" [ref=e182]
+        - alert
+          - StaticText "compliance.complianceActive"
+          - StaticText "compliance.complianceActiveDesc"
+    - generic
+      - StaticText "Performance Optimization"
+      - button "Web Vitals" [ref=e183]
+        - StaticText "Web Vitals"
+      - button "Cache Strategy" [ref=e184]
+        - StaticText "Cache Strategy"
+      - button "Lazy Loading" [ref=e185]
+        - StaticText "Lazy Loading"
+      - button "Performance Budget" [ref=e186]
+        - StaticText "Performance Budget"
+      - generic
+        - image
+        - generic
+          - StaticText "94"
+          - StaticText "/100"
+      - paragraph
+        - StaticText "performance.scoreExcellent"
+      - StaticText "performance.jsBundleSize"
+      - StaticText "142"
+      - StaticText "/"
+      - StaticText "150"
+      - StaticText "KB"
+      - progressbar: 94.66666412353516
+      - paragraph
+        - StaticText "⚠ performance.usedNearBudget 94.7%"
+      - paragraph
+        - StaticText "91.2%"
+      - paragraph
+        - StaticText "performance.cacheHitRateLabel"
+      - paragraph
+        - StaticText "847GB"
+      - paragraph
+        - StaticText "performance.cdnSaved"
+      - paragraph
+        - StaticText "94%"
+      - paragraph
+        - StaticText "performance.imageOptimizationRate"
+      - StaticText "CSS Bundle"
+      - StaticText "28"
+      - StaticText "KB"
+      - progressbar: 56
+      - generic
+        - image
+        - StaticText "1.2s"
+      - paragraph
+        - StaticText "FCP"
+      - paragraph
+        - StaticText "performance.target: <1.8s"
+      - image
+      - generic
+        - image
+        - StaticText "2.1s"
+      - paragraph
+        - StaticText "LCP"
+      - paragraph
+        - StaticText "performance.target: <2.5s"
+      - image
+      - generic
+        - image
+        - StaticText "120ms"
+      - paragraph
+        - StaticText "INP"
+      - paragraph
+        - StaticText "performance.target: <200ms"
+      - image
+      - generic
+        - image
+        - StaticText "0.05"
+      - paragraph
+        - StaticText "CLS"
+      - paragraph
+        - StaticText "performance.target: <0.1"
+      - image
+      - generic
+        - image
+        - StaticText "180ms"
+      - paragraph
+        - StaticText "TTFB"
+      - paragraph
+        - StaticText "performance.target: <200ms"
+      - image
+      - heading "performance.perfTrend7d" [level=4, ref=e187]
+      - paragraph
+        - StaticText "FCP"
+      - paragraph
+        - StaticText "↓ 14.3%"
+      - paragraph
+        - StaticText "LCP"
+      - paragraph
+        - StaticText "↓ 16.0%"
+      - paragraph
+        - StaticText "INP"
+      - paragraph
+        - StaticText "↓ 20.0%"
+      - paragraph
+        - StaticText "CLS"
+      - paragraph
+        - StaticText "↓ 37.5%"
+      - paragraph
+        - StaticText "TTFB"
+      - paragraph
+        - StaticText "↓ 14.3%"
+    - generic
+      - generic
+        - StaticText "On-chain Deployment Center"
+        - StaticText "LIVE"
+        - button "Deployment Overview" [ref=e188]
+          - StaticText "Deployment Overview"
+        - button "deployment.verificationTab" [ref=e189]
+          - StaticText "deployment.verificationTab"
+        - button "deployment.multisigTab" [ref=e190]
+          - StaticText "deployment.multisigTab"
+        - button "deployment.consistencyTab" [ref=e191]
+          - StaticText "deployment.consistencyTab"
+        - heading "deployment.networkStatus" [level=4, ref=e192]
+        - StaticText "deployment.deployLive"
+        - StaticText "NETWORK"
+        - paragraph
+          - StaticText "Base Mainnet"
+        - StaticText "Chain ID"
+        - paragraph
+          - StaticText "8453"
+        - generic
+          - StaticText "deployment.version"
+          - StaticText "v2.1.0"
+        - StaticText "deployment.lastDeploy"
+        - StaticText ": "
+        - StaticText "Mar 1"
+        - StaticText "deployment.uptime"
+        - StaticText "99.97%"
+        - StaticText "deployment.totalTransactions"
+        - StaticText "1,284,503"
+        - StaticText "deployment.deployPipelineLabel"
+        - StaticText "deployment.compileCheck"
+        - StaticText "deployment.testCoverage"
+        - StaticText "deployment.staticAnalysis"
+        - StaticText "deployment.formalVerification"
+        - StaticText "deployment.multiSigApproval"
+        - StaticText "deployment.mainnetDeploy"
+        - heading "deployment.deployedContracts" [level=4, ref=e193]
+        - StaticText "5"
+        - StaticText "/"
+        - StaticText "6"
+        - StaticText " "
+        - StaticText "deployment.verified"
+        - StaticText "AvatarCore"
+        - StaticText "deployment.contractVerifiedLabel"
+        - StaticText "0x7a3F...e9B1"
+        - button "Copy" [ref=e194]
+        - StaticText "v2.1.0"
+        - StaticText "8.2KB"
+        - StaticText "DynamicSplitter"
+        - StaticText "deployment.contractVerifiedLabel"
+        - StaticText "0x4cE2...a3D7"
+        - button "Copy" [ref=e195]
+        - StaticText "v2.1.0"
+        - StaticText "6.8KB"
+        - StaticText "CircuitGuard"
+        - StaticText "deployment.contractVerifiedLabel"
+        - StaticText "0x9bF1...c4E8"
+        - button "Copy" [ref=e196]
+        - StaticText "v2.1.0"
+        - StaticText "5.4KB"
+        - StaticText "SkillVault"
+        - StaticText "deployment.contractVerifiedLabel"
+        - StaticText "0x2dA8...f1B3"
+        - button "Copy" [ref=e197]
+        - StaticText "v2.0.0"
+        - StaticText "4.9KB"
+        - StaticText "IFDRouter"
+        - StaticText "deployment.contractVerifiedLabel"
+        - StaticText "0x8eC5...d2A6"
+        - button "Copy" [ref=e198]
+        - StaticText "v2.0.0"
+        - StaticText "7.1KB"
+        - StaticText "TokenVault"
+        - StaticText "deployment.contractPendingLabel"
+        - StaticText "0x5fB9...b7C4"
+        - button "Copy" [ref=e199]
+        - StaticText "v1.8.0"
+        - StaticText "6.3KB"
+        - button "deployment.reverifyAll" [ref=e200]
+        - button "deployment.exportDeployReport" [ref=e201]
+      - generic
+        - StaticText "Monitoring & Alert Center"
+        - paragraph
+          - StaticText "Monitoring & Alert Center"
+        - StaticText "monitoring.connecting"
+        - StaticText "Healthy"
+        - tablist [ref=e202] focusable [tabindex]
+          - tab "monitoring.systemMonitor" [selected, ref=e368]
+          - tab "monitoring.chainEventsTab" [ref=e369]
+          - tab "monitoring.alertRulesTab" [ref=e370]
+          - tab "monitoring.anomalyDetectionTab" [ref=e371]
+        - StaticText "CPU"
+        - StaticText "34"
+        - StaticText "%"
+        - StaticText "monitoring.memory"
+        - StaticText "62"
+        - StaticText "%"
+        - StaticText "monitoring.requestRateLabel"
+        - StaticText "3,420"
+        - StaticText "req/s"
+        - StaticText "monitoring.errorRateLabel"
+        - StaticText "0.12"
+        - StaticText "%"
+        - heading "monitoring.latencyDistribution" [level=4, ref=e203]
+        - SvgRoot
+          - StaticText "P50"
+          - StaticText "P95"
+          - StaticText "P99"
+        - StaticText "P50: "
+        - StaticText "45"
+        - StaticText "ms"
+        - StaticText "P95: "
+        - StaticText "180"
+        - StaticText "ms"
+        - StaticText "P99: "
+        - StaticText "420"
+        - StaticText "ms"
+        - heading "monitoring.networkIO" [level=4, ref=e204]
+        - StaticText "monitoring.inbound"
+        - StaticText "245"
+        - StaticText " Mbps"
+        - StaticText "monitoring.outbound"
+        - StaticText "128"
+        - StaticText " Mbps"
+        - StaticText "monitoring.activeConnectionsLabel"
+        - StaticText "1,247"
+        - heading "monitoring.prometheusMetrics" [level=4, ref=e205]
+        - StaticText "http_requests_total"
+        - generic
+          - StaticText "1,284,503 requests"
+        - StaticText "http_request_duration_seconds"
+        - generic
+          - StaticText "0.045 seconds"
+        - StaticText "circuit_breaker_state"
+        - generic
+          - StaticText "1 gauge"
+        - StaticText "resonance_score_gauge"
+        - generic
+          - StaticText "72 score"
+        - StaticText "liquidity_pool_depth"
+        - generic
+          - StaticText "87,500 USD"
+    - generic
+      - StaticText "Feature Flags & Gradual Rollout"
+      - button "features.tabFlags" [ref=e206]
+        - StaticText "features.tabFlags"
+      - button "features.tabAbTest" [ref=e207]
+        - StaticText "features.tabAbTest"
+      - button "features.tabRollback" [ref=e208]
+        - StaticText "features.tabRollback"
+      - button "features.tabPipeline" [ref=e209]
+        - StaticText "features.tabPipeline"
+      - StaticText "5"
+      - StaticText " "
+      - StaticText "features.activeCount"
+      - StaticText "4"
+      - StaticText " "
+      - StaticText "features.inactiveCount"
+      - StaticText "1"
+      - StaticText " "
+      - StaticText "features.scheduledCount"
+      - StaticText "features.totalFlags"
+      - combobox [expanded=false, ref=e210]: features.allStatus
+        - generic [ref=e372] clickable [onclick]
+          - StaticText "features.allStatus"
+      - combobox [expanded=false, ref=e211]: features.allEnv
+        - generic [ref=e373] clickable [onclick]
+          - StaticText "features.allEnv"
+      - LayoutTable
+        - heading "features.flagAvatarMarketplace" [level=4, ref=e391]
+        - code
+          - StaticText "avatar-marketplace"
+        - paragraph
+          - StaticText "features.flagAvatarMarketplaceDesc"
+        - StaticText "features.statusActive"
+        - StaticText "features.envProduction"
+        - StaticText "features.targetingAll"
+        - StaticText "Rollout Progress"
+        - button "Edit" [ref=e392]
+        - StaticText "100"
+        - StaticText "%"
+        - StaticText "12,847"
+        - StaticText " / "
+        - StaticText "12,847"
+        - StaticText " "
+        - StaticText "users"
+        - switch [checked=true, ref=e467]
+        - heading "features.flagContractSimulation" [level=4, ref=e393]
+        - code
+          - StaticText "contract-simulation"
+        - paragraph
+          - StaticText "features.flagContractSimulationDesc"
+        - StaticText "features.statusActive"
+        - StaticText "features.envProduction"
+        - StaticText "features.targetingTierPro"
+        - StaticText "Rollout Progress"
+        - button "Edit" [ref=e394]
+        - StaticText "75"
+        - StaticText "%"
+        - StaticText "6,423"
+        - StaticText " / "
+        - StaticText "8,564"
+        - StaticText " "
+        - StaticText "users"
+        - switch [checked=true, ref=e468]
+        - heading "features.flagLpLiquidity" [level=4, ref=e395]
+        - code
+          - StaticText "lp-liquidity"
+        - paragraph
+          - StaticText "features.flagLpLiquidityDesc"
+        - StaticText "features.statusActive"
+        - StaticText "features.envProduction"
+        - StaticText "features.targetingOptIn"
+        - StaticText "Rollout Progress"
+        - button "Edit" [ref=e396]
+        - StaticText "50"
+        - StaticText "%"
+        - StaticText "3,200"
+        - StaticText " / "
+        - StaticText "6,400"
+        - StaticText " "
+        - StaticText "users"
+        - switch [checked=true, ref=e469]
+        - heading "features.flagIfdV2Delegation" [level=4, ref=e397]
+        - code
+          - StaticText "ifd-v2-delegation"
+        - paragraph
+          - StaticText "features.flagIfdV2DelegationDesc"
+        - StaticText "features.statusActive"
+        - StaticText "features.envProduction"
+        - StaticText "features.targetingBetaTesters"
+        - StaticText "Rollout Progress"
+        - button "Edit" [ref=e398]
+        - StaticText "25"
+        - StaticText "%"
+        - StaticText "856"
+        - StaticText " / "
+        - StaticText "3,424"
+        - StaticText " "
+        - StaticText "users"
+        - switch [checked=true, ref=e470]
+        - heading "features.flagZkIdentity" [level=4, ref=e399]
+        - code
+          - StaticText "zk-identity"
+        - paragraph
+          - StaticText "features.flagZkIdentityDesc"
+        - StaticText "features.statusInactive"
+        - StaticText "features.envStaging"
+        - StaticText "features.targetingInternalOnly"
+        - StaticText "Rollout Progress"
+        - button "Edit" [ref=e400]
+        - StaticText "0"
+        - StaticText "%"
+        - StaticText "0"
+        - StaticText " / "
+        - StaticText "150"
+        - StaticText " "
+        - StaticText "users"
+        - switch [checked=false, ref=e471]
+        - heading "features.flagMultiChain" [level=4, ref=e401]
+        - code
+          - StaticText "multi-chain"
+        - paragraph
+          - StaticText "features.flagMultiChainDesc"
+        - StaticText "features.statusInactive"
+        - StaticText "features.envDevelopment"
+        - StaticText "features.targetingInternalOnly"
+        - StaticText "Rollout Progress"
+        - button "Edit" [ref=e402]
+        - StaticText "0"
+        - StaticText "%"
+        - StaticText "0"
+        - StaticText " / "
+        - StaticText "45"
+        - StaticText " "
+        - StaticText "users"
+        - switch [checked=false, ref=e472]
+        - heading "features.flagDaoGovernance" [level=4, ref=e403]
+        - code
+          - StaticText "dao-governance"
+        - paragraph
+          - StaticText "features.flagDaoGovernanceDesc"
+        - StaticText "features.statusScheduled"
+        - StaticText "features.envProduction"
+        - StaticText "features.targetingAll"
+        - StaticText "Apr 1"
+        - StaticText "Rollout Progress"
+        - button "Edit" [ref=e404]
+        - StaticText "0"
+        - StaticText "%"
+        - StaticText "0"
+        - StaticText " / "
+        - StaticText "12,847"
+        - StaticText " "
+        - StaticText "users"
+        - switch [checked=false, disabled, ref=e473]
+        - heading "features.flagSdkApi" [level=4, ref=e405]
+        - code
+          - StaticText "sdk-api"
+        - paragraph
+          - StaticText "features.flagSdkApiDesc"
+        - StaticText "features.statusInactive"
+        - StaticText "features.envStaging"
+        - StaticText "features.targetingEnterpriseOnly"
+        - StaticText "Rollout Progress"
+        - button "Edit" [ref=e406]
+        - StaticText "0"
+        - StaticText "%"
+        - StaticText "0"
+        - StaticText " / "
+        - StaticText "200"
+        - StaticText " "
+        - StaticText "users"
+        - switch [checked=false, ref=e474]
+        - heading "features.flagCrossChainBridge" [level=4, ref=e407]
+        - code
+          - StaticText "cross-chain-bridge"
+        - paragraph
+          - StaticText "features.flagCrossChainBridgeDesc"
+        - StaticText "features.statusInactive"
+        - StaticText "features.envDevelopment"
+        - StaticText "features.targetingInternalOnly"
+        - StaticText "Rollout Progress"
+        - button "Edit" [ref=e408]
+        - StaticText "0"
+        - StaticText "%"
+        - StaticText "0"
+        - StaticText " / "
+        - StaticText "45"
+        - StaticText " "
+        - StaticText "users"
+        - switch [checked=false, ref=e475]
+        - heading "features.flagAdvancedAnalytics" [level=4, ref=e409]
+        - code
+          - StaticText "advanced-analytics"
+        - paragraph
+          - StaticText "features.flagAdvancedAnalyticsDesc"
+        - StaticText "features.statusActive"
+        - StaticText "features.envProduction"
+        - StaticText "features.targetingPremiumUsers"
+        - StaticText "Rollout Progress"
+        - button "Edit" [ref=e410]
+        - StaticText "10"
+        - StaticText "%"
+        - StaticText "128"
+        - StaticText " / "
+        - StaticText "1,280"
+        - StaticText " "
+        - StaticText "users"
+        - switch [checked=true, ref=e476]
+    - StaticText "Multi-chain Deployment Center"
+    - paragraph
+      - StaticText "Multi-chain Deployment & Cross-chain Bridge"
+    - StaticText "3"
+    - StaticText " "
+    - StaticText "multichain.chainOnline"
+    - tablist [ref=e66] focusable [tabindex]
+      - tab "Chain Management" [selected, ref=e212]
+        - StaticText "Chain Management"
+      - tab "Cross-chain Bridge" [ref=e213]
+        - StaticText "Cross-chain Bridge"
+      - tab "State Sync" [ref=e214]
+        - StaticText "State Sync"
+      - tab "Chain Switch" [ref=e215]
+        - StaticText "Chain Switch"
+    - tabpanel "Chain Management" [ref=e67] focusable [tabindex]
+      - StaticText "3"
+      - StaticText " "
+      - StaticText "multichain.activeCount"
+      - StaticText "1"
+      - StaticText " "
+      - StaticText "multichain.pendingCount"
+      - StaticText "2"
+      - StaticText " "
+      - StaticText "multichain.plannedCount"
+      - StaticText "🔵"
+      - heading "Base" [level=5, ref=e216]
+      - generic
+        - StaticText "Chain 8453"
+      - StaticText "multichain.chainActive"
+      - StaticText "Block Height"
+      - StaticText "21,456,789"
+      - StaticText "Gas Price"
+      - StaticText "0.02"
+      - StaticText " Gwei"
+      - StaticText "multichain.avgBlockTime"
+      - StaticText "2s"
+      - StaticText "7"
+      - StaticText " "
+      - StaticText "multichain.contracts"
+      - StaticText "$1.25M"
+      - StaticText "TVL"
+      - StaticText "multichain.lastSync"
+      - StaticText ": "
+      - StaticText "Mar 10"
+      - button "multichain.switchAction" [ref=e217]
+      - StaticText "💎"
+      - heading "Ethereum" [level=5, ref=e218]
+      - generic
+        - StaticText "Chain 1"
+      - StaticText "multichain.chainActive"
+      - StaticText "Block Height"
+      - StaticText "19,876,543"
+      - StaticText "Gas Price"
+      - StaticText "12.5"
+      - StaticText " Gwei"
+      - StaticText "multichain.avgBlockTime"
+      - StaticText "12s"
+      - StaticText "3"
+      - StaticText " "
+      - StaticText "multichain.contracts"
+      - StaticText "$3.50M"
+      - StaticText "TVL"
+      - StaticText "multichain.lastSync"
+      - StaticText ": "
+      - StaticText "Mar 10"
+      - button "multichain.switchAction" [ref=e219]
+      - StaticText "🔷"
+      - heading "Arbitrum" [level=5, ref=e220]
+      - generic
+        - StaticText "Chain 42161"
+      - StaticText "multichain.chainActive"
+      - StaticText "Block Height"
+      - StaticText "156,789,012"
+      - StaticText "Gas Price"
+      - StaticText "0.05"
+      - StaticText " Gwei"
+      - StaticText "multichain.avgBlockTime"
+      - StaticText "0.25s"
+      - StaticText "5"
+      - StaticText " "
+      - StaticText "multichain.contracts"
+      - StaticText "$890K"
+      - StaticText "TVL"
+      - StaticText "multichain.lastSync"
+      - StaticText ": "
+      - StaticText "Mar 10"
+      - button "multichain.switchAction" [ref=e221]
+      - StaticText "🟣"
+      - heading "Polygon" [level=5, ref=e222]
+      - generic
+        - StaticText "Chain 137"
+      - StaticText "multichain.chainPending"
+      - StaticText "Block Height"
+      - StaticText "56,789,012"
+      - StaticText "Gas Price"
+      - StaticText "30"
+      - StaticText " Gwei"
+      - StaticText "multichain.avgBlockTime"
+      - StaticText "2s"
+      - StaticText "0"
+      - StaticText " "
+      - StaticText "multichain.contracts"
+      - StaticText "$0"
+      - StaticText "TVL"
+      - StaticText "multichain.lastSync"
+      - StaticText ": "
+      - StaticText "Mar 10"
+      - button "multichain.chainPending" [disabled, ref=e223]
+      - StaticText "🔴"
+      - heading "Optimism" [level=5, ref=e224]
+      - generic
+        - StaticText "Chain 10"
+      - StaticText "multichain.chainPlanned"
+      - StaticText "Block Height"
+      - StaticText "123,456,789"
+      - StaticText "Gas Price"
+      - StaticText "0.03"
+      - StaticText " Gwei"
+      - StaticText "multichain.avgBlockTime"
+      - StaticText "2s"
+      - StaticText "0"
+      - StaticText " "
+      - StaticText "multichain.contracts"
+      - StaticText "$0"
+      - StaticText "TVL"
+      - StaticText "multichain.lastSync"
+      - StaticText ": "
+      - StaticText "Mar 10"
+      - button "multichain.chainPlanned" [disabled, ref=e225]
+      - StaticText "🟢"
+      - heading "Solana" [level=5, ref=e226]
+      - generic
+        - StaticText "Chain 0"
+      - StaticText "multichain.chainPlanned"
+      - StaticText "Block Height"
+      - StaticText "256,789,012"
+      - StaticText "Gas Price"
+      - StaticText "0.00001"
+      - StaticText " Gwei"
+      - StaticText "multichain.avgBlockTime"
+      - StaticText "0.4s"
+      - StaticText "0"
+      - StaticText " "
+      - StaticText "multichain.contracts"
+      - StaticText "$0"
+      - StaticText "TVL"
+      - StaticText "multichain.lastSync"
+      - StaticText ": "
+      - StaticText "Mar 10"
+      - button "multichain.chainPlanned" [disabled, ref=e227]
+    - generic
+      - StaticText "SDK/API Open Platform"
+      - paragraph
+        - StaticText "RESTful API · Multi-language SDK · Webhook"
+      - StaticText "Online"
+      - tablist [ref=e68] focusable [tabindex]
+        - tab "API Docs" [selected, ref=e228]
+          - StaticText "API Docs"
+        - tab "API Key" [ref=e229]
+          - StaticText "API Key"
+        - tab "SDK Download" [ref=e230]
+          - StaticText "SDK Download"
+        - tab "Webhook & Quota" [ref=e231]
+          - StaticText "Webhook & Quota"
+      - paragraph
+        - StaticText "15"
+      - paragraph
+        - StaticText "sdk.totalEndpoints"
+      - paragraph
+        - StaticText "11"
+      - paragraph
+        - StaticText "Stable"
+      - paragraph
+        - StaticText "3"
+      - paragraph
+        - StaticText "Beta"
+      - paragraph
+        - StaticText "1"
+      - paragraph
+        - StaticText "Alpha"
+      - textbox "sdk.searchPlaceholder" [ref=e232]
+      - button "All" [ref=e69]
+      - button "Avatar" [ref=e70]
+      - button "Skill" [ref=e71]
+      - button "Revenue" [ref=e72]
+      - button "Resonance" [ref=e73]
+      - button "Governance" [ref=e74]
+      - button "Payment" [ref=e75]
+      - button "Compliance" [ref=e76]
+      - LayoutTable
+        - button "GET /api/v1/avatars 获取所有分身列表 stable" [ref=e411]
+          - StaticText "GET"
+          - StaticText "/api/v1/avatars"
+          - StaticText "获取所有分身列表"
+          - StaticText "stable"
+        - button "GET /api/v1/avatars/:id 获取分身详情 stable" [ref=e412]
+          - StaticText "GET"
+          - StaticText "/api/v1/avatars/:id"
+          - StaticText "获取分身详情"
+          - StaticText "stable"
+        - button "POST /api/v1/avatars 创建新分身 stable" [ref=e413]
+          - StaticText "POST"
+          - StaticText "/api/v1/avatars"
+          - StaticText "创建新分身"
+          - StaticText "stable"
+        - button "PUT /api/v1/avatars/:id/cognition 更新认知根哈希 stable" [ref=e414]
+          - StaticText "PUT"
+          - StaticText "/api/v1/avatars/:id/cognition"
+          - StaticText "更新认知根哈希"
+          - StaticText "stable"
+        - button "GET /api/v1/skills 获取技能列表 stable" [ref=e415]
+          - StaticText "GET"
+          - StaticText "/api/v1/skills"
+          - StaticText "获取技能列表"
+          - StaticText "stable"
+        - button "POST /api/v1/skills/:id/invoke 调用技能 stable" [ref=e416]
+          - StaticText "POST"
+          - StaticText "/api/v1/skills/:id/invoke"
+          - StaticText "调用技能"
+          - StaticText "stable"
+        - button "GET /api/v1/revenue/splits 获取分账记录 stable" [ref=e417]
+          - StaticText "GET"
+          - StaticText "/api/v1/revenue/splits"
+          - StaticText "获取分账记录"
+          - StaticText "stable"
+        - button "POST /api/v1/revenue/split 执行分账 beta" [ref=e418]
+          - StaticText "POST"
+          - StaticText "/api/v1/revenue/split"
+          - StaticText "执行分账"
+          - StaticText "beta"
+        - button "GET /api/v1/resonance/:avatarId 获取共振分数据 stable" [ref=e419]
+          - StaticText "GET"
+          - StaticText "/api/v1/resonance/:avatarId"
+          - StaticText "获取共振分数据"
+          - StaticText "stable"
+        - button "GET /api/v1/delegations 获取委托关系 stable" [ref=e420]
+          - StaticText "GET"
+          - StaticText "/api/v1/delegations"
+          - StaticText "获取委托关系"
+          - StaticText "stable"
+        - button "POST /api/v1/delegations 创建委托 stable" [ref=e421]
+          - StaticText "POST"
+          - StaticText "/api/v1/delegations"
+          - StaticText "创建委托"
+          - StaticText "stable"
+        - button "GET /api/v1/governance/proposals 获取治理提案 beta" [ref=e422]
+          - StaticText "GET"
+          - StaticText "/api/v1/governance/proposals"
+          - StaticText "获取治理提案"
+          - StaticText "beta"
+        - button "POST /api/v1/x402/pay x402支付 stable" [ref=e423]
+          - StaticText "POST"
+          - StaticText "/api/v1/x402/pay"
+          - StaticText "x402支付"
+          - StaticText "stable"
+        - button "GET /api/v1/compliance/status 合规状态查询 beta" [ref=e424]
+          - StaticText "GET"
+          - StaticText "/api/v1/compliance/status"
+          - StaticText "合规状态查询"
+          - StaticText "beta"
+        - button "GET /api/v2/avatars/:id/circuit 熔断状态查询(V2) alpha" [ref=e425]
+          - StaticText "GET"
+          - StaticText "/api/v2/avatars/:id/circuit"
+          - StaticText "熔断状态查询(V2)"
+          - StaticText "alpha"
+      - StaticText "DAO Governance Dashboard"
+      - StaticText "Decentralized Governance · Fluid Democracy Delegation · Community Treasury"
+      - StaticText "Governance Active"
+      - tablist [ref=e77] focusable [tabindex]
+        - tab "Governance Proposals" [selected, ref=e233]
+          - StaticText "Governance Proposals"
+        - tab "Voting Statistics" [ref=e234]
+          - StaticText "Voting Statistics"
+        - tab "Delegation Network" [ref=e235]
+          - StaticText "Delegation Network"
+        - tab "Community Treasury" [ref=e236]
+          - StaticText "Community Treasury"
+      - tabpanel "Governance Proposals" [ref=e78] focusable [tabindex]
+        - StaticText "TOTAL PROPOSALS"
+        - paragraph
+          - StaticText "24"
+        - StaticText "VOTING"
+        - paragraph
+          - StaticText "3"
+        - StaticText "PASSED"
+        - paragraph
+          - StaticText "18"
+        - StaticText "DEFEATED"
+        - paragraph
+          - StaticText "3"
+        - button "All" [ref=e237]
+        - button "Economics" [ref=e238]
+        - button "Technical" [ref=e239]
+        - button "Security" [ref=e240]
+        - button "Compliance" [ref=e241]
+        - button "Community" [ref=e242]
+        - LayoutTable
+          - heading "调整分账比例为 65/25/10" [level=4, ref=e426]
+          - StaticText "Economics"
+          - StaticText "Voting"
+          - StaticText "Medium Risk"
+          - paragraph
+          - button "Expand" [ref=e427]
+          - StaticText "For"
+          - StaticText " "
+          - StaticText "1.5M"
+          - StaticText " ("
+          - StaticText "57.6"
+          - StaticText "%)"
+          - StaticText "Against"
+          - StaticText " "
+          - StaticText "890K"
+          - StaticText " ("
+          - StaticText "33.7"
+          - StaticText "%)"
+          - StaticText "Abstain"
+          - StaticText " "
+          - StaticText "230K"
+          - StaticText " ("
+          - StaticText "8.7"
+          - StaticText "%)"
+          - StaticText "Quorum"
+          - StaticText ": "
+          - StaticText "2.6M"
+          - StaticText "/"
+          - StaticText "2.0M"
+          - StaticText " ("
+          - StaticText "52.8"
+          - StaticText "%)"
+          - StaticText "✓ Reached"
+          - progressbar: 52.79999923706055
+          - StaticText "0x7a3f...b2c1"
+          - StaticText "Remaining"
+          - StaticText " "
+          - StaticText "Ended"
+          - button "View Details" [ref=e428]
+          - button "Vote" [ref=e429]
+          - heading "激活 KYC 合规模块" [level=4, ref=e430]
+          - StaticText "Compliance"
+          - StaticText "Passed"
+          - StaticText "Low Risk"
+          - paragraph
+          - button "Expand" [ref=e431]
+          - StaticText "For"
+          - StaticText " "
+          - StaticText "3.2M"
+          - StaticText " ("
+          - StaticText "64.0"
+          - StaticText "%)"
+          - StaticText "Against"
+          - StaticText " "
+          - StaticText "1.1M"
+          - StaticText " ("
+          - StaticText "22.0"
+          - StaticText "%)"
+          - StaticText "Abstain"
+          - StaticText " "
+          - StaticText "700K"
+          - StaticText " ("
+          - StaticText "14.0"
+          - StaticText "%)"
+          - StaticText "Quorum"
+          - StaticText ": "
+          - StaticText "5.0M"
+          - StaticText "/"
+          - StaticText "2.0M"
+          - StaticText " ("
+          - StaticText "100.0"
+          - StaticText "%)"
+          - StaticText "✓ Reached"
+          - progressbar: 100
+          - StaticText "0x9c4e...d3f2"
+          - StaticText "Executed"
+          - StaticText " "
+          - StaticText "3mo ago"
+          - button "View Details" [ref=e432]
+          - heading "新增 Arbitrum 链支持" [level=4, ref=e433]
+          - StaticText "Technical"
+          - StaticText "Voting"
+          - StaticText "Medium Risk"
+          - paragraph
+          - button "Expand" [ref=e434]
+          - StaticText "For"
+          - StaticText " "
+          - StaticText "2.1M"
+          - StaticText " ("
+          - StaticText "77.8"
+          - StaticText "%)"
+          - StaticText "Against"
+          - StaticText " "
+          - StaticText "450K"
+          - StaticText " ("
+          - StaticText "16.7"
+          - StaticText "%)"
+          - StaticText "Abstain"
+          - StaticText " "
+          - StaticText "150K"
+          - StaticText " ("
+          - StaticText "5.6"
+          - StaticText "%)"
+          - StaticText "Quorum"
+          - StaticText ": "
+          - StaticText "2.7M"
+          - StaticText "/"
+          - StaticText "2.0M"
+          - StaticText " ("
+          - StaticText "54.0"
+          - StaticText "%)"
+          - StaticText "✓ Reached"
+          - progressbar: 54
+          - StaticText "0x5b2a...e8d1"
+          - StaticText "Remaining"
+          - StaticText " "
+          - StaticText "Ended"
+          - button "View Details" [ref=e435]
+          - button "Vote" [ref=e436]
+          - heading "调整熔断阈值为 45/65" [level=4, ref=e437]
+          - StaticText "Security"
+          - StaticText "Defeated"
+          - StaticText "High Risk"
+          - paragraph
+          - button "Expand" [ref=e438]
+          - StaticText "For"
+          - StaticText " "
+          - StaticText "890K"
+          - StaticText " ("
+          - StaticText "19.8"
+          - StaticText "%)"
+          - StaticText "Against"
+          - StaticText " "
+          - StaticText "3.1M"
+          - StaticText " ("
+          - StaticText "68.9"
+          - StaticText "%)"
+          - StaticText "Abstain"
+          - StaticText " "
+          - StaticText "510K"
+          - StaticText " ("
+          - StaticText "11.3"
+          - StaticText "%)"
+          - StaticText "Quorum"
+          - StaticText ": "
+          - StaticText "4.5M"
+          - StaticText "/"
+          - StaticText "2.0M"
+          - StaticText " ("
+          - StaticText "90.0"
+          - StaticText "%)"
+          - StaticText "✓ Reached"
+          - progressbar: 90
+          - StaticText "0x3f1c...a9b8"
+          - StaticText "Ended"
+          - StaticText " "
+          - StaticText "4mo ago"
+          - button "View Details" [ref=e439]
+          - heading "社区金库资助: 认知发现研究" [level=4, ref=e440]
+          - StaticText "Community"
+          - StaticText "Queued"
+          - StaticText "Low Risk"
+          - paragraph
+          - button "Expand" [ref=e441]
+          - StaticText "For"
+          - StaticText " "
+          - StaticText "0"
+          - StaticText " ("
+          - StaticText "0.0"
+          - StaticText "%)"
+          - StaticText "Against"
+          - StaticText " "
+          - StaticText "0"
+          - StaticText " ("
+          - StaticText "0.0"
+          - StaticText "%)"
+          - StaticText "Abstain"
+          - StaticText " "
+          - StaticText "0"
+          - StaticText " ("
+          - StaticText "0.0"
+          - StaticText "%)"
+          - StaticText "Quorum"
+          - StaticText ": "
+          - StaticText "0"
+          - StaticText "/"
+          - StaticText "2.0M"
+          - StaticText " ("
+          - StaticText "0.0"
+          - StaticText "%)"
+          - StaticText "Not Reached"
+          - progressbar: 0
+          - StaticText "0x8d7e...c4a5"
+          - StaticText "Ended"
+          - StaticText " "
+          - StaticText "3mo ago"
+          - button "View Details" [ref=e442]
+    - StaticText "Ecosystem Integration Hub"
+    - StaticText "4 Active"
+    - tablist [ref=e79] focusable [tabindex]
+      - tab "Protocol Integration" [selected, ref=e243]
+        - StaticText "Protocol Integration"
+      - tab "Wallet Ecosystem" [ref=e244]
+        - StaticText "Wallet Ecosystem"
+      - tab "Data Aggregation" [ref=e245]
+        - StaticText "Data Aggregation"
+      - tab "Notification Center 4" [ref=e246]
+        - StaticText "Notification Center"
+        - StaticText "4"
+    - tabpanel "Protocol Integration" [ref=e80] focusable [tabindex]
+      - StaticText "Total Integrations"
+      - paragraph
+        - StaticText "8"
+      - StaticText "Active Integrations"
+      - paragraph
+        - StaticText "4"
+      - StaticText "Total Users"
+      - paragraph
+        - StaticText "23.1K"
+      - StaticText "Monthly Active Users"
+      - paragraph
+        - StaticText "8.4K"
+      - StaticText "Transaction Volume"
+      - paragraph
+        - StaticText "$12.5M"
+      - StaticText "Developers"
+      - paragraph
+        - StaticText "156"
+      - StaticText "Protocol Status:"
+      - StaticText "4 Integrated"
+      - StaticText "2 Pending"
+      - StaticText "2 Planned"
+      - button "All" [ref=e247]
+      - button "DEX" [ref=e248]
+      - button "Lending" [ref=e249]
+      - button "Oracle" [ref=e250]
+      - button "Indexing" [ref=e251]
+      - button "Staking" [ref=e252]
+      - button "Identity" [ref=e253]
+      - button "DEX Aggregator" [ref=e254]
+      - StaticText "🦄"
+      - heading "Uniswap V4" [level=4, ref=e255]
+      - StaticText "DEX"
+      - StaticText "Integrated"
+      - paragraph
+        - StaticText "AFC/USDC流动性池托管，自动做市策略"
+      - paragraph
+        - StaticText "TVL"
+      - paragraph
+        - StaticText "$890.0K"
+      - paragraph
+        - StaticText "24h Vol"
+      - paragraph
+        - StaticText "$45.0K"
+      - paragraph
+        - StaticText "Users"
+      - paragraph
+        - StaticText "1.3K"
+      - StaticText "2026-02-20"
+      - button "Manage" [ref=e256]
+      - StaticText "👻"
+      - heading "Aave V3" [level=4, ref=e257]
+      - StaticText "Lending"
+      - StaticText "Integrated"
+      - paragraph
+        - StaticText "分身金库AFC质押借贷，自动利率优化"
+      - paragraph
+        - StaticText "TVL"
+      - paragraph
+        - StaticText "$520.0K"
+      - paragraph
+        - StaticText "24h Vol"
+      - paragraph
+        - StaticText "$18.0K"
+      - paragraph
+        - StaticText "Users"
+      - paragraph
+        - StaticText "890"
+      - StaticText "2026-02-25"
+      - button "Manage" [ref=e258]
+      - StaticText "🔗"
+      - heading "Chainlink" [level=4, ref=e259]
+      - StaticText "Oracle"
+      - StaticText "Integrated"
+      - paragraph
+        - StaticText "AFC价格预言机，共振分外部数据源"
+      - StaticText "2026-01-15"
+      - button "Manage" [ref=e260]
+      - StaticText "📊"
+      - heading "The Graph" [level=4, ref=e261]
+      - StaticText "Indexing"
+      - StaticText "Integrated"
+      - paragraph
+        - StaticText "链上事件索引，分身活动Subgraph"
+      - StaticText "2026-01-10"
+      - button "Manage" [ref=e262]
+      - StaticText "🏔️"
+      - heading "Lido" [level=4, ref=e263]
+      - StaticText "Staking"
+      - StaticText "Pending"
+      - paragraph
+        - StaticText "ETH质押收益接入分身金库"
+      - StaticText "—"
+      - button "Connecting" [ref=e264]
+      - StaticText "🏦"
+      - heading "Compound V3" [level=4, ref=e265]
+      - StaticText "Lending"
+      - StaticText "Pending"
+      - paragraph
+        - StaticText "备用借贷协议，利率比较策略"
+      - StaticText "—"
+      - button "Connecting" [ref=e266]
+      - StaticText "🟣"
+      - heading "1inch" [level=4, ref=e267]
+      - StaticText "DEX Aggregator"
+      - StaticText "Planned"
+      - paragraph
+        - StaticText "最优路径兑换，Gas节省优化"
+      - StaticText "—"
+      - button "Planned" [ref=e268]
+      - StaticText "📛"
+      - heading "ENS" [level=4, ref=e269]
+      - StaticText "Identity"
+      - StaticText "Planned"
+      - paragraph
+        - StaticText "分身.soul域名映射至ENS"
+      - StaticText "—"
+      - button "Planned" [ref=e270]
+    - StaticText "Solidity Contract Architecture"
+    - StaticText "7 Core Contracts · Interface Definitions · Interaction Graph · Test Coverage · Formal Verification"
+    - StaticText "Foundry"
+    - tablist [ref=e81] focusable [tabindex]
+      - tab "Architecture" [selected, ref=e271]
+        - StaticText "Architecture"
+      - tab "Interactions" [ref=e272]
+        - StaticText "Interactions"
+      - tab "Test Coverage" [ref=e273]
+        - StaticText "Test Coverage"
+      - tab "Formal Verification" [ref=e274]
+        - StaticText "Formal Verification"
+    - tabpanel "Architecture" [ref=e82] focusable [tabindex]
+      - paragraph
+        - StaticText "7"
+      - paragraph
+        - StaticText "Total Contracts"
+      - paragraph
+        - StaticText "3"
+      - paragraph
+        - StaticText "Deployed"
+      - paragraph
+        - StaticText "2,350"
+      - paragraph
+        - StaticText "Lines of Code"
+      - paragraph
+        - StaticText "95.3%"
+      - paragraph
+        - StaticText "Avg Coverage"
+      - StaticText "Category:"
+      - button "All" [ref=e275]
+      - button "Core Contracts" [ref=e276]
+      - button "Economics Contracts" [ref=e277]
+      - button "Security Contracts" [ref=e278]
+      - button "Governance Contracts" [ref=e279]
+      - StaticText "AvatarCore"
+      - StaticText "Core Contracts"
+      - StaticText "AvatarCore.sol"
+      - StaticText "v"
+      - StaticText "1.0.0"
+      - StaticText "Deployed"
+      - paragraph
+        - StaticText "认知分身核心合约 — .soul SBT铸造、认知根哈希绑定、DID映射"
+      - StaticText "0x7a3f...a1b2"
+      - button [ref=e280]
+      - paragraph
+        - StaticText "380"
+      - paragraph
+        - StaticText "LoC"
+      - paragraph
+        - StaticText "12.4 KB"
+      - paragraph
+        - StaticText "Bytecode"
+      - paragraph
+        - StaticText "20,000"
+      - paragraph
+        - StaticText "Opt Runs"
+      - StaticText "Inherits:"
+      - StaticText "UUPSUpgradeable"
+      - StaticText "ERC721"
+      - StaticText "ReentrancyGuard"
+      - StaticText "AccessControl"
+      - StaticText "Security Patterns:"
+      - StaticText "ReentrancyGuard"
+      - StaticText "AccessControl(ORACLE_ROLE)"
+      - StaticText "UUPS Proxy"
+      - button "View Functions (5)" [ref=e281]
+        - StaticText "View Functions (5)"
+      - StaticText "DynamicSplitter"
+      - StaticText "Economics Contracts"
+      - StaticText "DynamicSplitter.sol"
+      - StaticText "v"
+      - StaticText "1.0.0"
+      - StaticText "Deployed"
+      - paragraph
+        - StaticText "动态分账合约 — 70/20/10分配、金库比例Clamping、x402路由"
+      - StaticText "0x9c4e...d3f2"
+      - button [ref=e282]
+      - paragraph
+        - StaticText "420"
+      - paragraph
+        - StaticText "LoC"
+      - paragraph
+        - StaticText "14.8 KB"
+      - paragraph
+        - StaticText "Bytecode"
+      - paragraph
+        - StaticText "20,000"
+      - paragraph
+        - StaticText "Opt Runs"
+      - StaticText "Inherits:"
+      - StaticText "UUPSUpgradeable"
+      - StaticText "ReentrancyGuard"
+      - StaticText "AccessControl"
+      - StaticText "Security Patterns:"
+      - StaticText "ReentrancyGuard"
+      - StaticText "AccessControl(GUARDIAN_ROLE)"
+      - StaticText "Clamping [1500, 2500]"
+      - StaticText "Conservation Invariant"
+      - button "View Functions (5)" [ref=e283]
+        - StaticText "View Functions (5)"
+      - StaticText "CircuitGuard"
+      - StaticText "Security Contracts"
+      - StaticText "CircuitGuard.sol"
+      - StaticText "v"
+      - StaticText "1.0.0"
+      - StaticText "Deployed"
+      - paragraph
+        - StaticText "认知熔断合约 — NORMAL/SOFT/HARD/RECOVERY四级状态机"
+      - StaticText "0x5b2a...e8d1"
+      - button [ref=e284]
+      - paragraph
+        - StaticText "310"
+      - paragraph
+        - StaticText "LoC"
+      - paragraph
+        - StaticText "10.2 KB"
+      - paragraph
+        - StaticText "Bytecode"
+      - paragraph
+        - StaticText "20,000"
+      - paragraph
+        - StaticText "Opt Runs"
+      - StaticText "Inherits:"
+      - StaticText "UUPSUpgradeable"
+      - StaticText "AccessControl"
+      - StaticText "Pausable"
+      - StaticText "Security Patterns:"
+      - StaticText "AccessControl(GUARDIAN_ROLE)"
+      - StaticText "Pausable"
+      - StaticText "72h Recovery Window"
+      - button "View Functions (5)" [ref=e285]
+        - StaticText "View Functions (5)"
+      - StaticText "SkillVault"
+      - StaticText "Core Contracts"
+      - StaticText "SkillVault.sol"
+      - StaticText "v"
+      - StaticText "1.0.0"
+      - StaticText "Not Deployed"
+      - paragraph
+        - StaticText "技能库合约 — 收益阈值解锁逻辑、MCP能力节点注册"
+      - paragraph
+        - StaticText "290"
+      - paragraph
+        - StaticText "LoC"
+      - paragraph
+        - StaticText "9.8 KB"
+      - paragraph
+        - StaticText "Bytecode"
+      - paragraph
+        - StaticText "20,000"
+      - paragraph
+        - StaticText "Opt Runs"
+      - StaticText "Inherits:"
+      - StaticText "AccessControl"
+      - StaticText "Security Patterns:"
+      - StaticText "AccessControl(ORACLE_ROLE)"
+      - StaticText "Revenue Threshold Guard"
+      - button "View Functions (3)" [ref=e286]
+        - StaticText "View Functions (3)"
+      - StaticText "IFDRouter"
+      - StaticText "Governance Contracts"
+      - StaticText "IFDRouter.sol"
+      - StaticText "v"
+      - StaticText "1.0.0"
+      - StaticText "Not Deployed"
+      - paragraph
+        - StaticText "流体民主委托路由 — 领域委托、权重BPS计算、Merkle快照"
+      - paragraph
+        - StaticText "350"
+      - paragraph
+        - StaticText "LoC"
+      - paragraph
+        - StaticText "11.5 KB"
+      - paragraph
+        - StaticText "Bytecode"
+      - paragraph
+        - StaticText "20,000"
+      - paragraph
+        - StaticText "Opt Runs"
+      - StaticText "Inherits:"
+      - StaticText "AccessControl"
+      - StaticText "Security Patterns:"
+      - StaticText "Merkle Snapshot Anti-Flash-Loan"
+      - StaticText "BPS Normalization"
+      - button "View Functions (4)" [ref=e287]
+        - StaticText "View Functions (4)"
+      - StaticText "ECEOracle"
+      - StaticText "Governance Contracts"
+      - StaticText "ECEOracle.sol"
+      - StaticText "v"
+      - StaticText "1.0.0"
+      - StaticText "Not Deployed"
+      - paragraph
+        - StaticText "ECE情感计算预言机 — 多签验证、EIP-712签名、共振分更新"
+      - paragraph
+        - StaticText "260"
+      - paragraph
+        - StaticText "LoC"
+      - paragraph
+        - StaticText "8.9 KB"
+      - paragraph
+        - StaticText "Bytecode"
+      - paragraph
+        - StaticText "20,000"
+      - paragraph
+        - StaticText "Opt Runs"
+      - StaticText "Inherits:"
+      - StaticText "AccessControl"
+      - StaticText "EIP712"
+      - StaticText "Security Patterns:"
+      - StaticText "Multi-sig Verification (3/5)"
+      - StaticText "EIP-712 Typed Data"
+      - StaticText "Sliding Window Consensus"
+      - button "View Functions (3)" [ref=e288]
+        - StaticText "View Functions (3)"
+      - StaticText "TokenVault"
+      - StaticText "Economics Contracts"
+      - StaticText "TokenVault.sol"
+      - StaticText "v"
+      - StaticText "1.0.0"
+      - StaticText "Not Deployed"
+      - paragraph
+        - StaticText "AFC代币金库 — 质押、通缩燃烧、LP流动性注入"
+      - paragraph
+        - StaticText "340"
+      - paragraph
+        - StaticText "LoC"
+      - paragraph
+        - StaticText "11.8 KB"
+      - paragraph
+        - StaticText "Bytecode"
+      - paragraph
+        - StaticText "20,000"
+      - paragraph
+        - StaticText "Opt Runs"
+      - StaticText "Inherits:"
+      - StaticText "UUPSUpgradeable"
+      - StaticText "ReentrancyGuard"
+      - StaticText "AccessControl"
+      - StaticText "Security Patterns:"
+      - StaticText "ReentrancyGuard"
+      - StaticText "AccessControl(GUARDIAN_ROLE)"
+      - StaticText "Deflationary Burn"
+      - button "View Functions (4)" [ref=e289]
+        - StaticText "View Functions (4)"
+    - generic
+      - StaticText "Rust Engine Architecture"
+      - paragraph
+        - StaticText "6 Core Modules · 28 Functions · 165 Tests"
+      - StaticText "Engine Core"
+      - tablist [ref=e83] focusable [tabindex]
+        - tab "Engine Modules" [selected, ref=e290]
+          - StaticText "Engine Modules"
+        - tab "Data Flow" [ref=e291]
+          - StaticText "Data Flow"
+        - tab "Benchmarks" [ref=e292]
+          - StaticText "Benchmarks"
+        - tab "Math Models" [ref=e293]
+          - StaticText "Math Models"
+      - tabpanel "Engine Modules" [ref=e84] focusable [tabindex]
+        - paragraph
+          - StaticText "6"
+        - paragraph
+          - StaticText "Modules"
+        - paragraph
+          - StaticText "2.7K"
+        - paragraph
+          - StaticText "LoC"
+        - paragraph
+          - StaticText "28"
+        - paragraph
+          - StaticText "Functions"
+        - paragraph
+          - StaticText "165"
+        - paragraph
+          - StaticText "Tests"
+        - paragraph
+          - StaticText "78.3ms"
+        - paragraph
+          - StaticText "Avg Latency"
+        - button "All" [ref=e294]
+        - button "Core" [ref=e295]
+        - button "Oracle" [ref=e296]
+        - button "ZKP" [ref=e297]
+        - button "Discovery" [ref=e298]
+        - button "Economics" [ref=e299]
+        - button "Monitoring" [ref=e300]
+        - StaticText "weight_calculator.rs"
+        - StaticText "v"
+        - StaticText "1.2.0"
+        - paragraph
+          - StaticText "IFD认知权重函数 W(i,d,t) 实现 — 实时权重计算与归一化"
+        - StaticText "Core"
+        - StaticText "Production"
+        - paragraph
+          - StaticText "2.3ms"
+        - paragraph
+          - StaticText "Latency"
+        - paragraph
+          - StaticText "150K calc/s"
+        - paragraph
+          - StaticText "Throughput"
+        - paragraph
+          - StaticText "12MB"
+        - paragraph
+          - StaticText "Memory"
+        - StaticText "Tests:"
+        - StaticText "36"
+        - StaticText "/"
+        - StaticText "36"
+        - StaticText " "
+        - StaticText "passed"
+        - StaticText "|"
+        - StaticText "Unit "
+        - StaticText "24"
+        - StaticText "Prop "
+        - StaticText "8"
+        - StaticText "Bench "
+        - StaticText "4"
+        - button "Function List (5)" [ref=e301]
+          - StaticText "Function List"
+          - StaticText "("
+          - StaticText "5"
+          - StaticText ")"
+        - button "View Math Model" [ref=e302]
+        - StaticText "ece_oracle_client.rs"
+        - StaticText "v"
+        - StaticText "1.1.0"
+        - paragraph
+          - StaticText "ECE多签聚合客户端 — 滑动窗口共识、EIP-712签名生成"
+        - StaticText "Oracle"
+        - StaticText "Production"
+        - paragraph
+          - StaticText "0.8ms"
+        - paragraph
+          - StaticText "Latency"
+        - paragraph
+          - StaticText "50K req/s"
+        - paragraph
+          - StaticText "Throughput"
+        - paragraph
+          - StaticText "8MB"
+        - paragraph
+          - StaticText "Memory"
+        - StaticText "Tests:"
+        - StaticText "27"
+        - StaticText "/"
+        - StaticText "27"
+        - StaticText " "
+        - StaticText "passed"
+        - StaticText "|"
+        - StaticText "Unit "
+        - StaticText "18"
+        - StaticText "Prop "
+        - StaticText "6"
+        - StaticText "Bench "
+        - StaticText "3"
+        - button "Function List (3)" [ref=e303]
+          - StaticText "Function List"
+          - StaticText "("
+          - StaticText "3"
+          - StaticText ")"
+        - button "View Math Model" [ref=e304]
+        - StaticText "poue_prover.rs"
+        - StaticText "v"
+        - StaticText "0.3.0"
+        - paragraph
+          - StaticText "ZK电路验证器 — PoUE证明生成、Merkle Root输出"
+        - StaticText "ZKP"
+        - StaticText "Beta"
+        - paragraph
+          - StaticText "450ms"
+        - paragraph
+          - StaticText "Latency"
+        - paragraph
+          - StaticText "2.2 proof/s"
+        - paragraph
+          - StaticText "Throughput"
+        - paragraph
+          - StaticText "256MB"
+        - paragraph
+          - StaticText "Memory"
+        - StaticText "Tests:"
+        - StaticText "22"
+        - StaticText "/"
+        - StaticText "22"
+        - StaticText " "
+        - StaticText "passed"
+        - StaticText "|"
+        - StaticText "Unit "
+        - StaticText "12"
+        - StaticText "Prop "
+        - StaticText "4"
+        - StaticText "Bench "
+        - StaticText "6"
+        - button "Function List (3)" [ref=e305]
+          - StaticText "Function List"
+          - StaticText "("
+          - StaticText "3"
+          - StaticText ")"
+        - button "View Math Model" [ref=e306]
+        - StaticText "mcp_router.rs"
+        - StaticText "v"
+        - StaticText "1.0.0"
+        - paragraph
+          - StaticText "MCP认知发现路由 — 语义向量检索、技能匹配"
+        - StaticText "Discovery"
+        - StaticText "Production"
+        - paragraph
+          - StaticText "15.2ms"
+        - paragraph
+          - StaticText "Latency"
+        - paragraph
+          - StaticText "5K queries/s"
+        - paragraph
+          - StaticText "Throughput"
+        - paragraph
+          - StaticText "64MB"
+        - paragraph
+          - StaticText "Memory"
+        - StaticText "Tests:"
+        - StaticText "24"
+        - StaticText "/"
+        - StaticText "24"
+        - StaticText " "
+        - StaticText "passed"
+        - StaticText "|"
+        - StaticText "Unit "
+        - StaticText "16"
+        - StaticText "Prop "
+        - StaticText "5"
+        - StaticText "Bench "
+        - StaticText "3"
+        - button "Function List (3)" [ref=e307]
+          - StaticText "Function List"
+          - StaticText "("
+          - StaticText "3"
+          - StaticText ")"
+        - button "View Math Model" [ref=e308]
+        - StaticText "split_calculator.rs"
+        - StaticText "v"
+        - StaticText "1.1.0"
+        - paragraph
+          - StaticText "动态分账公式 — 金库比例Clamping、复杂度因子"
+        - StaticText "Economics"
+        - StaticText "Production"
+        - paragraph
+          - StaticText "0.3ms"
+        - paragraph
+          - StaticText "Latency"
+        - paragraph
+          - StaticText "200K calc/s"
+        - paragraph
+          - StaticText "Throughput"
+        - paragraph
+          - StaticText "4MB"
+        - paragraph
+          - StaticText "Memory"
+        - StaticText "Tests:"
+        - StaticText "34"
+        - StaticText "/"
+        - StaticText "34"
+        - StaticText " "
+        - StaticText "passed"
+        - StaticText "|"
+        - StaticText "Unit "
+        - StaticText "20"
+        - StaticText "Prop "
+        - StaticText "12"
+        - StaticText "Bench "
+        - StaticText "2"
+        - button "Function List (3)" [ref=e309]
+          - StaticText "Function List"
+          - StaticText "("
+          - StaticText "3"
+          - StaticText ")"
+        - button "View Math Model" [ref=e310]
+        - StaticText "circuit_monitor.rs"
+        - StaticText "v"
+        - StaticText "1.0.0"
+        - paragraph
+          - StaticText "熔断状态监听 — 告警推送、自动恢复窗口计时"
+        - StaticText "Monitoring"
+        - StaticText "Production"
+        - paragraph
+          - StaticText "1.1ms"
+        - paragraph
+          - StaticText "Latency"
+        - paragraph
+          - StaticText "100K events/s"
+        - paragraph
+          - StaticText "Throughput"
+        - paragraph
+          - StaticText "16MB"
+        - paragraph
+          - StaticText "Memory"
+        - StaticText "Tests:"
+        - StaticText "22"
+        - StaticText "/"
+        - StaticText "22"
+        - StaticText " "
+        - StaticText "passed"
+        - StaticText "|"
+        - StaticText "Unit "
+        - StaticText "14"
+        - StaticText "Prop "
+        - StaticText "6"
+        - StaticText "Bench "
+        - StaticText "2"
+        - button "Function List (3)" [ref=e311]
+          - StaticText "Function List"
+          - StaticText "("
+          - StaticText "3"
+          - StaticText ")"
+        - button "View Math Model" [ref=e312]
+      - heading "Off-Chain Engine Status" [level=3, ref=e85]
+      - paragraph
+        - StaticText "Real-time monitoring of 4 engine microservices · 0/6 live"
+      - StaticText "4"
+      - StaticText " Online"
+      - StaticText "System Uptime"
+      - StaticText ": "
+      - StaticText "533d 1h 41m"
+      - StaticText "SYSTEM HEALTH"
+      - StaticText "4"
+      - StaticText "/"
+      - StaticText "4"
+      - StaticText " "
+      - StaticText "modules operational"
+      - StaticText "15"
+      - StaticText " "
+      - StaticText "event types registered"
+      - StaticText "Last update"
+      - StaticText ": "
+      - StaticText "just now"
+      - generic
+        - StaticText "IFD Weight Calculator"
+        - StaticText "Incentivized Fluid Democracy delegation graph with weight decay and cycle detection"
+        - StaticText "Online"
+        - StaticText ":"
+        - StaticText "3005"
+        - StaticText "Total Weight"
+        - StaticText "492.80"
+        - StaticText "Active Nodes"
+        - StaticText "6"
+        - StaticText "Cycles Detected"
+        - StaticText "0"
+        - StaticText "Decay Factor"
+        - StaticText "0.8"
+        - StaticText "Max Depth"
+        - StaticText "3"
+        - StaticText "Broadcast Interval"
+        - StaticText "5s"
+        - StaticText "Uptime"
+        - StaticText " "
+        - StaticText "533d 1h 41m"
+        - StaticText "Updated"
+        - StaticText " "
+        - StaticText "just now"
+        - StaticText "weight_update"
+        - StaticText "graph_change"
+        - StaticText "cycle_detected"
+      - generic
+        - StaticText "ECE Oracle Client"
+        - StaticText "Multi-source price aggregation with median calculation and deviation alerts"
+        - StaticText "Online"
+        - StaticText ":"
+        - StaticText "3006"
+        - StaticText "AFC Price"
+        - StaticText "$1.2487"
+        - StaticText "ETH Price"
+        - StaticText "$3,452.30"
+        - StaticText "BTC Price"
+        - StaticText "$67,180.50"
+        - StaticText "USDC Price"
+        - StaticText "$1.0001"
+        - StaticText "Avg Confidence"
+        - StaticText "94%"
+        - StaticText "Data Sources"
+        - StaticText "5/5 healthy"
+        - StaticText "Uptime"
+        - StaticText " "
+        - StaticText "533d 1h 41m"
+        - StaticText "Updated"
+        - StaticText " "
+        - StaticText "just now"
+        - StaticText "price_update"
+        - StaticText "deviation_alert"
+        - StaticText "source_health"
+      - generic
+        - StaticText "PoUE ZK Prover"
+        - StaticText "Zero-knowledge proof verification with optimistic mode and 7-day challenge period"
+        - StaticText "Online"
+        - StaticText ":"
+        - StaticText "3007"
+        - StaticText "Proofs Verified"
+        - StaticText "127"
+        - StaticText "Proofs Rejected"
+        - StaticText "8"
+        - StaticText "Pending Queue"
+        - StaticText "3"
+        - StaticText "Total Rewards"
+        - StaticText "142.5 AFC"
+        - StaticText "Avg Quality"
+        - StaticText "84/100"
+        - StaticText "Challenge Period"
+        - StaticText "7 days"
+        - StaticText "Uptime"
+        - StaticText " "
+        - StaticText "533d 1h 41m"
+        - StaticText "Updated"
+        - StaticText " "
+        - StaticText "5s ago"
+        - StaticText "proof_submitted"
+        - StaticText "proof_verified"
+        - StaticText "proof_rejected"
+        - StaticText "reward_distributed"
+      - generic
+        - StaticText "MCP Router"
+        - StaticText "Model Context Protocol routing with weighted provider selection and slashing"
+        - StaticText "Online"
+        - StaticText ":"
+        - StaticText "3008"
+        - StaticText "#1 CognitionCore"
+        - StaticText "87.40"
+        - StaticText "#2 NeuralPath"
+        - StaticText "79.30"
+        - StaticText "#3 SynapticLink"
+        - StaticText "72.70"
+        - StaticText "Total Requests"
+        - StaticText "842"
+        - StaticText "Slash Events"
+        - StaticText "2"
+        - StaticText "Routing Weights"
+        - StaticText "40/30/30"
+        - StaticText "Uptime"
+        - StaticText " "
+        - StaticText "533d 1h 41m"
+        - StaticText "Updated"
+        - StaticText " "
+        - StaticText "just now"
+        - StaticText "provider_registered"
+        - StaticText "request_routed"
+        - StaticText "response_received"
+        - StaticText "provider_slashed"
+        - StaticText "leaderboard_update"
+    - generic
+      - StaticText "Web3 Integration"
+      - paragraph
+        - StaticText "Wallet · Contracts · Events · Gas Tracker"
+      - StaticText "Base Mainnet"
+      - tablist [ref=e86] focusable [tabindex]
+        - tab "Wallets" [selected, ref=e313]
+          - StaticText "Wallets"
+        - tab "Contracts" [ref=e314]
+          - StaticText "Contracts"
+        - tab "Events" [ref=e315]
+          - StaticText "Events"
+        - tab "Gas Tracker" [ref=e316]
+          - StaticText "Gas Tracker"
+      - tabpanel "Wallets" [ref=e87] focusable [tabindex]
+        - StaticText "Connected"
+        - StaticText " ("
+        - StaticText "1"
+        - StaticText ")"
+        - StaticText "Available Wallets"
+        - StaticText " ("
+        - StaticText "4"
+        - StaticText ")"
+        - StaticText "MetaMask"
+        - StaticText "Connected"
+        - code
+          - StaticText "0x7a3f...b2c1"
+        - button "Copy" [ref=e317]
+        - button "Disconnect" [ref=e318]
+        - paragraph
+          - StaticText "Chain"
+        - paragraph
+          - StaticText "Base"
+        - paragraph
+          - StaticText "Chain ID: 8453"
+        - paragraph
+          - StaticText "Balance"
+        - paragraph
+          - StaticText "1,250.45 AFC"
+        - paragraph
+          - StaticText "$3,062.85"
+        - paragraph
+          - StaticText "Last Connected"
+        - paragraph
+          - StaticText "30"
+        - paragraph
+          - StaticText "Status"
+        - paragraph
+          - StaticText "Online"
+        - heading "Available Wallets" [level=4, ref=e319]
+        - generic
+          - StaticText "WalletConnect"
+          - StaticText "Available"
+        - button "Connect" [ref=e320]
+        - generic
+          - StaticText "Coinbase Wallet"
+          - StaticText "Available"
+        - button "Connect" [ref=e321]
+        - generic
+          - StaticText "Rainbow"
+          - StaticText "Available"
+        - button "Connect" [ref=e322]
+        - generic
+          - StaticText "Ledger"
+          - StaticText "Available"
+        - button "Connect" [ref=e323]
+        - heading "Wagmi Config" [level=4, ref=e324]
+        - paragraph
+          - StaticText "Supported Chains"
+        - StaticText "Base"
+        - StaticText " ("
+        - StaticText "8453"
+        - StaticText ")"
+        - StaticText "Base Sepolia"
+        - StaticText " ("
+        - StaticText "84532"
+        - StaticText ")"
+        - StaticText "Ethereum"
+        - StaticText " ("
+        - StaticText "1"
+        - StaticText ")"
+        - StaticText "Arbitrum"
+        - StaticText " ("
+        - StaticText "42161"
+        - StaticText ")"
+        - StaticText "Connectors"
+        - StaticText "injected, walletConnect, coinbaseWallet"
+        - StaticText "Auto Connect"
+        - StaticText "Enabled"
+        - StaticText "Polling Interval"
+        - StaticText "4.0"
+        - StaticText "s"
+      - StaticText "Web3 Wallet"
+      - paragraph
+        - StaticText "Wallet · Contracts · Transactions · Gas"
+      - StaticText "Base Mainnet"
+      - tablist [ref=e88] focusable [tabindex]
+        - tab "Wallet" [selected, ref=e325]
+          - StaticText "Wallet"
+        - tab "Contracts" [ref=e326]
+          - StaticText "Contracts"
+        - tab "Transactions" [ref=e327]
+          - StaticText "Transactions"
+        - tab "Gas" [ref=e328]
+          - StaticText "Gas"
+      - tabpanel "Wallet" [ref=e89] focusable [tabindex]
+        - paragraph
+          - StaticText "Connection Status"
+        - StaticText "Not Connected"
+        - paragraph
+          - StaticText "Network"
+        - StaticText "Base"
+        - paragraph
+          - StaticText "ID: 8453"
+        - paragraph
+          - StaticText "Balance"
+        - StaticText "--"
+        - paragraph
+          - StaticText "--"
+        - paragraph
+          - StaticText "Block Height"
+        - StaticText "#"
+        - StaticText "48,097,960"
+        - paragraph
+          - StaticText "Gas: 0.006 Gwei"
+        - StaticText "MetaMask"
+        - StaticText "Connected"
+        - code
+          - StaticText "0x7a3f...b2c1"
+        - button "Copy" [ref=e329]
+        - button "Disconnect" [ref=e330]
+        - paragraph
+          - StaticText "Chain"
+        - paragraph
+          - StaticText "Base"
+        - paragraph
+          - StaticText "Chain ID: 8453"
+        - paragraph
+          - StaticText "Balance"
+        - paragraph
+          - StaticText "1,250.45 AFC"
+        - paragraph
+          - StaticText "$3,062.85"
+        - paragraph
+          - StaticText "Last Connected"
+        - paragraph
+          - StaticText "30 min ago"
+        - paragraph
+          - StaticText "Status"
+        - paragraph
+          - StaticText "Online"
+        - heading "Available Wallets" [level=4, ref=e331]
+        - generic
+          - StaticText "WalletConnect"
+          - StaticText "Available"
+        - button "Connect" [ref=e332]
+        - generic
+          - StaticText "Coinbase Wallet"
+          - StaticText "Available"
+        - button "Connect" [ref=e333]
+        - generic
+          - StaticText "Rainbow"
+          - StaticText "Available"
+        - button "Connect" [ref=e334]
+        - generic
+          - StaticText "Ledger"
+          - StaticText "Available"
+        - button "Connect" [ref=e335]
+        - heading "Wagmi Config" [level=4, ref=e336]
+        - paragraph
+          - StaticText "Supported Chains"
+        - StaticText "Base"
+        - StaticText " ("
+        - StaticText "8453"
+        - StaticText ")"
+        - StaticText "Base Sepolia"
+        - StaticText " ("
+        - StaticText "84532"
+        - StaticText ")"
+        - StaticText "Ethereum"
+        - StaticText " ("
+        - StaticText "1"
+        - StaticText ")"
+        - StaticText "Arbitrum"
+        - StaticText " ("
+        - StaticText "42161"
+        - StaticText ")"
+        - StaticText "Connectors"
+        - StaticText "injected, walletConnect, coinbaseWallet"
+        - StaticText "Auto Connect"
+        - StaticText "Enabled"
+        - StaticText "Polling Interval"
+        - StaticText "4.0"
+        - StaticText "s"
+    - StaticText "Data Infrastructure"
+    - paragraph
+      - StaticText "Subgraph · IPFS · State Sync · Analytics"
+    - StaticText "Running"
+    - tablist [ref=e90] focusable [tabindex]
+      - tab "The Graph Subgraph" [selected, ref=e337]
+        - StaticText "The Graph"
+        - StaticText "Subgraph"
+      - tab "IPFS Storage" [ref=e338]
+        - StaticText "IPFS"
+        - StaticText "Storage"
+      - tab "State Sync" [ref=e339]
+        - StaticText "State"
+        - StaticText "Sync"
+      - tab "Data Pipeline" [ref=e340]
+        - StaticText "Data"
+        - StaticText "Pipeline"
+    - tabpanel "The Graph Subgraph" [ref=e91] focusable [tabindex]
+      - heading "afc-avatar-protocol" [level=4, ref=e341]
+      - StaticText "base-mainnet"
+      - paragraph
+        - StaticText "Synced Block 21,456,789/21,456,789"
+      - paragraph
+        - StaticText "SYNC LAG"
+      - paragraph
+        - StaticText "0 blocks"
+      - StaticText "synced"
+      - heading "Entity Count" [level=4, ref=e342]
+      - paragraph
+        - StaticText "Avatars"
+      - paragraph
+        - StaticText "12.4K"
+      - paragraph
+        - StaticText "Skills"
+      - paragraph
+        - StaticText "48"
+      - paragraph
+        - StaticText "Revenue Splits"
+      - paragraph
+        - StaticText "89.2K"
+      - paragraph
+        - StaticText "Delegations"
+      - paragraph
+        - StaticText "3.5K"
+      - paragraph
+        - StaticText "Circuit Events"
+      - paragraph
+        - StaticText "890"
+      - paragraph
+        - StaticText "Resonance Updates"
+      - paragraph
+        - StaticText "156.0K"
+      - heading "Event Handlers" [level=4, ref=e343]
+      - table
+        - rowgroup
+          - row
+            - columnheader "Event Signature" [ref=e477]
+            - columnheader "Entity" [ref=e478]
+            - columnheader "Field" [ref=e479]
+            - columnheader "Indexed" [ref=e480]
+        - row
+          - cell "AvatarCreated(address,uint256,bytes32)" [ref=e443]
+          - cell "Avatar" [ref=e444]
+          - cell "soulId, owner, cognitionRoot, createdAt" [ref=e445]
+          - cell "Yes" [ref=e446]
+        - row
+          - cell "SplitExecuted(uint256,uint256,uint256,uint256)" [ref=e447]
+          - cell "RevenueSplit" [ref=e448]
+          - cell "amount, humanShare, avatarShare, protocolShare, timestamp" [ref=e449]
+          - cell "Yes" [ref=e450]
+        - row
+          - cell "CircuitStateChanged(uint256,uint8,uint8)" [ref=e451]
+          - cell "CircuitEvent" [ref=e452]
+          - cell "soulId, oldState, newState, timestamp" [ref=e453]
+          - cell "Yes" [ref=e454]
+        - row
+          - cell "DelegationCreated(address,address,string,uint256)" [ref=e455]
+          - cell "Delegation" [ref=e456]
+          - cell "delegator, delegatee, domain, weight, timestamp" [ref=e457]
+          - cell "Yes" [ref=e458]
+        - row
+          - cell "ResonanceUpdated(uint256,uint256)" [ref=e459]
+          - cell "ResonanceUpdate" [ref=e460]
+          - cell "soulId, score, timestamp" [ref=e461]
+          - cell "Yes" [ref=e462]
+        - row
+          - cell "SkillUnlocked(uint256,uint256)" [ref=e463]
+          - cell "SkillUnlock" [ref=e464]
+          - cell "soulId, skillId, timestamp" [ref=e465]
+          - cell "No" [ref=e466]
+      - heading "GraphQL Query Examples" [level=4, ref=e344]
+      - StaticText "dataInfra.获取分身列表"
+      - button "Copy" [ref=e345]
+      - StaticText "{ avatars(first: 10, orderBy: createdAt, orderDirection: desc) { soulId owner resonanceScore } }"
+      - StaticText "dataInfra.查询收益分账"
+      - button "Copy" [ref=e346]
+      - StaticText "{ revenueSplits(where: { soulId: \"1\" }, first: 20) { amount humanShare timestamp } }"
+      - StaticText "dataInfra.熔断事件历史"
+      - button "Copy" [ref=e347]
+      - StaticText "{ circuitEvents(where: { newState: 2 }) { soulId newState timestamp } }"
+      - button "Query Subgraph" [ref=e348]
+    - StaticText "Payment History"
+    - button "Refresh" [ref=e92]
+    - generic
+      - StaticText "$100.08"
+    - StaticText "Total"
+    - StaticText "1"
+    - StaticText "Confirmed"
+    - StaticText "3"
+    - StaticText "Pending"
+    - StaticText "0"
+    - StaticText "Failed"
+    - button "All" [ref=e93]
+    - button "Confirmed" [ref=e94]
+    - button "Pending" [ref=e95]
+    - button "Failed" [ref=e96]
+    - generic
+      - StaticText "Enterprise Plan"
+      - StaticText "05/26 18:05"
+      - generic
+      - StaticText "Pending"
+      - StaticText "Test Micro"
+      - StaticText "05/26 18:04"
+      - generic
+      - StaticText "Pending"
+      - StaticText "GPT-4o Text Gen"
+      - StaticText "05/26 17:07"
+      - generic
+      - StaticText "Confirmed"
+      - StaticText "GPT-4o Text Generation"
+      - StaticText "05/26 17:06"
+      - generic
+      - StaticText "Pending"
+    - StaticText "Subscription Management"
+    - button "Refresh" [ref=e97]
+    - generic
+      - heading "Starter" [level=3, ref=e349]
+      - StaticText "$"
+      - StaticText "9.99"
+      - StaticText "/"
+      - StaticText "mo"
+      - list
+      - button "Upgrade" [ref=e350]
+    - generic
+      - StaticText "Most Popular"
+      - heading "Pro" [level=3, ref=e351]
+      - StaticText "$"
+      - StaticText "29.99"
+      - StaticText "/"
+      - StaticText "mo"
+      - list
+      - button "Upgrade" [ref=e352]
+    - generic
+      - heading "Enterprise" [level=3, ref=e353]
+      - StaticText "$"
+      - StaticText "99.99"
+      - StaticText "/"
+      - StaticText "mo"
+      - list
+      - button "Upgrade" [ref=e354]
+    - generic
+      - StaticText "API Usage"
+      - button "Refresh" [ref=e98]
+      - StaticText "Billing Period"
+      - StaticText ":"
+      - StaticText "Jul 1"
+      - StaticText " – "
+      - StaticText "Jul 31, 2026"
+      - generic
+      - StaticText "Unbilled"
+      - generic
+      - StaticText "Projected Monthly"
+      - StaticText "0"
+      - StaticText "Total Calls"
+      - StaticText "No usage data available"
+      - StaticText "Invoices"
+      - button "Refresh" [ref=e99]
+      - button "Generate" [ref=e100]
+      - StaticText "Filter"
+      - StaticText ":"
+      - combobox [expanded=false, ref=e101]: All
+        - generic [ref=e355] clickable [onclick]
+    - button [ref=e102]
+    - heading "REVENUE OVERVIEW" [level=3, ref=e103]
+    - heading "PAYMENT METHOD BREAKDOWN" [level=3, ref=e104]
+    - heading "CONVERSION FUNNEL" [level=3, ref=e105]
+    - progressbar: 100
+    - progressbar: 20
+    - progressbar: 0
+    - heading "TOP SERVICES BY REVENUE" [level=3, ref=e106]
+    - heading "RECENT ACTIVITY" [level=3, ref=e107]
+  - region "Notifications (F8)" [ref=e1]
+  - button "Open Next.js Dev Tools" [expanded=false, ref=e374]
+  - button "Open issues overlay" [ref=e375]
+  - button "Collapse issues badge" [ref=e376]

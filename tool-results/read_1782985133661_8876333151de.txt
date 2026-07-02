@@ -1,0 +1,748 @@
+     1→'use client';
+     2→
+     3→import { useState, Suspense, useEffect, useCallback } from 'react';
+     4→import dynamic from 'next/dynamic';
+     5→import { motion } from 'framer-motion';
+     6→import {
+     7→  Brain,
+     8→  Wallet,
+     9→  Activity,
+    10→  Shield,
+    11→  Sparkles,
+    12→  Clock,
+    13→  DollarSign,
+    14→  Users,
+    15→  Menu,
+    16→  X,
+    17→  Zap,
+    18→  Scale,
+    19→  FlaskConical,
+    20→  Gauge,
+    21→  Globe,
+    22→  Radio,
+    23→  Flag,
+    24→  Link2,
+    25→  Code2,
+    26→  Vote,
+    27→  Puzzle,
+    28→  FileCode,
+    29→  Cog,
+    30→  Database,
+    31→  ChevronsLeft,
+    32→  ChevronsRight,
+    33→  Download,
+    34→  Receipt,
+    35→  BarChart3,
+    36→  Crown,
+    37→  FileText,
+    38→  BookOpen,
+    39→} from 'lucide-react';
+    40→import { useSearchParams } from 'next/navigation';
+    41→import { useToast } from '@/hooks/use-toast';
+    42→import { cn } from '@/lib/utils';
+    43→import type { DashboardState } from '@/lib/types';
+    44→import {
+    45→  MOCK_AVATAR,
+    46→  MOCK_AVATAR_SKILLS,
+    47→  MOCK_REVENUE_SUMMARY,
+    48→  MOCK_REVENUES,
+    49→  MOCK_DELEGATIONS,
+    50→  MOCK_TIMELINE,
+    51→  MOCK_RESONANCE_HISTORY,
+    52→} from '@/lib/mock-data';
+    53→import { useDashboardStore } from '@/stores/dashboard-store';
+    54→import { useWeb3Store } from '@/stores/web3-store';
+    55→import { useI18n } from '@/hooks/use-i18n';
+    56→import { useDashboardData } from '@/hooks/use-dashboard-data';
+    57→import { useEngineStatus } from '@/hooks/use-engine-status';
+    58→import { LanguageSwitcher } from '@/components/ui/language-switcher';
+    59→import { LazySection } from '@/components/ui/lazy-section';
+    60→
+    61→// ── Dynamic imports for heavy dashboard components ────────────
+    62→const CognitiveCard = dynamic(() => import('@/components/dashboard/cognitive-card'), { ssr: false });
+    63→const SplitDashboard = dynamic(() => import('@/components/dashboard/split-dashboard'), { ssr: false });
+    64→const ResonanceWave = dynamic(() => import('@/components/dashboard/resonance-wave'), { ssr: false });
+    65→const CircuitPanel = dynamic(() => import('@/components/dashboard/circuit-panel'), { ssr: false });
+    66→const IFDDelegation = dynamic(() => import('@/components/dashboard/ifd-delegation'), { ssr: false });
+    67→const SkillVault = dynamic(() => import('@/components/dashboard/skill-vault'), { ssr: false });
+    68→const CognitiveTimeline = dynamic(() => import('@/components/dashboard/cognitive-timeline'), { ssr: false });
+    69→const X402Payment = dynamic(() => import('@/components/dashboard/x402-payment'), { ssr: false });
+    70→const AvatarMarketplace = dynamic(() => import('@/components/dashboard/avatar-marketplace'), { ssr: false });
+    71→const NotificationCenter = dynamic(() => import('@/components/dashboard/notification-center'), { ssr: false });
+    72→const CompliancePanel = dynamic(() => import('@/components/dashboard/compliance-panel'), { ssr: false });
+    73→const SecurityAudit = dynamic(() => import('@/components/dashboard/security-audit'), { ssr: false });
+    74→const LPLiquidity = dynamic(() => import('@/components/dashboard/lp-liquidity'), { ssr: false });
+    75→const ContractSimulation = dynamic(() => import('@/components/dashboard/contract-simulation'), { ssr: false });
+    76→const PerformanceDashboard = dynamic(() => import('@/components/dashboard/performance-dashboard'), { ssr: false });
+    77→const DeploymentCenter = dynamic(() => import('@/components/dashboard/deployment-center'), { ssr: false });
+    78→const MonitoringCenter = dynamic(() => import('@/components/dashboard/monitoring-center'), { ssr: false });
+    79→const FeatureFlags = dynamic(() => import('@/components/dashboard/feature-flags'), { ssr: false });
+    80→const MultichainDeploy = dynamic(() => import('@/components/dashboard/multichain-deploy'), { ssr: false });
+    81→const SdkPlatform = dynamic(() => import('@/components/dashboard/sdk-platform'), { ssr: false });
+    82→const DaoGovernance = dynamic(() => import('@/components/dashboard/dao-governance'), { ssr: false });
+    83→const EcosystemHub = dynamic(() => import('@/components/dashboard/ecosystem-hub'), { ssr: false });
+    84→const ContractsArch = dynamic(() => import('@/components/dashboard/contracts-arch'), { ssr: false });
+    85→const EngineArch = dynamic(() => import('@/components/dashboard/engine-arch'), { ssr: false });
+    86→const Web3Integration = dynamic(() => import('@/components/dashboard/web3-integration'), { ssr: false });
+    87→const DataInfra = dynamic(() => import('@/components/dashboard/data-infra'), { ssr: false });
+    88→const EngineStatusDashboard = dynamic(() => import('@/components/dashboard/engine-status'), { ssr: false });
+    89→const Web3Wallet = dynamic(() => import('@/components/dashboard/web3-wallet'), { ssr: false });
+    90→const PaymentHistory = dynamic(() => import('@/components/dashboard/payment-history'), { ssr: false });
+    91→const SubscriptionPanel = dynamic(() => import('@/components/dashboard/subscription-panel'), { ssr: false });
+    92→const InvoiceList = dynamic(() => import('@/components/dashboard/invoice-list'), { ssr: false });
+    93→const MeteredUsage = dynamic(() => import('@/components/dashboard/metered-usage'), { ssr: false });
+    94→const PaymentAnalytics = dynamic(() => import('@/components/dashboard/payment-analytics'), { ssr: false });
+    95→
+    96→// ── Navigation Items ──────────────────────────────────────────
+    97→const NAV_ITEMS = [
+    98→  { id: 'overview', navKey: 'nav.overview', icon: Brain },
+    99→  { id: 'revenue', navKey: 'nav.split', icon: DollarSign },
+   100→  { id: 'resonance', navKey: 'nav.resonance', icon: Activity },
+   101→  { id: 'skills', navKey: 'nav.skills', icon: Sparkles },
+   102→  { id: 'marketplace', navKey: 'nav.marketplace', icon: Users },
+   103→  { id: 'liquidity', navKey: 'nav.liquidity', icon: DollarSign },
+   104→  { id: 'simulation', navKey: 'nav.simulation', icon: FlaskConical },
+   105→  { id: 'governance', navKey: 'nav.governance', icon: Users },
+   106→  { id: 'timeline', navKey: 'nav.timeline', icon: Clock },
+   107→  { id: 'security', navKey: 'nav.security', icon: Shield },
+   108→  { id: 'compliance', navKey: 'nav.compliance', icon: Scale },
+   109→  { id: 'performance', navKey: 'nav.performance', icon: Gauge },
+   110→  { id: 'deployment', navKey: 'nav.deployment', icon: Globe },
+   111→  { id: 'monitoring', navKey: 'nav.monitoring', icon: Radio },
+   112→  { id: 'flags', navKey: 'nav.featureFlags', icon: Flag },
+   113→  { id: 'multichain', navKey: 'nav.multichain', icon: Link2 },
+   114→  { id: 'sdk', navKey: 'nav.sdk', icon: Code2 },
+   115→  { id: 'dao', navKey: 'nav.dao', icon: Vote },
+   116→  { id: 'ecosystem', navKey: 'nav.ecosystem', icon: Puzzle },
+   117→  { id: 'contracts', navKey: 'nav.contracts', icon: FileCode },
+   118→  { id: 'engine', navKey: 'nav.engine', icon: Cog },
+   119→  { id: 'web3', navKey: 'nav.web3', icon: Wallet },
+   120→  { id: 'data', navKey: 'nav.data', icon: Database },
+   121→  { id: 'payment-history', navKey: 'nav.paymentHistory', icon: DollarSign },
+   122→  { id: 'subscription', navKey: 'nav.subscription', icon: Crown },
+   123→  { id: 'usage', navKey: 'nav.usage', icon: BarChart3 },
+   124→  { id: 'invoices', navKey: 'nav.invoices', icon: Receipt },
+   125→];
+   126→
+   127→// ── Mobile Bottom Nav Items ───────────────────────────────────
+   128→const MOBILE_NAV = [
+   129→  { id: 'overview', navKey: 'nav.overview', icon: Brain },
+   130→  { id: 'revenue', navKey: 'nav.split', icon: DollarSign },
+   131→  { id: 'marketplace', navKey: 'nav.marketplace', icon: Users },
+   132→  { id: 'security', navKey: 'nav.security', icon: Shield },
+   133→];
+   134→
+   135→const INITIAL_DATA: DashboardState = {
+   136→  avatar: MOCK_AVATAR,
+   137→  skills: MOCK_AVATAR_SKILLS,
+   138→  revenueSummary: MOCK_REVENUE_SUMMARY,
+   139→  recentRevenues: MOCK_REVENUES,
+   140→  delegations: MOCK_DELEGATIONS,
+   141→  timeline: MOCK_TIMELINE,
+   142→  resonanceHistory: MOCK_RESONANCE_HISTORY,
+   143→};
+   144→
+   145→// ── Maps nav section IDs to their LazySection row ID ──────────
+   146→const SECTION_TO_ROW: Record<string, string> = {
+   147→  overview: 'overview',
+   148→  revenue: 'overview',
+   149→  resonance: 'resonance',
+   150→  skills: 'skills',
+   151→  governance: 'skills',
+   152→  marketplace: 'marketplace',
+   153→  liquidity: 'liquidity',
+   154→  simulation: 'simulation',
+   155→  timeline: 'timeline',
+   156→  security: 'security',
+   157→  compliance: 'security',
+   158→  performance: 'performance',
+   159→  deployment: 'deployment',
+   160→  monitoring: 'deployment',
+   161→  flags: 'flags',
+   162→  multichain: 'multichain',
+   163→  sdk: 'sdk',
+   164→  dao: 'sdk',
+   165→  ecosystem: 'ecosystem',
+   166→  contracts: 'contracts',
+   167→  engine: 'engine',
+   168→  web3: 'web3',
+   169→  data: 'data',
+   170→  'payment-history': 'payment-history',
+   171→  subscription: 'subscription',
+   172→  usage: 'usage',
+   173→  invoices: 'usage',
+   174→};
+   175→
+   176→// ── Web3 Connect Button (using Web3Store) ────────────────────
+   177→function Web3ConnectButton() {
+   178→  const { address, isConnected } = useWeb3Store();
+   179→  const { t } = useI18n();
+   180→  const truncated = address
+   181→    ? `${address.slice(0, 6)}...${address.slice(-4)}`
+   182→    : t('web3.connect');
+   183→  const truncatedShort = address
+   184→    ? `${address.slice(0, 6)}...`
+   185→    : t('web3.connect');
+   186→
+   187→  return (
+   188→    <button
+   189→      aria-label={t('web3.connectWallet')}
+   190→      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-violet-500/50 transition-colors text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+   191→    >
+   192→      <Wallet className="w-3.5 h-3.5 text-violet-400" />
+   193→      {isConnected ? (
+   194→        <>
+   195→          <span className="hidden sm:inline text-slate-300 font-mono">{truncated}</span>
+   196→          <span className="sm:hidden text-slate-300 font-mono">{truncatedShort}</span>
+   197→        </>
+   198→      ) : (
+   199→        <span className="text-slate-300">{truncated}</span>
+   200→      )}
+   201→    </button>
+   202→  );
+   203→}
+   204→
+   205→// ── Stripe Return URL Handler (needs Suspense for useSearchParams) ──
+   206→function StripeReturnHandler() {
+   207→  const searchParams = useSearchParams();
+   208→  const { toast } = useToast();
+   209→  const { t } = useI18n();
+   210→
+   211→  const handleStripeReturn = useCallback(() => {
+   212→    const successId = searchParams.get('stripe_success');
+   213→    const cancelId = searchParams.get('stripe_cancel');
+   214→
+   215→    if (successId) {
+   216→      // Fetch payment status and show success toast
+   217→      fetch(`/api/payment/${successId}`)
+   218→        .then((res) => res.ok ? res.json() : null)
+   219→        .then((payment) => {
+   220→          if (payment) {
+   221→            toast({
+   222→              title: t('dashboard.paymentSuccess'),
+   223→              description: `${payment.serviceName || 'Payment'} — $${Number(payment.amount).toFixed(2)} ${payment.currency || 'USD'}`,
+   224→            });
+   225→          } else {
+   226→            toast({
+   227→              title: t('dashboard.paymentSuccess'),
+   228→              description: t('dashboard.paymentSuccessDesc'),
+   229→            });
+   230→          }
+   231→        })
+   232→        .catch(() => {
+   233→          toast({
+   234→            title: t('dashboard.paymentSuccess'),
+   235→            description: t('dashboard.paymentSuccessDesc'),
+   236→          });
+   237→        });
+   238→
+   239→      // Clean URL params
+   240→      window.history.replaceState({}, '', window.location.pathname);
+   241→    } else if (cancelId) {
+   242→      toast({
+   243→        title: t('dashboard.paymentCancelled'),
+   244→        description: t('dashboard.paymentCancelledDesc'),
+   245→        variant: 'destructive',
+   246→      });
+   247→
+   248→      // Clean URL params
+   249→      window.history.replaceState({}, '', window.location.pathname);
+   250→    }
+   251→  }, [searchParams, toast, t]);
+   252→
+   253→  useEffect(() => {
+   254→    handleStripeReturn();
+   255→  }, [handleStripeReturn]);
+   256→
+   257→  return null; // This component renders nothing
+   258→}
+   259→
+   260→export default function Home() {
+   261→  const { activeSection, setActiveSection, sidebarCollapsed, toggleSidebar } = useDashboardStore();
+   262→  const { t } = useI18n();
+   263→  const {
+   264→    avatar, skills, revenueSummary, recentRevenues,
+   265→    delegations, timeline, resonanceHistory, isLoading,
+   266→  } = useDashboardData();
+   267→  const engineStatus = useEngineStatus();
+   268→  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+   269→  const [paymentOpen, setPaymentOpen] = useState(false);
+   270→  const [paymentService, setPaymentService] = useState('');
+   271→  const [paymentAmount, setPaymentAmount] = useState(0.02);
+   272→  const [downloading, setDownloading] = useState(false);
+   273→
+   274→  const dashboardData: DashboardState = (avatar && revenueSummary)
+   275→    ? { avatar, skills, revenueSummary, recentRevenues, delegations, timeline, resonanceHistory }
+   276→    : INITIAL_DATA;
+   277→
+   278→  if (isLoading && !avatar) {
+   279→    return (
+   280→      <div className="min-h-screen flex items-center justify-center bg-[#0F172A]">
+   281→        <motion.div
+   282→          initial={{ opacity: 0, scale: 0.8 }}
+   283→          animate={{ opacity: 1, scale: 1 }}
+   284→          className="flex flex-col items-center gap-4"
+   285→        >
+   286→          <Brain className="w-12 h-12 text-violet-400 animate-pulse" />
+   287→          <p className="text-slate-400 text-sm">{t('dashboard.loadingSystem')}</p>
+   288→        </motion.div>
+   289→      </div>
+   290→    );
+   291→  }
+   292→
+   293→  const scrollTo = (id: string) => {
+   294→    setActiveSection(id);
+   295→    setMobileMenuOpen(false);
+   296→    const rowId = SECTION_TO_ROW[id] || id;
+   297→    const el = document.getElementById(`section-${rowId}`);
+   298→    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+   299→  };
+   300→
+   301→  return (
+   302→    <div className="min-h-screen bg-[#0F172A] text-slate-50 flex flex-col">
+   303→      {/* ── Header ──────────────────────────────────── */}
+   304→      <header className="sticky top-0 z-50 bg-[#0F172A]/80 backdrop-blur-xl border-b border-slate-800/50">
+   305→        <div className="max-w-[1600px] mx-auto px-4 h-14 flex items-center justify-between">
+   306→          <div className="flex items-center gap-3">
+   307→            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center">
+   308→              <Brain className="w-4 h-4 text-white" />
+   309→            </div>
+   310→            <span className="font-semibold text-sm tracking-tight hidden sm:inline">
+   311→              {t('dashboard.title')}
+   312→            </span>
+   313→            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">
+   314→              {t('dashboard.phase')} 6
+   315→            </span>
+   316→          </div>
+   317→
+   318→          <div className="flex items-center gap-2">
+   319→            {/* Quick Resonance Indicator */}
+   320→            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+   321→              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+   322→              <span className="text-xs text-emerald-300 font-medium">{dashboardData.avatar.resonanceScore}</span>
+   323→            </div>
+   324→
+   325→            {/* Service Health Indicator */}
+   326→            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+   327→              <div className={cn(
+   328→                "w-1.5 h-1.5 rounded-full",
+   329→                engineStatus.allConnected ? "bg-emerald-400 animate-pulse" : "bg-amber-400 animate-pulse"
+   330→              )} />
+   331→              <span className="text-xs text-slate-300 font-mono">{engineStatus.connectedCount}/{engineStatus.totalServices}</span>
+   332→            </div>
+   333→
+   334→            {/* Language Switcher */}
+   335→            <LanguageSwitcher />
+   336→
+   337→            {/* Wallet Connect */}
+   338→            <Web3ConnectButton />
+   339→
+   340→            {/* Download: System Report */}
+   341→            <a
+   342→              href="/api/docs/download-report"
+   343→              download="BB-PROTOCOL-SYSTEM-REPORT.md"
+   344→              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-violet-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium"
+   345→              title={t('dashboard.ratingReportTitle')}
+   346→            >
+   347→              <FileText className="w-3.5 h-3.5 text-violet-400" />
+   348→              <span className="hidden lg:inline text-slate-300">{t('dashboard.ratingReport')}</span>
+   349→            </a>
+   350→
+   351→            {/* Download: Deployment Guide */}
+   352→            <a
+   353→              href="/api/docs/download-deployment"
+   354→              download="BB-PROTOCOL-DEPLOYMENT-GUIDE.md"
+   355→              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-cyan-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium"
+   356→              title={t('dashboard.deploymentGuideTitle')}
+   357→            >
+   358→              <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+   359→              <span className="hidden lg:inline text-slate-300">{t('dashboard.deploymentGuide')}</span>
+   360→            </a>
+   361→
+   362→            {/* Download Source Code */}
+   363→            <button
+   364→              aria-label="Download source code"
+   365→              onClick={() => {
+   366→                if (downloading) return;
+   367→                setDownloading(true);
+   368→                const a = document.createElement('a');
+   369→                a.href = '/api/download';
+   370→                a.download = 'bb-protocol-source.tar.gz';
+   371→                document.body.appendChild(a);
+   372→                a.click();
+   373→                document.body.removeChild(a);
+   374→                toast({
+   375→                  title: t('dashboard.downloadStarted'),
+   376→                  description: t('dashboard.downloadingSource'),
+   377→                });
+   378→                setTimeout(() => setDownloading(false), 3000);
+   379→              }}
+   380→              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-emerald-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+   381→            >
+   382→              <Download className={cn('w-3.5 h-3.5 text-emerald-400', downloading && 'animate-bounce')} />
+   383→              <span className="hidden sm:inline text-slate-300">{downloading ? t('dashboard.downloading') : t('dashboard.sourceCode')}</span>
+   384→            </button>
+   385→
+   386→            {/* Notification Center */}
+   387→            <NotificationCenter />
+   388→
+   389→            {/* x402 Quick Pay */}
+   390→            <button
+   391→              aria-label="Quick payment"
+   392→              onClick={() => {
+   393→                setPaymentService(t('dashboard.defaultService'));
+   394→                setPaymentAmount(0.02);
+   395→                setPaymentOpen(true);
+   396→              }}
+   397→              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 transition-all text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+   398→            >
+   399→              <Zap className="w-3.5 h-3.5" />
+   400→              <span className="hidden sm:inline">{t('nav.payment')}</span>
+   401→            </button>
+   402→
+   403→            {/* Mobile Menu Toggle */}
+   404→            <button
+   405→              aria-label="Toggle menu"
+   406→              className="lg:hidden p-1.5 rounded-lg hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+   407→              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+   408→            >
+   409→              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+   410→            </button>
+   411→          </div>
+   412→        </div>
+   413→      </header>
+   414→
+   415→      {/* ── Main Content ────────────────────────────── */}
+   416→      <div className="flex-1 flex max-w-[1600px] mx-auto w-full">
+   417→        {/* ── Desktop Sidebar ─────────────────────── */}
+   418→        <aside className={cn(
+   419→          "hidden lg:flex flex-col shrink-0 border-r border-slate-800/50 py-6 sticky top-14 h-[calc(100vh-3.5rem)] transition-all duration-300",
+   420→          sidebarCollapsed ? "w-[60px] px-1.5" : "w-[220px] px-3"
+   421→        )}>
+   422→          <nav className="flex flex-col gap-1">
+   423→            {NAV_ITEMS.map((item) => (
+   424→              <button
+   425→                key={item.id}
+   426→                aria-label={t(item.navKey)}
+   427→                onClick={() => scrollTo(item.id)}
+   428→                className={cn(
+   429→                  'flex items-center gap-2.5 rounded-lg text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+   430→                  sidebarCollapsed ? 'px-2 py-2 justify-center' : 'px-3 py-2',
+   431→                  activeSection === item.id
+   432→                    ? 'bg-violet-500/15 text-violet-300 font-medium'
+   433→                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+   434→                )}
+   435→                title={sidebarCollapsed ? t(item.navKey) : undefined}
+   436→              >
+   437→                <item.icon className={cn(
+   438→                  'w-4 h-4 shrink-0',
+   439→                  activeSection === item.id ? 'text-violet-400' : 'text-slate-500'
+   440→                )} />
+   441→                {!sidebarCollapsed && t(item.navKey)}
+   442→              </button>
+   443→            ))}
+   444→          </nav>
+   445→
+   446→          {/* Collapse toggle button */}
+   447→          <button
+   448→            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+   449→            onClick={toggleSidebar}
+   450→            className="mt-2 mx-auto flex items-center justify-center w-7 h-7 rounded-md bg-slate-800/60 border border-slate-700/50 hover:bg-slate-700/60 hover:border-slate-600/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+   451→          >
+   452→            {sidebarCollapsed ? (
+   453→              <ChevronsRight className="w-3.5 h-3.5 text-slate-400" />
+   454→            ) : (
+   455→              <ChevronsLeft className="w-3.5 h-3.5 text-slate-400" />
+   456→            )}
+   457→          </button>
+   458→
+   459→          {/* Tier Badge */}
+   460→          {!sidebarCollapsed && (
+   461→            <div className="mt-auto p-3 rounded-xl bg-gradient-to-br from-violet-500/10 to-blue-500/10 border border-violet-500/20">
+   462→              <div className="text-[10px] text-violet-300/60 uppercase tracking-widest mb-1">{t('dashboard.currentPlan')}</div>
+   463→              <div className="text-sm font-semibold text-violet-200">{t('dashboard.proTier')}</div>
+   464→              <div className="text-[10px] text-slate-500 mt-0.5">{t('dashboard.avatarsCount', { count: 3 })}</div>
+   465→            </div>
+   466→          )}
+   467→        </aside>
+   468→
+   469→        {/* ── Mobile Slide-out Menu ────────────────── */}
+   470→        {mobileMenuOpen && (
+   471→          <motion.div
+   472→            initial={{ opacity: 0, x: -20 }}
+   473→            animate={{ opacity: 1, x: 0 }}
+   474→            exit={{ opacity: 0, x: -20 }}
+   475→            className="fixed inset-0 z-40 lg:hidden"
+   476→          >
+   477→            <div className="absolute inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
+   478→            <div className="absolute left-0 top-0 bottom-0 w-64 bg-[#0F172A] border-r border-slate-800 p-4 pt-20">
+   479→              <nav className="flex flex-col gap-1">
+   480→                {NAV_ITEMS.map((item) => (
+   481→                  <button
+   482→                    key={item.id}
+   483→                    aria-label={t(item.navKey)}
+   484→                    onClick={() => scrollTo(item.id)}
+   485→                    className={cn(
+   486→                      'flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+   487→                      activeSection === item.id
+   488→                        ? 'bg-violet-500/15 text-violet-300 font-medium'
+   489→                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+   490→                    )}
+   491→                  >
+   492→                    <item.icon className="w-4 h-4" />
+   493→                    {t(item.navKey)}
+   494→                  </button>
+   495→                ))}
+   496→              </nav>
+   497→            </div>
+   498→          </motion.div>
+   499→        )}
+   500→
+   501→        {/* ── Dashboard Grid with Lazy Rendering ── */}
+   502→        <main className="flex-1 p-4 lg:p-6 space-y-6 pb-24 lg:pb-6 overflow-y-auto">
+   503→          {/* Row 1: Identity + Revenue — EAGER (above the fold) */}
+   504→          <LazySection id="section-overview" className="grid grid-cols-1 xl:grid-cols-2 gap-6" eager>
+   505→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   506→              <CognitiveCard avatar={dashboardData.avatar} skills={dashboardData.skills} />
+   507→            </motion.div>
+   508→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+   509→              <SplitDashboard summary={dashboardData.revenueSummary} recentRevenues={dashboardData.recentRevenues} />
+   510→            </motion.div>
+   511→          </LazySection>
+   512→
+   513→          {/* Row 2: Resonance + Circuit */}
+   514→          <LazySection id="section-resonance" className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+   515→            <motion.div className="xl:col-span-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   516→              <ResonanceWave
+   517→                data={dashboardData.resonanceHistory}
+   518→                currentScore={dashboardData.avatar.resonanceScore}
+   519→                circuitState={dashboardData.avatar.circuitState}
+   520→              />
+   521→            </motion.div>
+   522→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+   523→              <CircuitPanel avatar={dashboardData.avatar} />
+   524→            </motion.div>
+   525→          </LazySection>
+   526→
+   527→          {/* Row 3: Skills + IFD */}
+   528→          <LazySection id="section-skills" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+   529→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   530→              <SkillVault
+   531→                skills={dashboardData.skills}
+   532→                cumulativeRevenue={dashboardData.revenueSummary.totalRevenue}
+   533→                currentTier={dashboardData.avatar.tier}
+   534→              />
+   535→            </motion.div>
+   536→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+   537→              <IFDDelegation delegations={dashboardData.delegations} />
+   538→            </motion.div>
+   539→          </LazySection>
+   540→
+   541→          {/* Row 4: Marketplace (full width) */}
+   542→          <LazySection id="section-marketplace">
+   543→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   544→              <AvatarMarketplace
+   545→                onRent={(avatar: { name: string; hourlyRate: number }) => {
+   546→                  setPaymentService(`${t('dashboard.rentAvatar')} ${avatar.name}`);
+   547→                  setPaymentAmount(avatar.hourlyRate * 0.01);
+   548→                  setPaymentOpen(true);
+   549→                }}
+   550→              />
+   551→            </motion.div>
+   552→          </LazySection>
+   553→
+   554→          {/* Row 5: LP Liquidity (full width) */}
+   555→          <LazySection id="section-liquidity">
+   556→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   557→              <LPLiquidity />
+   558→            </motion.div>
+   559→          </LazySection>
+   560→
+   561→          {/* Row 6: Contract Simulation (full width) */}
+   562→          <LazySection id="section-simulation">
+   563→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   564→              <ContractSimulation />
+   565→            </motion.div>
+   566→          </LazySection>
+   567→
+   568→          {/* Row 7: Timeline (full width) */}
+   569→          <LazySection id="section-timeline">
+   570→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   571→              <CognitiveTimeline events={dashboardData.timeline} />
+   572→            </motion.div>
+   573→          </LazySection>
+   574→
+   575→          {/* Row 8: Security + Compliance */}
+   576→          <LazySection id="section-security" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+   577→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   578→              <SecurityAudit />
+   579→            </motion.div>
+   580→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+   581→              <CompliancePanel />
+   582→            </motion.div>
+   583→          </LazySection>
+   584→
+   585→          {/* Row 9: Performance Dashboard (full width) */}
+   586→          <LazySection id="section-performance">
+   587→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   588→              <PerformanceDashboard />
+   589→            </motion.div>
+   590→          </LazySection>
+   591→
+   592→          {/* Row 10: Deployment + Monitoring */}
+   593→          <LazySection id="section-deployment" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+   594→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   595→              <DeploymentCenter />
+   596→            </motion.div>
+   597→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+   598→              <MonitoringCenter />
+   599→            </motion.div>
+   600→          </LazySection>
+   601→
+   602→          {/* Row 11: Feature Flags (full width) */}
+   603→          <LazySection id="section-flags">
+   604→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   605→              <FeatureFlags />
+   606→            </motion.div>
+   607→          </LazySection>
+   608→
+   609→          {/* Row 12: Multichain Deploy (full width) */}
+   610→          <LazySection id="section-multichain">
+   611→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   612→              <MultichainDeploy />
+   613→            </motion.div>
+   614→          </LazySection>
+   615→
+   616→          {/* Row 13: SDK Platform + DAO Governance */}
+   617→          <LazySection id="section-sdk" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+   618→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   619→              <SdkPlatform />
+   620→            </motion.div>
+   621→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+   622→              <DaoGovernance />
+   623→            </motion.div>
+   624→          </LazySection>
+   625→
+   626→          {/* Row 14: Ecosystem Hub (full width) */}
+   627→          <LazySection id="section-ecosystem">
+   628→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   629→              <EcosystemHub />
+   630→            </motion.div>
+   631→          </LazySection>
+   632→
+   633→          {/* Row 15: Contracts Arch (full width) */}
+   634→          <LazySection id="section-contracts">
+   635→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   636→              <ContractsArch />
+   637→            </motion.div>
+   638→          </LazySection>
+   639→
+   640→          {/* Row 16: Engine Arch + Engine Status */}
+   641→          <LazySection id="section-engine" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+   642→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   643→              <EngineArch />
+   644→            </motion.div>
+   645→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+   646→              <EngineStatusDashboard engineStatus={engineStatus} />
+   647→            </motion.div>
+   648→          </LazySection>
+   649→
+   650→          {/* Row 17: Web3 Integration + Web3 Wallet */}
+   651→          <LazySection id="section-web3" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+   652→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   653→              <Web3Integration />
+   654→            </motion.div>
+   655→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+   656→              <Web3Wallet />
+   657→            </motion.div>
+   658→          </LazySection>
+   659→
+   660→          {/* Row 18: Data Infra (full width) */}
+   661→          <LazySection id="section-data">
+   662→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   663→              <DataInfra />
+   664→            </motion.div>
+   665→          </LazySection>
+   666→
+   667→          {/* Row 19: Payment History */}
+   668→          <LazySection id="section-payment-history">
+   669→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   670→              <PaymentHistory />
+   671→            </motion.div>
+   672→          </LazySection>
+   673→
+   674→          {/* Row 20: Subscription Panel (full width) */}
+   675→          <LazySection id="section-subscription">
+   676→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   677→              <SubscriptionPanel />
+   678→            </motion.div>
+   679→          </LazySection>
+   680→
+   681→          {/* Row 21: Metered Usage + Invoice List */}
+   682→          <LazySection id="section-usage" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+   683→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   684→              <MeteredUsage />
+   685→            </motion.div>
+   686→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+   687→              <InvoiceList />
+   688→            </motion.div>
+   689→          </LazySection>
+   690→
+   691→          {/* Row 22: Payment Analytics (full width) */}
+   692→          <LazySection id="section-analytics">
+   693→            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   694→              <PaymentAnalytics />
+   695→            </motion.div>
+   696→          </LazySection>
+   697→        </main>
+   698→      </div>
+   699→
+   700→      {/* ── Mobile Bottom Navigation ──────────────── */}
+   701→      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0F172A]/90 backdrop-blur-xl border-t border-slate-800/50 safe-area-pb">
+   702→        <div className="flex items-center justify-around h-14">
+   703→          {MOBILE_NAV.map((item) => (
+   704→            <button
+   705→              key={item.id}
+   706→              aria-label={t(item.navKey)}
+   707→              onClick={() => scrollTo(item.id)}
+   708→              className={cn(
+   709→                'flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+   710→                activeSection === item.id
+   711→                  ? 'text-violet-300'
+   712→                  : 'text-slate-500 hover:text-slate-300'
+   713→              )}
+   714→            >
+   715→              <item.icon className={cn(
+   716→                'w-5 h-5',
+   717→                activeSection === item.id && 'text-violet-400'
+   718→              )} />
+   719→              <span className="text-[10px]">{t(item.navKey)}</span>
+   720→            </button>
+   721→          ))}
+   722→        </div>
+   723→      </nav>
+   724→
+   725→      {/* ── x402 Payment Dialog ──────────────────── */}
+   726→      <X402Payment
+   727→        isOpen={paymentOpen}
+   728→        onClose={() => setPaymentOpen(false)}
+   729→        service={paymentService}
+   730→        amount={paymentAmount}
+   731→      />
+   732→
+   733→      {/* ── Stripe Return Handler (Suspense required for useSearchParams) ── */}
+   734→      <Suspense fallback={null}>
+   735→        <StripeReturnHandler />
+   736→      </Suspense>
+   737→
+   738→      {/* ── Footer ────────────────────────────────── */}
+   739→      <footer className="hidden lg:block border-t border-slate-800/50 bg-[#0F172A] mt-auto">
+   740→        <div className="max-w-[1600px] mx-auto px-6 h-10 flex items-center justify-between text-[10px] text-slate-600">
+   741→          <span>{t('dashboard.footer')}</span>
+   742→          <span>{t('dashboard.migration')} · 6 Microservices · 8 i18n · Stripe + x402</span>
+   743→        </div>
+   744→      </footer>
+   745→    </div>
+   746→  );
+   747→}
+   748→
