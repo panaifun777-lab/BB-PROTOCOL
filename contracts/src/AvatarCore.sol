@@ -189,6 +189,10 @@ contract AvatarCore is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard, IAvat
 
     // ─── ERC-721 Overrides ───────────────────────────────────────────
 
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721URIStorage) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
     function tokenURI(
         uint256 tokenId
     ) public view override(ERC721, ERC721URIStorage) returns (string memory) {

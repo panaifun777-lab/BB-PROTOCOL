@@ -125,7 +125,7 @@ contract PoUEVerifier is IPoUEVerifier, AccessControl {
             if (!_proofExists[taskIds[i]]) {
                 statuses[i] = ProofStatus.REJECTED;
             } else {
-                statuses[i] = verifyProof(taskIds[i]);
+                statuses[i] = this.verifyProof(taskIds[i]);
             }
         }
     }

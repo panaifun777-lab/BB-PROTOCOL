@@ -24,18 +24,18 @@ export const CHAIN_CONFIG = {
   },
 } as const;
 
-// ── Contract Addresses (Mock/Placeholder) ────────────────
+// ── Contract Addresses (Deployed on Base Sepolia Testnet) ──
 export const CONTRACT_ADDRESSES = {
-  avatarCore: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as Address,
-  dynamicSplitter: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512' as Address,
-  circuitGuard: '0x9fE46736679d2D9a65F0992F2272De9f3c7fa6e0' as Address,
-  skillVault: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9' as Address,
-  ifdRouter: '0xDc64a140Aa8C5D5AeB9F8a7E0F1C9b9B9b9b9b9b' as Address,
-  tokenVault: '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707' as Address,
-  eceOracle: '0x0165878A594ca255338adfa4d48449f69242Eb8F' as Address,
-  afcToken: '0xa513E6E4b8f2a923D98304ec87F64353C4D5C853' as Address,
-  governance: '0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6' as Address,
-  proxyAdmin: '0x8A791620dd6260079BF849Dc5567aDC3F2FdC318' as Address,
+  avatarCore: '0x521109f047742Cb178b6dAEb885B24BDB1A58f2E' as Address,
+  dynamicSplitter: '0x725aeb5c0e0A115a2C92ed5e0C38B3A93029f2B8' as Address,
+  circuitGuard: '0xBDEbe9ce46F2f4D75f14778537d8b23baA9f2a6B' as Address,
+  skillVault: '0x72F1de8C97fdc3AA8Ec027Abe405d10E5739ccAc' as Address,
+  ifdRouter: '0x5cA3a41138AD21D00e3C71725Fd4A3C285f92a12' as Address,
+  tokenVault: '0x79DE3DF928Dd0B98110B6D8fDE63C4F7134071C6' as Address,
+  eceOracle: '0x93bca6E51a5c597f86563aC320977427e5df669D' as Address,
+  poueVerifier: '0xfbADf35642A1A5Ec92411358ac7735cD766b9Ff6' as Address,
+  mcpRouter: '0x9923B7CB6B509991b3250f53b386c53C56abbDbF' as Address,
+  governanceToken: '0xC742381FBb85e6c7e76233a37bD90c1Ffd502536' as Address,
 } as const;
 
 export type ContractName = keyof typeof CONTRACT_ADDRESSES;
@@ -352,7 +352,66 @@ export const CONTRACT_ABIS: Record<ContractName, Abi> = {
   ifdRouter: IFD_ROUTER_ABI,
   tokenVault: TOKEN_VAULT_ABI,
   eceOracle: ECE_ORACLE_ABI,
-  afcToken: [
+  poueVerifier: [
+    {
+      type: 'function',
+      name: 'submitProof',
+      inputs: [
+        { name: 'taskId', type: 'bytes32' },
+        { name: 'proofHash', type: 'bytes32' },
+        { name: 'proofData', type: 'bytes' },
+      ],
+      outputs: [],
+      stateMutability: 'nonpayable',
+    },
+    {
+      type: 'function',
+      name: 'verifyProof',
+      inputs: [{ name: 'taskId', type: 'bytes32' }],
+      outputs: [{ name: 'status', type: 'uint8' }],
+      stateMutability: 'view',
+    },
+    {
+      type: 'event',
+      name: 'ProofSubmitted',
+      inputs: [
+        { name: 'taskId', type: 'bytes32', indexed: true },
+        { name: 'proofHash', type: 'bytes32', indexed: false },
+      ],
+    },
+  ],
+  mcpRouter: [
+    {
+      type: 'function',
+      name: 'registerProvider',
+      inputs: [
+        { name: 'providerId', type: 'bytes32' },
+        { name: 'provider', type: 'address' },
+        { name: 'stake', type: 'uint256' },
+      ],
+      outputs: [],
+      stateMutability: 'nonpayable',
+    },
+    {
+      type: 'function',
+      name: 'routeRequest',
+      inputs: [
+        { name: 'modelId', type: 'bytes32' },
+        { name: 'input', type: 'bytes' },
+      ],
+      outputs: [{ name: 'requestId', type: 'bytes32' }],
+      stateMutability: 'nonpayable',
+    },
+    {
+      type: 'event',
+      name: 'RequestRouted',
+      inputs: [
+        { name: 'requestId', type: 'bytes32', indexed: true },
+        { name: 'modelId', type: 'bytes32', indexed: false },
+      ],
+    },
+  ],
+  governanceToken: [
     {
       type: 'function',
       name: 'balanceOf',
@@ -371,6 +430,28 @@ export const CONTRACT_ABIS: Record<ContractName, Abi> = {
       stateMutability: 'nonpayable',
     },
     {
+      type: 'function',
+      name: 'propose',
+      inputs: [
+        { name: 'description', type: 'string' },
+        { name: 'targets', type: 'address[]' },
+        { name: 'values', type: 'uint256[]' },
+        { name: 'calldatas', type: 'bytes[]' },
+      ],
+      outputs: [{ name: '', type: 'uint256' }],
+      stateMutability: 'nonpayable',
+    },
+    {
+      type: 'function',
+      name: 'castVote',
+      inputs: [
+        { name: 'proposalId', type: 'uint256' },
+        { name: 'support', type: 'uint8' },
+      ],
+      outputs: [],
+      stateMutability: 'nonpayable',
+    },
+    {
       type: 'event',
       name: 'Transfer',
       inputs: [
@@ -379,31 +460,15 @@ export const CONTRACT_ABIS: Record<ContractName, Abi> = {
         { name: 'value', type: 'uint256', indexed: false },
       ],
     },
-  ],
-  governance: [
     {
-      type: 'function',
-      name: 'propose',
+      type: 'event',
+      name: 'VoteCast',
       inputs: [
-        { name: 'targets', type: 'address[]' },
-        { name: 'values', type: 'uint256[]' },
-        { name: 'calldatas', type: 'bytes[]' },
-        { name: 'description', type: 'string' },
+        { name: 'proposalId', type: 'uint256', indexed: true },
+        { name: 'voter', type: 'address', indexed: true },
+        { name: 'support', type: 'uint8', indexed: false },
+        { name: 'weight', type: 'uint256', indexed: false },
       ],
-      outputs: [{ name: '', type: 'uint256' }],
-      stateMutability: 'nonpayable',
-    },
-  ],
-  proxyAdmin: [
-    {
-      type: 'function',
-      name: 'upgrade',
-      inputs: [
-        { name: 'proxy', type: 'address' },
-        { name: 'implementation', type: 'address' },
-      ],
-      outputs: [],
-      stateMutability: 'nonpayable',
     },
   ],
 };

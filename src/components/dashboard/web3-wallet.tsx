@@ -175,8 +175,8 @@ const CONTRACTS_LIST = [
   { key: 'tokenVault' as ContractName, name: 'TokenVault', color: 'blue', descKey: 'descTokenVault' },
   { key: 'skillVault' as ContractName, name: 'SkillVault', color: 'cyan', descKey: 'descSkillVault' },
   { key: 'ifdRouter' as ContractName, name: 'IFDRouter', color: 'rose', descKey: 'descIfdRouter' },
-  { key: 'governance' as ContractName, name: 'Governance', color: 'orange', descKey: 'descGovernance' },
-  { key: 'afcToken' as ContractName, name: 'AFCToken', color: 'teal', descKey: 'descAfcToken' },
+  { key: 'governanceToken' as ContractName, name: 'GovToken', color: 'orange', descKey: 'descGovernance' },
+  { key: 'poueVerifier' as ContractName, name: 'PoUEVerifier', color: 'teal', descKey: 'descAfcToken' },
 ];
 
 // ── Helpers ────────────────────────────────────────────
@@ -479,7 +479,7 @@ function ContractsTab({ data }: { data: Web3IntegrationData }) {
         skillVault: { unlocked: true, tier: 2 },
         ifdRouter: { delegated: true, weight: 100 },
         governance: { proposalCount: 7, quorum: 4 },
-        afcToken: { balance: '10,000 AFC', allowance: '5,000 AFC' },
+        governanceToken: { balance: '10,000 BBGOV', allowance: '5,000 BBGOV' },
       };
       setSimResult(results[selectedContract] || { success: true });
       setSimulating(false);

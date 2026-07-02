@@ -159,10 +159,10 @@ contract GovernanceToken is ERC20, ERC20Permit, IGovernance, Ownable {
         if (block.timestamp < proposal.voteEnd) return ProposalState.ACTIVE;
 
         // Voting ended — check results
-        uint256 quorum = (totalSupply() * QUORUM_BPS) / BPS_BASE;
+        uint256 quorumRequired = (totalSupply() * QUORUM_BPS) / BPS_BASE;
         uint256 totalVotes = proposal.forVotes + proposal.againstVotes + proposal.abstainVotes;
 
-        if (totalVotes < quorum) return ProposalState.DEFEATED;
+        if (totalVotes < quorumRequired) return ProposalState.DEFEATED;
         if (proposal.forVotes <= proposal.againstVotes) return ProposalState.DEFEATED;
 
         // Check timelock
