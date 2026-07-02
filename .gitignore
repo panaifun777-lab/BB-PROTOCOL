@@ -61,3 +61,4 @@ db/*.db
 db/*.db-journal
 # Upload temp files
 upload/tool-results/
+.github/workflows/
