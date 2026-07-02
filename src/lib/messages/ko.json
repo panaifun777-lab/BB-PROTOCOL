@@ -133,7 +133,14 @@
     "success": "성공",
     "total": "합계",
     "version": "버전",
-    "warning": "경고"
+    "warning": "경고",
+    "language": "언어",
+    "degraded": "저하",
+    "justNow": "방금",
+    "secondsAgo": "{count}초 전",
+    "minutesAgo": "{count}분 전",
+    "hoursAgo": "{count}시간 전",
+    "daysAgo": "{count}일 전"
   },
   "compliance": {
     "accessibility": "접근성 감사",
@@ -373,7 +380,18 @@
     "resonanceScore": "공명 점수",
     "title": "인지 아바타 프로토콜",
     "walletConnect": "지갑 연결",
-    "x402Pay": "x402 결제"
+    "x402Pay": "x402 결제",
+    "ratingReport": "평가 보고서",
+    "ratingReportTitle": "시스템 기능 소개 및 평가 보고서",
+    "deploymentGuide": "배포 가이드",
+    "deploymentGuideTitle": "전체 환경 배포 가이드",
+    "downloadStarted": "다운로드 시작",
+    "downloadingSource": "소스코드 다운로드 중",
+    "sourceCode": "소스",
+    "paymentSuccess": "결제 성공",
+    "paymentCancelled": "결제 취소",
+    "paymentSuccessDesc": "Stripe 결제가 처리되었습니다",
+    "paymentCancelledDesc": "Stripe 결제를 취소했습니다. 요금이 청구되지 않습니다."
   },
   "dataInfra": {
     "algorithm": "알고리즘",
@@ -747,7 +765,9 @@
     "systemHealth": "시스템 상태",
     "systemUptime": "시스템 가동 시간",
     "title": "오프체인 엔진 상태",
-    "updated": "업데이트됨"
+    "updated": "업데이트됨",
+    "uptime": "가동 시간",
+    "live": "실시간"
   },
   "errors": {
     "contractError": "컨트랙트 상호작용 오류",
@@ -1476,5 +1496,13 @@
     "recentActivity": "최근 활동",
     "count": "건",
     "noData": "데이터 없음"
+  },
+  "error": {
+    "title": "애플리케이션 오류",
+    "message": "예기치 않은 오류가 발생했습니다",
+    "retry": "재시도"
+  },
+  "loading": {
+    "text": "로딩 중..."
   }
 }

@@ -133,7 +133,14 @@
     "success": "Erfolg",
     "total": "Gesamt",
     "version": "Version",
-    "warning": "Warnung"
+    "warning": "Warnung",
+    "language": "Sprache",
+    "degraded": "Beeinträchtigt",
+    "justNow": "gerade eben",
+    "secondsAgo": "vor {count}s",
+    "minutesAgo": "vor {count}Min",
+    "hoursAgo": "vor {count}Std",
+    "daysAgo": "vor {count}T"
   },
   "compliance": {
     "accessibility": "Barrierefreiheits-Audit",
@@ -373,7 +380,18 @@
     "resonanceScore": "Resonanz-Score",
     "title": "Kognitives Avatar-Protokoll",
     "walletConnect": "Wallet Verbinden",
-    "x402Pay": "x402 Zahlung"
+    "x402Pay": "x402 Zahlung",
+    "ratingReport": "Bewertungsbericht",
+    "ratingReportTitle": "Systemfunktionsvorstellung und Bewertungsbericht",
+    "deploymentGuide": "Bereitstellungsleitfaden",
+    "deploymentGuideTitle": "Vollständiger Bereitstellungsleitfaden",
+    "downloadStarted": "Download gestartet",
+    "downloadingSource": "Quellcode wird heruntergeladen",
+    "sourceCode": "Quelle",
+    "paymentSuccess": "Zahlung erfolgreich",
+    "paymentCancelled": "Zahlung storniert",
+    "paymentSuccessDesc": "Ihre Stripe-Zahlung wurde verarbeitet",
+    "paymentCancelledDesc": "Sie haben die Stripe-Zahlung storniert. Es wurden keine Gebühren erhoben."
   },
   "dataInfra": {
     "algorithm": "Algorithmus",
@@ -747,7 +765,9 @@
     "systemHealth": "Systemzustand",
     "systemUptime": "System-Uptime",
     "title": "Off-Chain-Engine-Status",
-    "updated": "Aktualisiert"
+    "updated": "Aktualisiert",
+    "uptime": "Betriebszeit",
+    "live": "live"
   },
   "errors": {
     "contractError": "Vertragsinteraktionsfehler",
@@ -1475,5 +1495,13 @@
     "topServices": "Top-Dienste nach Einnahmen",
     "recentActivity": "Letzte Aktivität",
     "count": "Anz."
+  },
+  "error": {
+    "title": "Anwendungsfehler",
+    "message": "Ein unerwarteter Fehler ist aufgetreten",
+    "retry": "Erneut versuchen"
+  },
+  "loading": {
+    "text": "Laden..."
   }
 }

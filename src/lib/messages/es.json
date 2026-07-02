@@ -133,7 +133,14 @@
     "success": "Éxito",
     "total": "Total",
     "version": "Versión",
-    "warning": "Advertencia"
+    "warning": "Advertencia",
+    "language": "Idioma",
+    "degraded": "Degradado",
+    "justNow": "ahora mismo",
+    "secondsAgo": "hace {count}s",
+    "minutesAgo": "hace {count}m",
+    "hoursAgo": "hace {count}h",
+    "daysAgo": "hace {count}d"
   },
   "compliance": {
     "accessibility": "Auditoría de Accesibilidad",
@@ -373,7 +380,18 @@
     "resonanceScore": "Puntuación de Resonancia",
     "title": "Protocolo de Avatar Cognitivo",
     "walletConnect": "Conectar Billetera",
-    "x402Pay": "Pago x402"
+    "x402Pay": "Pago x402",
+    "ratingReport": "Informe de Calificación",
+    "ratingReportTitle": "Introducción de Funcionalidad y Informe de Calificación",
+    "deploymentGuide": "Guía de Despliegue",
+    "deploymentGuideTitle": "Guía de Despliegue Completo",
+    "downloadStarted": "Descarga iniciada",
+    "downloadingSource": "Descargando código fuente",
+    "sourceCode": "Fuente",
+    "paymentSuccess": "Pago exitoso",
+    "paymentCancelled": "Pago cancelado",
+    "paymentSuccessDesc": "Su pago de Stripe ha sido procesado",
+    "paymentCancelledDesc": "Canceló el pago de Stripe. No se realizaron cargos."
   },
   "dataInfra": {
     "algorithm": "Algoritmo",
@@ -747,7 +765,9 @@
     "systemHealth": "Salud del sistema",
     "systemUptime": "Tiempo de actividad del sistema",
     "title": "Estado del motor off-chain",
-    "updated": "Actualizado"
+    "updated": "Actualizado",
+    "uptime": "Tiempo activo",
+    "live": "en vivo"
   },
   "errors": {
     "contractError": "Error de interacción con contrato",
@@ -1476,5 +1496,13 @@
     "recentActivity": "Actividad Reciente",
     "count": "conteo",
     "noData": "Sin datos disponibles"
+  },
+  "error": {
+    "title": "Error de aplicación",
+    "message": "Ocurrió un error inesperado",
+    "retry": "Reintentar"
+  },
+  "loading": {
+    "text": "Cargando..."
   }
 }

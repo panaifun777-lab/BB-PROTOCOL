@@ -133,7 +133,14 @@
     "success": "Success",
     "total": "Total",
     "version": "Version",
-    "warning": "Warning"
+    "warning": "Warning",
+    "language": "Language",
+    "degraded": "Degraded",
+    "justNow": "just now",
+    "secondsAgo": "{count}s ago",
+    "minutesAgo": "{count}m ago",
+    "hoursAgo": "{count}h ago",
+    "daysAgo": "{count}d ago"
   },
   "compliance": {
     "accessibility": "Accessibility Audit",
@@ -373,7 +380,18 @@
     "resonanceScore": "Resonance Score",
     "title": "Cognitive Avatar Protocol",
     "walletConnect": "Connect Wallet",
-    "x402Pay": "x402 Pay"
+    "x402Pay": "x402 Pay",
+    "ratingReport": "Rating Report",
+    "ratingReportTitle": "System Functionality & Rating Report",
+    "deploymentGuide": "Deploy Guide",
+    "deploymentGuideTitle": "Full Environment Deployment Guide",
+    "downloadStarted": "Download started",
+    "downloadingSource": "Source code downloading",
+    "sourceCode": "Source",
+    "paymentSuccess": "Payment Successful",
+    "paymentCancelled": "Payment Cancelled",
+    "paymentSuccessDesc": "Your Stripe payment has been processed",
+    "paymentCancelledDesc": "You cancelled the Stripe payment. No charges were made."
   },
   "dataInfra": {
     "algorithm": "Algorithm",
@@ -747,7 +765,9 @@
     "systemHealth": "System Health",
     "systemUptime": "System Uptime",
     "title": "Off-Chain Engine Status",
-    "updated": "Updated"
+    "updated": "Updated",
+    "uptime": "Uptime",
+    "live": "live"
   },
   "errors": {
     "contractError": "Contract interaction error",
@@ -1476,5 +1496,13 @@
     "recentActivity": "Recent Activity",
     "count": "count",
     "noData": "No data available"
+  },
+  "error": {
+    "title": "Application Error",
+    "message": "An unexpected error occurred",
+    "retry": "Retry"
+  },
+  "loading": {
+    "text": "Loading..."
   }
 }

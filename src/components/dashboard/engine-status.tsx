@@ -88,11 +88,12 @@ function TrendIcon({ trend }: { trend?: string }) {
 // ── Status Badge ─────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
+  const { t } = useI18n()
   if (status === 'online') {
     return (
       <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30">
         <span className="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-        Online
+        {t('common.online')}
       </Badge>
     )
   }
@@ -100,14 +101,14 @@ function StatusBadge({ status }: { status: string }) {
     return (
       <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30">
         <span className="mr-1 inline-block h-2 w-2 rounded-full bg-amber-400" />
-        Degraded
+        {t('common.degraded')}
       </Badge>
     )
   }
   return (
     <Badge className="bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30">
       <WifiOff className="mr-1 h-3 w-3" />
-      Offline
+      {t('common.offline')}
     </Badge>
   )
 }
@@ -115,13 +116,14 @@ function StatusBadge({ status }: { status: string }) {
 // ── Relative Time ────────────────────────────────────────────
 
 function relativeTime(isoString: string): string {
+  const { t } = useI18n()
   const now = Date.now()
   const then = new Date(isoString).getTime()
   const diff = Math.max(0, Math.floor((now - then) / 1000))
-  if (diff < 5) return 'just now'
-  if (diff < 60) return `${diff}s ago`
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
-  return `${Math.floor(diff / 3600)}h ago`
+  if (diff < 5) return t('common.justNow')
+  if (diff < 60) return t('common.secondsAgo', { count: diff })
+  if (diff < 3600) return t('common.minutesAgo', { count: Math.floor(diff / 60) })
+  return t('common.hoursAgo', { count: Math.floor(diff / 3600) })
 }
 
 // ── Metric Color ─────────────────────────────────────────────
@@ -197,7 +199,7 @@ function ModuleCard({ module, index }: { module: EngineModuleStatus; index: numb
           <div className="flex items-center justify-between text-[10px] text-slate-500 border-t border-slate-700/50 pt-2">
             <div className="flex items-center gap-1.5">
               <Clock className="h-3 w-3" />
-            <span>Uptime: {module.uptime}</span>
+            <span>{t('engineStatus.uptime')} {module.uptime}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Wifi className="h-3 w-3" />
@@ -314,7 +316,7 @@ export default function EngineStatusDashboard({ engineStatus }: EngineStatusDash
               {t('engineStatus.subtitle')}
               {engineStatus && (
                 <> · <span className={engineStatus.allConnected ? 'text-emerald-400' : 'text-amber-400'}>
-                  {engineStatus.connectedCount}/{engineStatus.totalServices} live
+                  {engineStatus.connectedCount}/{engineStatus.totalServices} {t('engineStatus.live')}
                 </span></>
               )}
             </p>

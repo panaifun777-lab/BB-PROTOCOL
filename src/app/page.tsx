@@ -176,16 +176,17 @@ const SECTION_TO_ROW: Record<string, string> = {
 // ── Web3 Connect Button (using Web3Store) ────────────────────
 function Web3ConnectButton() {
   const { address, isConnected } = useWeb3Store();
+  const { t } = useI18n();
   const truncated = address
     ? `${address.slice(0, 6)}...${address.slice(-4)}`
-    : 'Connect';
+    : t('web3.connect');
   const truncatedShort = address
     ? `${address.slice(0, 6)}...`
-    : 'Connect';
+    : t('web3.connect');
 
   return (
     <button
-      aria-label="Connect wallet"
+      aria-label={t('web3.connectWallet')}
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-violet-500/50 transition-colors text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
     >
       <Wallet className="w-3.5 h-3.5 text-violet-400" />
@@ -205,6 +206,7 @@ function Web3ConnectButton() {
 function StripeReturnHandler() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const { t } = useI18n();
 
   const handleStripeReturn = useCallback(() => {
     const successId = searchParams.get('stripe_success');
@@ -217,20 +219,20 @@ function StripeReturnHandler() {
         .then((payment) => {
           if (payment) {
             toast({
-              title: 'Payment Successful',
+              title: t('dashboard.paymentSuccess'),
               description: `${payment.serviceName || 'Payment'} — $${Number(payment.amount).toFixed(2)} ${payment.currency || 'USD'}`,
             });
           } else {
             toast({
-              title: 'Payment Successful',
-              description: 'Your Stripe payment has been processed.',
+              title: t('dashboard.paymentSuccess'),
+              description: t('dashboard.paymentSuccessDesc'),
             });
           }
         })
         .catch(() => {
           toast({
-            title: 'Payment Successful',
-            description: 'Your Stripe payment has been processed.',
+            title: t('dashboard.paymentSuccess'),
+            description: t('dashboard.paymentSuccessDesc'),
           });
         });
 
@@ -238,15 +240,15 @@ function StripeReturnHandler() {
       window.history.replaceState({}, '', window.location.pathname);
     } else if (cancelId) {
       toast({
-        title: 'Payment Cancelled',
-        description: 'You cancelled the Stripe payment. No charges were made.',
+        title: t('dashboard.paymentCancelled'),
+        description: t('dashboard.paymentCancelledDesc'),
         variant: 'destructive',
       });
 
       // Clean URL params
       window.history.replaceState({}, '', window.location.pathname);
     }
-  }, [searchParams, toast]);
+  }, [searchParams, toast, t]);
 
   useEffect(() => {
     handleStripeReturn();
@@ -265,7 +267,7 @@ export default function Home() {
   const engineStatus = useEngineStatus();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
-  const [paymentService, setPaymentService] = useState('GPT-4o 文本生成');
+  const [paymentService, setPaymentService] = useState('');
   const [paymentAmount, setPaymentAmount] = useState(0.02);
   const [downloading, setDownloading] = useState(false);
 
@@ -340,10 +342,10 @@ export default function Home() {
               href="/api/docs/download-report"
               download="BB-PROTOCOL-SYSTEM-REPORT.md"
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-violet-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium"
-              title="系统功能介绍与评级报告"
+              title={t('dashboard.ratingReportTitle')}
             >
               <FileText className="w-3.5 h-3.5 text-violet-400" />
-              <span className="hidden lg:inline text-slate-300">评级报告</span>
+              <span className="hidden lg:inline text-slate-300">{t('dashboard.ratingReport')}</span>
             </a>
 
             {/* Download: Deployment Guide */}
@@ -351,10 +353,10 @@ export default function Home() {
               href="/api/docs/download-deployment"
               download="BB-PROTOCOL-DEPLOYMENT-GUIDE.md"
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-cyan-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium"
-              title="全环境部署指南"
+              title={t('dashboard.deploymentGuideTitle')}
             >
               <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden lg:inline text-slate-300">部署指南</span>
+              <span className="hidden lg:inline text-slate-300">{t('dashboard.deploymentGuide')}</span>
             </a>
 
             {/* Download Source Code */}
@@ -370,15 +372,15 @@ export default function Home() {
                 a.click();
                 document.body.removeChild(a);
                 toast({
-                  title: t('dashboard.downloadSuccess') || '下载已开始',
-                  description: t('dashboard.downloadSuccessDesc') || 'bb-protocol-source.tar.gz 正在下载（含依赖，约160MB）',
+                  title: t('dashboard.downloadStarted'),
+                  description: t('dashboard.downloadingSource'),
                 });
                 setTimeout(() => setDownloading(false), 3000);
               }}
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-emerald-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
             >
               <Download className={cn('w-3.5 h-3.5 text-emerald-400', downloading && 'animate-bounce')} />
-              <span className="hidden sm:inline text-slate-300">{downloading ? t('dashboard.downloading') || 'Downloading...' : t('dashboard.download') || '源码'}</span>
+              <span className="hidden sm:inline text-slate-300">{downloading ? t('dashboard.downloading') : t('dashboard.sourceCode')}</span>
             </button>
 
             {/* Notification Center */}

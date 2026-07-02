@@ -133,7 +133,14 @@
     "success": "成功",
     "total": "合計",
     "version": "バージョン",
-    "warning": "警告"
+    "warning": "警告",
+    "language": "言語",
+    "degraded": "低下",
+    "justNow": "たった今",
+    "secondsAgo": "{count}秒前",
+    "minutesAgo": "{count}分前",
+    "hoursAgo": "{count}時間前",
+    "daysAgo": "{count}日前"
   },
   "compliance": {
     "accessibility": "アクセシビリティ監査",
@@ -373,7 +380,18 @@
     "resonanceScore": "共鳴スコア",
     "title": "認知アバタープロトコル",
     "walletConnect": "ウォレット接続",
-    "x402Pay": "x402支払い"
+    "x402Pay": "x402支払い",
+    "ratingReport": "評価レポート",
+    "ratingReportTitle": "システム機能紹介と評価レポート",
+    "deploymentGuide": "デプロイガイド",
+    "deploymentGuideTitle": "全環境デプロイガイド",
+    "downloadStarted": "ダウンロード開始",
+    "downloadingSource": "ソースコードダウンロード中",
+    "sourceCode": "ソース",
+    "paymentSuccess": "支払い成功",
+    "paymentCancelled": "支払いキャンセル",
+    "paymentSuccessDesc": "Stripe決済が処理されました",
+    "paymentCancelledDesc": "Stripe決済をキャンセルしました。課金はありません。"
   },
   "dataInfra": {
     "algorithm": "アルゴリズム",
@@ -747,7 +765,9 @@
     "systemHealth": "システムヘルス",
     "systemUptime": "システム稼働時間",
     "title": "オフチェーンエンジンステータス",
-    "updated": "更新"
+    "updated": "更新",
+    "uptime": "稼働時間",
+    "live": "ライブ"
   },
   "errors": {
     "contractError": "コントラクト連携エラー",
@@ -1476,5 +1496,13 @@
     "recentActivity": "最近のアクティビティ",
     "count": "件",
     "noData": "データがありません"
+  },
+  "error": {
+    "title": "アプリケーションエラー",
+    "message": "予期しないエラーが発生しました",
+    "retry": "再試行"
+  },
+  "loading": {
+    "text": "読み込み中..."
   }
 }

@@ -1,17 +1,14 @@
 'use client';
 
-// ===== i18n Hook — wraps next-intl useTranslations with fallback =====
+// ===== i18n Hook — reads locale from Zustand store (global reactive state) =====
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   type Locale,
   locales,
-  defaultLocale,
-  getStoredLocale,
-  setStoredLocale,
-  detectBrowserLocale,
   isRtl,
 } from '@/lib/i18n-config';
+import { useI18nStore } from '@/stores/i18n-store';
 
 // ── Message Imports ─────────────────────────────────────────
 import zhMessages from '@/lib/messages/zh.json';
@@ -22,6 +19,8 @@ import esMessages from '@/lib/messages/es.json';
 import frMessages from '@/lib/messages/fr.json';
 import deMessages from '@/lib/messages/de.json';
 import arMessages from '@/lib/messages/ar.json';
+
+import { defaultLocale } from '@/lib/i18n-config';
 
 const messageMap: Record<Locale, Record<string, Record<string, string>>> = {
   zh: zhMessages,
@@ -80,25 +79,12 @@ function createTranslateFn(locale: Locale): TranslateFn {
   };
 }
 
-// ── Hook: useI18n ────────────────────────────────────────────
+// ── Hook: useI18n (reads from Zustand store — all components share same locale) ──
 export function useI18n() {
-  const [locale, setLocaleState] = useState<Locale>(() => {
-    if (typeof window === 'undefined') return defaultLocale;
-    return getStoredLocale() || detectBrowserLocale();
-  });
+  const locale = useI18nStore((s) => s.locale);
+  const setLocale = useI18nStore((s) => s.setLocale);
 
-  const setLocale = useCallback((newLocale: Locale) => {
-    setLocaleState(newLocale);
-    setStoredLocale(newLocale);
-
-    // Update document direction for RTL languages
-    if (typeof document !== 'undefined') {
-      document.documentElement.dir = isRtl(newLocale) ? 'rtl' : 'ltr';
-      document.documentElement.lang = newLocale;
-    }
-  }, []);
-
-  // Set initial direction on mount
+  // Set initial direction on mount and when locale changes
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.dir = isRtl(locale) ? 'rtl' : 'ltr';
@@ -106,7 +92,11 @@ export function useI18n() {
     }
   }, [locale]);
 
-  const t = createTranslateFn(locale);
+  // Memoize t based on locale — re-creates only when locale changes
+  const t = useCallback(
+    (key: string, params?: Record<string, string | number>) => createTranslateFn(locale)(key, params),
+    [locale]
+  );
 
   return {
     t,

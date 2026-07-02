@@ -133,7 +133,14 @@
     "success": "نجاح",
     "total": "الإجمالي",
     "version": "الإصدار",
-    "warning": "تحذير"
+    "warning": "تحذير",
+    "language": "اللغة",
+    "degraded": "متدهور",
+    "justNow": "الآن",
+    "secondsAgo": "منذ {count} ث",
+    "minutesAgo": "منذ {count} د",
+    "hoursAgo": "منذ {count} س",
+    "daysAgo": "منذ {count} ي"
   },
   "compliance": {
     "accessibility": "تدقيق إمكانية الوصول",
@@ -373,7 +380,18 @@
     "resonanceScore": "درجة الرنين",
     "title": "بروتوكول الصورة الرمزية المعرفية",
     "walletConnect": "ربط المحفظة",
-    "x402Pay": "دفع x402"
+    "x402Pay": "دفع x402",
+    "ratingReport": "تقرير التقييم",
+    "ratingReportTitle": "مقدمة وظائف النظام وتقرير التقييم",
+    "deploymentGuide": "دليل النشر",
+    "deploymentGuideTitle": "دليل النشر الشامل",
+    "downloadStarted": "بدأ التنزيل",
+    "downloadingSource": "جاري تنزيل الكود المصدري",
+    "sourceCode": "المصدر",
+    "paymentSuccess": "الدفع ناجح",
+    "paymentCancelled": "تم إلغاء الدفع",
+    "paymentSuccessDesc": "تمت معالجة دفعة Stripe الخاصة بك",
+    "paymentCancelledDesc": "لقد ألغيت دفعة Stripe. لم يتم فرض أي رسوم."
   },
   "dataInfra": {
     "algorithm": "الخوارزمية",
@@ -747,7 +765,9 @@
     "systemHealth": "صحة النظام",
     "systemUptime": "وقت تشغيل النظام",
     "title": "حالة المحرك خارج السلسلة",
-    "updated": "تم التحديث"
+    "updated": "تم التحديث",
+    "uptime": "وقت التشغيل",
+    "live": "مباشر"
   },
   "errors": {
     "contractError": "خطأ في التفاعل مع العقد",
@@ -1476,5 +1496,13 @@
     "recentActivity": "النشاط الأخير",
     "count": "عدد",
     "noData": "لا توجد بيانات"
+  },
+  "error": {
+    "title": "خطأ في التطبيق",
+    "message": "حدث خطأ غير متوقع",
+    "retry": "إعادة المحاولة"
+  },
+  "loading": {
+    "text": "جاري التحميل..."
   }
 }

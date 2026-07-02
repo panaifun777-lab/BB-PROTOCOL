@@ -44,7 +44,14 @@
     "online": "在线",
     "offline": "离线",
     "connected": "已连接",
-    "disconnected": "已断开"
+    "disconnected": "已断开",
+    "language": "语言",
+    "degraded": "降级",
+    "justNow": "刚刚",
+    "secondsAgo": "{count}秒前",
+    "minutesAgo": "{count}分钟前",
+    "hoursAgo": "{count}小时前",
+    "daysAgo": "{count}天前"
   },
   "nav": {
     "overview": "总览",
@@ -96,7 +103,18 @@
     "proTier": "专业版",
     "rentAvatar": "租用",
     "download": "下载",
-    "downloading": "下载中..."
+    "downloading": "下载中...",
+    "ratingReport": "评级报告",
+    "ratingReportTitle": "系统功能介绍与评级报告",
+    "deploymentGuide": "部署指南",
+    "deploymentGuideTitle": "全环境部署指南",
+    "downloadStarted": "下载已开始",
+    "downloadingSource": "源码包正在下载",
+    "sourceCode": "源码",
+    "paymentSuccess": "支付成功",
+    "paymentCancelled": "支付已取消",
+    "paymentSuccessDesc": "您的Stripe支付已处理完成",
+    "paymentCancelledDesc": "您已取消Stripe支付，未产生扣费"
   },
   "avatar": {
     "title": "认知身份卡片",
@@ -804,7 +822,7 @@
     "lastConnected": "最后连接",
     "status": "状态",
     "online": "在线",
-    "connect": "连接",
+    "connect": "连接钱包",
     "wagmiConfig": "Wagmi 配置",
     "supportedChains": "支持链",
     "connectors": "连接器",
@@ -1298,7 +1316,9 @@
     "eventTypesRegistered": "个事件类型已注册",
     "lastUpdate": "最后更新",
     "systemUptime": "系统运行时间",
-    "updated": "更新于"
+    "updated": "更新于",
+    "uptime": "运行时间",
+    "live": "实时"
   },
   "payment": {
     "title": "x402 支付流程",
@@ -1475,5 +1495,13 @@
     "topServices": "收入Top服务",
     "recentActivity": "最近活动",
     "count": "笔"
+  },
+  "error": {
+    "title": "应用错误",
+    "message": "发生了意外错误",
+    "retry": "重试"
+  },
+  "loading": {
+    "text": "加载中..."
   }
 }

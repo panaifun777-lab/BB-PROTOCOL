@@ -52,3 +52,12 @@ prompt
 server.log
 # Skills directory
 /skills/
+# Foundry cache & broadcast (contains sensitive data)
+contracts/cache/
+contracts/broadcast/
+contracts/lib/
+# Database
+db/*.db
+db/*.db-journal
+# Upload temp files
+upload/tool-results/

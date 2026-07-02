@@ -4,6 +4,9 @@ import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { translate } from '@/hooks/use-i18n';
+import { getStoredLocale } from '@/lib/i18n-config';
+import { defaultLocale } from '@/lib/i18n-config';
 
 export default function Error({
   error,
@@ -12,6 +15,9 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const locale = getStoredLocale() || defaultLocale;
+  const t = (key: string) => translate(locale, key);
+
   useEffect(() => {
     console.error('[App Error]', error);
   }, [error]);
@@ -22,19 +28,19 @@ export default function Error({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-red-400">
             <AlertTriangle className="size-5" />
-            应用错误
+            {t('error.title')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-slate-300">
-            {error.message || '发生了意外错误'}
+            {error.message || t('error.message')}
           </p>
           <Button
             onClick={reset}
             className="w-full bg-violet-600 hover:bg-violet-500"
           >
             <RefreshCw className="mr-2 size-4" />
-            重试
+            {t('error.retry')}
           </Button>
         </CardContent>
       </Card>

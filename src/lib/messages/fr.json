@@ -133,7 +133,14 @@
     "success": "Succès",
     "total": "Total",
     "version": "Version",
-    "warning": "Avertissement"
+    "warning": "Avertissement",
+    "language": "Langue",
+    "degraded": "Dégradé",
+    "justNow": "à l'instant",
+    "secondsAgo": "il y a {count}s",
+    "minutesAgo": "il y a {count}m",
+    "hoursAgo": "il y a {count}h",
+    "daysAgo": "il y a {count}j"
   },
   "compliance": {
     "accessibility": "Audit d'Accessibilité",
@@ -373,7 +380,18 @@
     "resonanceScore": "Score de Résonance",
     "title": "Protocole d'Avatar Cognitif",
     "walletConnect": "Connecter Portefeuille",
-    "x402Pay": "Paiement x402"
+    "x402Pay": "Paiement x402",
+    "ratingReport": "Rapport d'Évaluation",
+    "ratingReportTitle": "Présentation des Fonctionnalités et Rapport d'Évaluation",
+    "deploymentGuide": "Guide de Déploiement",
+    "deploymentGuideTitle": "Guide de Déploiement Complet",
+    "downloadStarted": "Téléchargement commencé",
+    "downloadingSource": "Téléchargement du code source",
+    "sourceCode": "Source",
+    "paymentSuccess": "Paiement réussi",
+    "paymentCancelled": "Paiement annulé",
+    "paymentSuccessDesc": "Votre paiement Stripe a été traité",
+    "paymentCancelledDesc": "Vous avez annulé le paiement Stripe. Aucun frais n'a été facturé."
   },
   "dataInfra": {
     "algorithm": "Algorithme",
@@ -747,7 +765,9 @@
     "systemHealth": "Santé du système",
     "systemUptime": "Disponibilité du système",
     "title": "État du moteur off-chain",
-    "updated": "Mis à jour"
+    "updated": "Mis à jour",
+    "uptime": "Temps de fonctionnement",
+    "live": "en direct"
   },
   "errors": {
     "contractError": "Erreur d'interaction avec le contrat",
@@ -1476,5 +1496,13 @@
     "recentActivity": "Activité Récente",
     "count": "nb",
     "noData": "Aucune donnée disponible"
+  },
+  "error": {
+    "title": "Erreur d'application",
+    "message": "Une erreur inattendue s'est produite",
+    "retry": "Réessayer"
+  },
+  "loading": {
+    "text": "Chargement..."
   }
 }
