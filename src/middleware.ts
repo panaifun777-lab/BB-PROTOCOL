@@ -31,14 +31,12 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
-// ── API Key Validation ──
+// ── API Key Validation (optional — only enforced when REQUIRE_API_KEY env is set) ──
 function validateApiKey(request: NextRequest): boolean {
-  const apiKey = request.headers.get('x-api-key');
-  // For development, accept any non-empty key
-  // In production, validate against a secure store
-  if (process.env.NODE_ENV === 'development') {
-    return true;
+  if (!process.env.REQUIRE_API_KEY) {
+    return true; // allow all requests when API key enforcement is disabled
   }
+  const apiKey = request.headers.get('x-api-key');
   if (!apiKey || apiKey.length < 8) {
     return false;
   }
