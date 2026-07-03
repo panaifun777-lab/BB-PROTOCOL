@@ -8,7 +8,7 @@ export async function POST() {
     // In production, this would fetch live rates from an API (e.g., Stripe or external FX API)
     // For now, we use the fallback rates and store them in DB
     const rates = FALLBACK_RATES;
-    const results = [];
+    const results: any[] = [];
 
     for (const [target, rate] of Object.entries(rates)) {
       if (target === 'USD') continue; // Skip base currency

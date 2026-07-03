@@ -30,12 +30,9 @@ import {
   Database,
   ChevronsLeft,
   ChevronsRight,
-  Download,
   Receipt,
   BarChart3,
   Crown,
-  FileText,
-  BookOpen,
 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -270,7 +267,6 @@ export default function Home() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [paymentService, setPaymentService] = useState('');
   const [paymentAmount, setPaymentAmount] = useState(0.02);
-  const [downloading, setDownloading] = useState(false);
 
   const dashboardData: DashboardState = (avatar && revenueSummary)
     ? { avatar, skills, revenueSummary, recentRevenues, delegations, timeline, resonanceHistory }
@@ -337,52 +333,6 @@ export default function Home() {
 
             {/* Wallet Connect */}
             <Web3ConnectButton />
-
-            {/* Download: System Report */}
-            <a
-              href="/api/docs/download-report"
-              download="BB-PROTOCOL-SYSTEM-REPORT.md"
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-violet-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium"
-              title={t('dashboard.ratingReportTitle')}
-            >
-              <FileText className="w-3.5 h-3.5 text-violet-400" />
-              <span className="hidden lg:inline text-slate-300">{t('dashboard.ratingReport')}</span>
-            </a>
-
-            {/* Download: Deployment Guide */}
-            <a
-              href="/api/docs/download-deployment"
-              download="BB-PROTOCOL-DEPLOYMENT-GUIDE.md"
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-cyan-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium"
-              title={t('dashboard.deploymentGuideTitle')}
-            >
-              <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden lg:inline text-slate-300">{t('dashboard.deploymentGuide')}</span>
-            </a>
-
-            {/* Download Source Code */}
-            <button
-              aria-label="Download source code"
-              onClick={() => {
-                if (downloading) return;
-                setDownloading(true);
-                const a = document.createElement('a');
-                a.href = '/api/download';
-                a.download = 'bb-protocol-source.tar.gz';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                toast({
-                  title: t('dashboard.downloadStarted'),
-                  description: t('dashboard.downloadingSource'),
-                });
-                setTimeout(() => setDownloading(false), 3000);
-              }}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-emerald-500/50 hover:bg-slate-700/80 transition-all text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
-            >
-              <Download className={cn('w-3.5 h-3.5 text-emerald-400', downloading && 'animate-bounce')} />
-              <span className="hidden sm:inline text-slate-300">{downloading ? t('dashboard.downloading') : t('dashboard.sourceCode')}</span>
-            </button>
 
             {/* Notification Center */}
             <NotificationCenter />

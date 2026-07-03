@@ -42,7 +42,7 @@ export async function GET() {
         code: c.code,
         symbol: c.symbol,
         name: c.name,
-        default: c.default ?? false,
+        default: (c as any).default ?? false,
       })),
       exchangeRates,
     });

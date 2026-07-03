@@ -16,7 +16,7 @@ export async function POST() {
 
     const result = await db.$transaction(async (tx) => {
       // 1. Create the 9 skills from ALL_SKILLS
-      const skills = [];
+      const skills: any[] = [];
       for (const s of ALL_SKILLS) {
         const skill = await tx.skill.create({
           data: {

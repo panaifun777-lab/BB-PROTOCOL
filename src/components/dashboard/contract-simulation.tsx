@@ -939,7 +939,7 @@ export default function ContractSimulation() {
                     </div>
 
                     {/* Split visualization (DynamicSplitter only) */}
-                    {selectedContractId === 'DynamicSplitter' && selectedFunctionName === 'executeSplit' && !!simulationResult.split && (
+                    {selectedContractId === 'DynamicSplitter' && selectedFunctionName === 'executeSplit' && (simulationResult as any)?.split ? (
                       <div className="space-y-2">
                         <div className="text-[11px] text-slate-400 font-medium">{t('simulation.splitVisualization')}</div>
                         {(() => {
@@ -998,7 +998,7 @@ export default function ContractSimulation() {
                           );
                         })()}
                       </div>
-                    )}
+                    ) : null}
 
                     {/* Dynamic Adjustment Info (DynamicSplitter only) */}
                     {selectedContractId === 'DynamicSplitter' && selectedFunctionName === 'executeSplit' && simulationResult.dynamicAdjustment && (

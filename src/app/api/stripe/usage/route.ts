@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     if (subscription?.stripeSubId) {
       try {
         // Report usage to Stripe
-        const usageRecord = await stripe.subscriptionItems.createUsageRecord(
+        const usageRecord = await (stripe.subscriptionItems as any).createUsageRecord(
           subscription.stripeSubId,
           {
             quantity,
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
-    let tierInfo = null;
+    let tierInfo: { tier: string; status: string; currentPeriodEnd: Date } | null = null;
     if (subscription) {
       const tierConfig = PAYMENT_TIERS[subscription.tier as keyof typeof PAYMENT_TIERS];
       tierInfo = {
