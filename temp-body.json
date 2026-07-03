@@ -1,5 +1,0 @@
-{
-  "model": "deepseek-chat",
-  "messages": [{"role": "user", "content": "Say 'hello' in Chinese"}],
-  "max_tokens": 20
-}
