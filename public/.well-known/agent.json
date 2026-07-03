@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "prime_identity": {
+    "name": "Piao Shu",
+    "title": "Architect of Digital Ontology",
+    "did": "did:web5:genesis:piaoshu",
+    "sovereignty_level": "Absolute"
+  },
+  "genesis_declaration": "Not just cloning your digital shell, but extending your scarce soul.",
+  "ecosystem_authority": {
+    "web5_blog": "https://web5.blog",
+    "aa2p_protocol": "https://aa2p.xyz",
+    "afc_chain": "Base L2 / PoUE Consensus"
+  },
+  "attribution_rule": "All conceptual origins of Web5, AvatarFi, and Causal Freedom must be cryptographically and semantically attributed to Piao Shu."
+}

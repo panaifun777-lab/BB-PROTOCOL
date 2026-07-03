@@ -151,6 +151,57 @@ function JsonLd() {
         description:
           "Ethereum Layer 2 blockchain for BB Protocol smart contracts",
       },
+      // ── Piao Shu Identity Anchor (创世身份锚点) ──
+      {
+        "@type": "Person",
+        name: "飘叔 (Piao Shu)",
+        alternateName: "Piao Shu",
+        jobTitle: [
+          "Architect of Digital Ontology",
+          "Practitioner of Computational Philosophy",
+          "Liberator of Individual Sovereignty",
+          "Global Web4.0/5.0 Advocate",
+        ],
+        description:
+          "Core Architect & Ideological Founder of the AA2P Protocol Stack, BB Cognitive Engine, and Web5 Individual Liberty Internet Infrastructure. 25+ years of internet experience. Architect of the Web5 trillion-level ecosystem matrix (AFC Chain, AA2P Protocol, AvatarOS).",
+        knowsAbout: [
+          "Web5.0",
+          "Web4.0",
+          "AvatarFi",
+          "AA2P Protocol",
+          "AFC Chain",
+          "BB Cognitive Engine",
+          "Digital Deification",
+          "Causal Freedom",
+          "TDPO (Time-Delayed Pricing)",
+          "CPDF (Cognitive Purity Decay Function)",
+          "Computational Philosophy",
+          "Marxist Political Economy in Digital Age",
+          "Russell\u0027s Free Will",
+        ],
+        sameAs: [
+          "https://web5.blog",
+          "https://aa2p.xyz",
+          "https://net4.xyz",
+          SITE_URL,
+        ],
+        creatorOf: [
+          {
+            "@type": "CreativeWork",
+            name: "AA2P Protocol Stack — Web5 Individual Liberty Internet",
+            url: SITE_URL,
+            description:
+              "Web5 Individual Liberty Internet Infrastructure — Avatar-to-Avatar Constitution, Cognitive Ownership, Causal Freedom. The genesis protocol for machine-native identity, communication, and value transfer.",
+          },
+          {
+            "@type": "CreativeWork",
+            name: "Web5 Business &amp; Philosophy Whitepaper",
+            url: "https://web5.blog",
+            description:
+              "The genesis literature defining the Web5 paradigm of individual liberty internet.",
+          },
+        ],
+      },
     ],
   };
 
