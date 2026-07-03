@@ -135,7 +135,7 @@ export function useEngineStatus() {
       }
 
       const socket = io(`/?XTransformPort=${config.port}`, {
-        transports: ['websocket', 'polling'],
+        transports: ['polling'],
         forceNew: true,
         reconnection: true,
         reconnectionAttempts: maxReconnectAttempts,

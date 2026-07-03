@@ -89,7 +89,7 @@ export function useMonitoringStream() {
     }
 
     const socket = io('/?XTransformPort=3004', {
-      transports: ['websocket', 'polling'],
+      transports: ['polling'],
       forceNew: true,
       reconnection: true,
       reconnectionAttempts: maxReconnectAttempts,

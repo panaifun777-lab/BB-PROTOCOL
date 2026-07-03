@@ -86,7 +86,7 @@ export function useResonanceStream() {
     }
 
     const socket = io('/?XTransformPort=3003', {
-      transports: ['websocket', 'polling'],
+      transports: ['polling'],
       forceNew: true,
       reconnection: true,
       reconnectionAttempts: maxReconnectAttempts,

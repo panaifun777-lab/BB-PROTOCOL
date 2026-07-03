@@ -1,5 +1,6 @@
-// ── BB Protocol: Next.js Middleware ──
-// Handles API authentication, CORS, rate limiting, and request logging.
+// ── BB Protocol: Next.js Proxy Route ──
+// Replaces deprecated middleware.ts for API authentication, CORS, rate limiting.
+// Next.js 16+ recommended: https://nextjs.org/docs/app/api-reference/file-conventions/route
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -54,8 +55,8 @@ function getCorsHeaders(request: NextRequest) {
   };
 }
 
-// ── Middleware ──
-export function middleware(request: NextRequest) {
+// ── Proxy Route Handler ──
+export async function handler(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     || request.headers.get('x-real-ip')
@@ -109,7 +110,7 @@ export function middleware(request: NextRequest) {
   return response;
 }
 
-// ── Matcher (only run on API routes) ──
+// ── Export route config (Next.js 16+ proxy route) ──
 export const config = {
   matcher: '/api/:path*',
 };
