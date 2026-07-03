@@ -598,7 +598,7 @@ export default function X402Payment({
           >
             <AlertTriangle className="size-3.5 shrink-0 text-amber-400" />
             <span className="text-[10px] text-amber-300">
-              {t('payment.splitOutOfSync') || '链上分账比例已更新，法币分账待同步'}
+              {t('payment.splitOutOfSync')}
             </span>
           </motion.div>
         )}

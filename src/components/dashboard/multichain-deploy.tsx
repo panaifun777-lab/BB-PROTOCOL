@@ -988,7 +988,7 @@ export default function MultiChainDeploy() {
               </div>
               <div>
                 <CardTitle className="text-base text-slate-100">{t('multichain.title')}</CardTitle>
-                <p className="text-[11px] text-slate-500 mt-0.5">Multi-chain Deployment & Cross-chain Bridge</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{t('multichain.subtitle')}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">

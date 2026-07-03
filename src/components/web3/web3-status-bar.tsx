@@ -3,6 +3,7 @@
 // ===== Web3 Status Bar — Compact Header Component =====
 
 import { useMemo } from 'react';
+import { useI18n } from '@/hooks/use-i18n';
 import { motion } from 'framer-motion';
 import {
   Wifi,
@@ -36,6 +37,7 @@ const CHAIN_COLORS: Record<number, string> = {
 
 // ── Main Component ──────────────────────────────────────
 export default function Web3StatusBar() {
+  const { t } = useI18n();
   const { isConnected } = useAccount();
   const chainId = useChainId();
   const { data: blockNumber } = useBlockNumber({ watch: true });
@@ -54,7 +56,7 @@ export default function Web3StatusBar() {
         className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/60 border border-slate-700/40"
       >
         <WifiOff className="w-3.5 h-3.5 text-slate-500" />
-        <span className="text-[11px] text-slate-500 font-medium">未连接</span>
+        <span className="text-[11px] text-slate-500 font-medium">{t("web3.notConnected")}</span>
         <div className="w-1.5 h-1.5 rounded-full bg-slate-600" />
       </motion.div>
     );
@@ -73,7 +75,7 @@ export default function Web3StatusBar() {
           <Wifi className="w-3.5 h-3.5 text-emerald-400" />
           <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
         </div>
-        <span className="text-[11px] text-emerald-300 font-medium hidden sm:inline">已连接</span>
+        <span className="text-[11px] text-emerald-300 font-medium hidden sm:inline">{t("web3.connected")}</span>
       </div>
 
       {/* Network Name */}
@@ -112,6 +114,7 @@ export default function Web3StatusBar() {
 
 // ── Ultra-compact variant for very tight spaces ────────
 export function Web3StatusDot() {
+  const { t } = useI18n();
   const { isConnected } = useAccount();
 
   return (
@@ -128,7 +131,7 @@ export function Web3StatusDot() {
         'text-[10px] font-medium',
         isConnected ? 'text-emerald-300' : 'text-slate-500',
       )}>
-        {isConnected ? '在线' : '离线'}
+        {isConnected ? t('web3.online') : t('web3.offline')}
       </span>
     </div>
   );

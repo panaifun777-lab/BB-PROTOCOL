@@ -595,7 +595,7 @@ export default function MonitoringCenter() {
                             : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'
                         )}
                       >
-                        {cat === 'all' ? t('monitoring.allLabel') : cat}
+                        {cat === 'all' ? t('monitoring.allLabel') : t(`monitoring.category${cat}`)}
                       </Button>
                     ))}
                   </div>
@@ -682,9 +682,9 @@ export default function MonitoringCenter() {
                 {/* Summary + Add button */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 text-[11px]">
-                    <span className="text-emerald-400 font-medium">{activeCount} active</span>
-                    <span className="text-amber-400">{silencedCount} silenced</span>
-                    <span className="text-slate-500">{disabledCount} disabled</span>
+                    <span className="text-emerald-400 font-medium">{activeCount} {t('common.active')}</span>
+                    <span className="text-amber-400">{silencedCount} {t('monitoring.silenced')}</span>
+                    <span className="text-slate-500">{disabledCount} {t('monitoring.disabled')}</span>
                   </div>
                   <Button
                     variant="outline"
@@ -700,15 +700,15 @@ export default function MonitoringCenter() {
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
                     <div className="w-3 h-3 rounded bg-red-500/60" />
-                    <span className="text-[10px] text-slate-400">Critical: {alertRules.filter((r) => r.severity === 'critical').length}</span>
+                    <span className="text-[10px] text-slate-400">{t('monitoring.critical')}: {alertRules.filter((r) => r.severity === 'critical').length}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <div className="w-3 h-3 rounded bg-amber-500/60" />
-                    <span className="text-[10px] text-slate-400">Warning: {alertRules.filter((r) => r.severity === 'warning').length}</span>
+                    <span className="text-[10px] text-slate-400">{t('monitoring.warning')}: {alertRules.filter((r) => r.severity === 'warning').length}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <div className="w-3 h-3 rounded bg-blue-500/60" />
-                    <span className="text-[10px] text-slate-400">Info: {alertRules.filter((r) => r.severity === 'info').length}</span>
+                    <span className="text-[10px] text-slate-400">{t('common.info')}: {alertRules.filter((r) => r.severity === 'info').length}</span>
                   </div>
                 </div>
 
@@ -743,19 +743,19 @@ export default function MonitoringCenter() {
                           {rule.status === 'active' && (
                             <div className="flex items-center gap-1 text-[10px] text-emerald-400">
                               <Bell className="w-3 h-3" />
-                              active
+                              {t('common.active')}
                             </div>
                           )}
                           {rule.status === 'silenced' && (
                             <div className="flex items-center gap-1 text-[10px] text-amber-400">
                               <BellOff className="w-3 h-3" />
-                              silenced
+                              {t('monitoring.silenced')}
                             </div>
                           )}
                           {rule.status === 'disabled' && (
                             <div className="flex items-center gap-1 text-[10px] text-slate-500">
                               <XCircle className="w-3 h-3" />
-                              disabled
+                              {t('monitoring.disabled')}
                             </div>
                           )}
                         </div>
@@ -816,7 +816,7 @@ export default function MonitoringCenter() {
                       ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
                       : 'bg-red-500/15 text-red-400 border-red-500/30'
                   )}>
-                    {anomalyDetection?.status || 'monitoring'}
+                    {anomalyDetection?.status !== 'anomaly_detected' ? t('monitoring.normalMonitoring') : t('monitoring.anomalyDetected')}
                   </Badge>
                 </div>
 
