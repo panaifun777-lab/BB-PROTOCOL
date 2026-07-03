@@ -13,7 +13,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const SITE_URL = "https://bb-protocol.dev";
+const SITE_URL = "https://www.bbprotocol.xyz";
+
+export const viewport = {
+  themeColor: "#0F172A",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -23,6 +30,15 @@ export const metadata: Metadata = {
   },
   description:
     "Web4.0 Cognitive Ownership Infrastructure — Build AI-powered cognitive avatars as on-chain digital twins. Behavior as Contract, Memory as Eternity, Resonance as Divinity, Awakening as Freedom.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "BB Protocol",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   keywords: [
     "AI Avatar",
     "Cognitive Avatar",
